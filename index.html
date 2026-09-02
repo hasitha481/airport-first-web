@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Airport First | Sri Lanka Luxury Airport Transfers &amp; Island Tours</title>
+<meta name="description" content="Airport First - Sri Lanka's #1 luxury airport transfer and tour agency. Chauffeur driven sedans, vans and VIP SUVs. 24/7 flight monitoring, fixed transparent rates." />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy:  { DEFAULT:'#0F172A', 50:'#F1F5F9', 700:'#1B263F', 800:'#141E33', 900:'#0F172A', 950:'#080D18' },
+          coral: { DEFAULT:'#FF5733', 400:'#FF7C5C', 500:'#FF5733', 600:'#E8431F' },
+          gold:  { DEFAULT:'#F59E0B', 300:'#FCD34D', 400:'#FBBF24', 500:'#F59E0B', 600:'#D97706' },
+          cream: '#FAF9F6'
+        },
+        fontFamily: {
+          sans:    ['"Plus Jakarta Sans"','ui-sans-serif','system-ui','sans-serif'],
+          display: ['"Playfair Display"','ui-serif','Georgia','serif']
+        },
+        boxShadow: {
+          glow: '0 20px 60px -18px rgba(255,87,51,.55)',
+          lux:  '0 30px 80px -30px rgba(15,23,42,.45)',
+          card: '0 10px 40px -18px rgba(15,23,42,.28)'
+        },
+        keyframes: {
+          floaty:   { '0%,100%':{ transform:'translateY(0)' }, '50%':{ transform:'translateY(-10px)' } },
+          pulseRing:{ '0%':{ transform:'scale(.85)', opacity:'.7' }, '70%':{ transform:'scale(1.7)', opacity:'0' }, '100%':{ opacity:'0' } },
+          slideDown:{ from:{ opacity:'0', transform:'translateY(-8px)' }, to:{ opacity:'1', transform:'translateY(0)' } },
+          popIn:    { from:{ opacity:'0', transform:'scale(.94) translateY(12px)' }, to:{ opacity:'1', transform:'none' } }
+        },
+        animation: {
+          floaty:'floaty 6s ease-in-out infinite',
+          pulseRing:'pulseRing 2.4s cubic-bezier(.3,0,.4,1) infinite',
+          slideDown:'slideDown .25s ease-out both',
+          popIn:'popIn .35s cubic-bezier(.16,1,.3,1) both'
+        }
+      }
+    }
+  }
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<style>
+  html { scroll-padding-top: 110px; }
+  body { background:#FAF9F6; -webkit-font-smoothing:antialiased; }
+  ::selection { background:#FF5733; color:#fff; }
+
+  ::-webkit-scrollbar { width:10px; }
+  ::-webkit-scrollbar-track { background:rgba(15,23,42,.05); }
+  ::-webkit-scrollbar-thumb { background:linear-gradient(#FF5733,#F59E0B); border-radius:99px; }
+
+  /* ---------- Glassmorphism ---------- */
+  .glass {
+    background: rgba(255,255,255,.10);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255,255,255,.20);
+  }
+  .glass-light {
+    background: rgba(255,255,255,.82);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.9);
+  }
+  .glass-navy {
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255,255,255,.12);
+  }
+
+  /* ---------- Text ---------- */
+  .text-gradient-gold {
+    background: linear-gradient(100deg,#FCD34D 0%,#F59E0B 42%,#FF5733 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .eyebrow { letter-spacing:.22em; text-transform:uppercase; font-size:.7rem; font-weight:800; }
+
+  /* ---------- Buttons ---------- */
+  .btn-coral {
+    position:relative; overflow:hidden;
+    background:linear-gradient(120deg,#FF5733,#FF7C5C 55%,#F59E0B);
+    background-size:180% 100%;
+    transition:.45s cubic-bezier(.16,1,.3,1);
+  }
+  .btn-coral:hover { background-position:100% 0; transform:translateY(-3px); box-shadow:0 22px 50px -18px rgba(255,87,51,.75); }
+  .btn-coral::after {
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45),transparent 70%);
+    transform:translateX(-130%); transition:transform .75s;
+  }
+  .btn-coral:hover::after { transform:translateX(130%); }
+  .btn-ghost { transition:.35s cubic-bezier(.16,1,.3,1); }
+  .btn-ghost:hover { transform:translateY(-3px); border-color:#F59E0B; color:#F59E0B; }
+
+  /* ---------- Nav ---------- */
+  .nav-link { position:relative; }
+  .nav-link::after {
+    content:""; position:absolute; left:0; bottom:-6px; height:2px; width:0;
+    background:linear-gradient(90deg,#FF5733,#F59E0B);
+    transition:width .35s cubic-bezier(.16,1,.3,1);
+  }
+  .nav-link:hover::after, .nav-link.active::after { width:100%; }
+
+  /* ---------- Cards ---------- */
+  .hover-card { transition: transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s; }
+  .hover-card:hover { transform:translateY(-10px); box-shadow:0 34px 70px -30px rgba(15,23,42,.45); }
+  .hover-card:hover .zoom-img { transform:scale(1.10); }
+  .zoom-img { transition:transform .9s cubic-bezier(.16,1,.3,1); }
+
+  /* ---------- Reveal ---------- */
+  .reveal { opacity:0; transform:translateY(30px); transition:opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+  .reveal.in { opacity:1; transform:none; }
+
+  /* ---------- Misc ---------- */
+  .noise::before {
+    content:""; position:absolute; inset:0; opacity:.35; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+  .divider-gold { height:3px; width:72px; background:linear-gradient(90deg,#FF5733,#F59E0B); border-radius:99px; }
+  input, select, textarea { outline:none; }
+  input:focus, select:focus, textarea:focus { box-shadow:0 0 0 3px rgba(245,158,11,.28); border-color:#F59E0B !important; }
+  .tab-active { background:linear-gradient(120deg,#FF5733,#F59E0B); color:#fff; box-shadow:0 14px 30px -14px rgba(255,87,51,.8); }
+  .marquee-track { display:flex; width:max-content; animation:scrollX 34s linear infinite; }
+  @keyframes scrollX { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .marquee-mask:hover .marquee-track { animation-play-state:paused; }
+
+  /* ---------- Universal interaction smoothing ----------
+     Guarantees every control eases rather than snapping, without
+     forcing `transition: all` (which janks layout-affecting props). */
+  a, button, select, input, textarea, summary,
+  .hover-card, article, figure, .lift {
+    transition-property: color, background-color, border-color, box-shadow,
+                         transform, opacity, filter;
+    transition-duration: .3s;
+    transition-timing-function: cubic-bezier(.16,1,.3,1);
+  }
+
+  /* Lift-on-hover for secondary controls and tiles */
+  .lift:hover { transform: translateY(-4px); box-shadow: 0 22px 48px -18px rgba(15,23,42,.5); }
+  .lift:active { transform: translateY(-1px); }
+
+  /* Dropdowns and date fields get the same tactile feedback as buttons */
+  select:hover, input[type="date"]:hover, input[type="time"]:hover {
+    border-color: rgba(245,158,11,.55) !important;
+    box-shadow: 0 8px 22px -14px rgba(15,23,42,.5);
+  }
+  select { cursor: pointer; }
+
+  /* ---------- Ambient amber halo behind primary CTAs ---------- */
+  @keyframes ctaHalo {
+    0%, 100% { box-shadow: 0 0 22px -6px rgba(245,158,11,.50), 0 18px 45px -18px rgba(255,87,51,.65); }
+    50%      { box-shadow: 0 0 42px -2px rgba(245,158,11,.78), 0 22px 55px -18px rgba(255,87,51,.85); }
+  }
+  .cta-glow { animation: ctaHalo 4.5s ease-in-out infinite; }
+  .cta-glow:hover {
+    animation: none;
+    box-shadow: 0 0 52px 0 rgba(245,158,11,.85), 0 26px 60px -18px rgba(255,87,51,.95);
+  }
+
+  /* ---------- Floating WhatsApp: breathing halo ----------
+     Animated via box-shadow only, so it never fights the hover translate. */
+  @keyframes waHalo {
+    0%   { box-shadow: 0 18px 45px -12px rgba(37,211,102,.75), 0 0 0 0 rgba(37,211,102,.55); }
+    70%  { box-shadow: 0 18px 45px -12px rgba(37,211,102,.75), 0 0 0 16px rgba(37,211,102,0); }
+    100% { box-shadow: 0 18px 45px -12px rgba(37,211,102,.75), 0 0 0 0 rgba(37,211,102,0); }
+  }
+  .wa-float { animation: waHalo 2.8s cubic-bezier(.3,0,.4,1) infinite; }
+  .wa-float:hover { animation-play-state: paused; box-shadow: 0 22px 55px -12px rgba(37,211,102,.9); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity:1 !important; transform:none !important; }
+    .marquee-track, .animate-floaty, .cta-glow, .wa-float,
+    .animate-pulseRing, .animate-floaty { animation:none !important; }
+    .lift:hover { transform:none; }
+  }
+</style>
+</head>
+
+<body class="font-sans text-navy-900 antialiased">
+
+<!-- ==================== TOP NOTIFICATION BAR ==================== -->
+<div class="relative z-40 bg-navy-950 text-white/85 text-[13px] noise">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-11 items-center justify-between gap-4">
+
+      <div class="flex items-center gap-5">
+        <a href="tel:+94714784444" class="flex items-center gap-2 hover:text-gold-400 transition">
+          <i data-lucide="phone-call" class="h-3.5 w-3.5 text-coral"></i>
+          <span class="font-semibold tracking-wide">+94 71 478 4444</span>
+        </a>
+        <span class="hidden sm:block h-4 w-px bg-white/15"></span>
+        <a href="mailto:airportfirst1@gmail.com" class="hidden sm:flex items-center gap-2 hover:text-gold-400 transition">
+          <i data-lucide="mail" class="h-3.5 w-3.5 text-coral"></i>
+          <span>airportfirst1@gmail.com</span>
+        </a>
+      </div>
+
+      <div class="hidden md:flex items-center gap-2 text-[12px]">
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 animate-pulseRing"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+        </span>
+        <span class="text-white/70">24/7 VIP Airport Pickups &amp; Island Tours | Bandaranaike International Airport (CMB)</span>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <span class="hidden lg:inline text-white/45">Follow</span>
+        <a href="#" onclick="openConciergeDesk(event)" aria-label="Facebook"    class="lift h-6 w-6 grid place-items-center rounded-full bg-white/10 hover:bg-coral"><i data-lucide="facebook" class="h-3 w-3"></i></a>
+        <a href="#" onclick="openConciergeDesk(event)" aria-label="Instagram"   class="lift h-6 w-6 grid place-items-center rounded-full bg-white/10 hover:bg-coral"><i data-lucide="instagram" class="h-3 w-3"></i></a>
+        <a href="#" onclick="openConciergeDesk(event)" aria-label="TripAdvisor" class="lift h-6 w-6 grid place-items-center rounded-full bg-white/10 hover:bg-coral"><i data-lucide="globe" class="h-3 w-3"></i></a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ==================== HEADER ==================== -->
+<header id="header" class="sticky top-0 z-50 transition-all duration-500 bg-white/85 backdrop-blur-xl border-b border-navy-900/5">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div id="headerInner" class="flex items-center justify-between gap-6 h-20 transition-all duration-500">
+
+      <a href="#home" class="flex items-center gap-3 shrink-0 group">
+        <div class="relative">
+          <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-navy-900 to-navy-700 grid place-items-center shadow-lux transition group-hover:scale-105">
+            <i data-lucide="plane-takeoff" class="h-5 w-5 text-gold-400"></i>
+          </div>
+          <span class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-coral ring-2 ring-white grid place-items-center">
+            <i data-lucide="check" class="h-2.5 w-2.5 text-white"></i>
+          </span>
+        </div>
+        <div class="leading-tight">
+          <div class="font-display text-[1.35rem] font-bold tracking-tight text-navy-900">
+            Airport<span class="text-gradient-gold"> First</span>
+          </div>
+          <div class="hidden sm:flex items-center mt-0.5">
+            <span class="inline-flex items-center gap-1 rounded-full bg-gold-500/10 px-2 py-[2px] text-[9.5px] font-extrabold uppercase tracking-[.11em] text-gold-600 ring-1 ring-gold-500/25">
+              <i data-lucide="crown" class="h-2.5 w-2.5"></i> Sri Lanka&rsquo;s #1 Luxury Transport &amp; Tours
+            </span>
+          </div>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-8 text-[14.5px] font-semibold text-navy-900/70">
+        <a href="#home"      class="nav-link active hover:text-navy-900 transition">Home</a>
+        <a href="#transfers" class="nav-link hover:text-navy-900 transition">Airport Transfers</a>
+        <a href="#tours"     class="nav-link hover:text-navy-900 transition">Sri Lanka Tours</a>
+        <a href="#fleet"     class="nav-link hover:text-navy-900 transition">Vehicle Fleet</a>
+        <a href="#reviews"   class="nav-link hover:text-navy-900 transition">Reviews</a>
+        <a href="#contact"   class="nav-link hover:text-navy-900 transition">Contact</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="tel:+94714784444" class="hidden xl:flex items-center gap-2.5 text-navy-900">
+          <span class="h-10 w-10 grid place-items-center rounded-full bg-navy-900/5 text-coral"><i data-lucide="headset" class="h-4 w-4"></i></span>
+          <span class="leading-tight">
+            <span class="block text-[9.5px] uppercase tracking-[.16em] text-navy-900/40 font-extrabold">Talk to us</span>
+            <span class="block text-[13.5px] font-bold">+94 71 478 4444</span>
+          </span>
+        </a>
+        <a href="#booking" class="btn-coral hidden sm:inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-bold text-white shadow-glow cta-glow">
+          <i data-lucide="calendar-check" class="h-4 w-4"></i> Book Transfer Now
+        </a>
+        <button id="navToggle" aria-label="Open menu" class="lg:hidden h-11 w-11 grid place-items-center rounded-xl bg-navy-900 text-white">
+          <i data-lucide="menu" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="mobileNav" class="lg:hidden hidden border-t border-navy-900/10 bg-white animate-slideDown">
+    <nav class="mx-auto max-w-7xl px-6 py-5 flex flex-col gap-1 text-[15px] font-semibold text-navy-900">
+      <a href="#home"      class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Home <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#transfers" class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Airport Transfers <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#tours"     class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Sri Lanka Tours <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#fleet"     class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Vehicle Fleet <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#reviews"   class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Reviews <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#contact"   class="mobile-link flex items-center justify-between rounded-xl px-4 py-3 hover:bg-navy-50">Contact <i data-lucide="chevron-right" class="h-4 w-4 text-coral"></i></a>
+      <a href="#booking"   class="mobile-link btn-coral mt-3 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-bold text-white">
+        <i data-lucide="calendar-check" class="h-4 w-4"></i> Book Transfer Now
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!-- ==================== HERO ==================== -->
+<section id="home" class="relative overflow-hidden">
+  <div class="absolute inset-0">
+    <img class="hero-img h-full w-full object-cover object-center"
+         data-fallback="Sri Lanka Airport Arrivals"
+         src="https://images.unsplash.com/photo-1642035148715-7cc0c7538904?auto=format&fit=crop&w=2000&q=80"
+         alt="International airport arrivals hall with flight information board" />
+    <div class="absolute inset-0 bg-navy-950/55"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-navy-950/95 via-navy-900/80 to-navy-900/45"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_8%,rgba(245,158,11,.20),transparent_55%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_88%_82%,rgba(255,87,51,.22),transparent_55%)]"></div>
+  </div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-24 lg:pt-20 lg:pb-32">
+    <div class="grid lg:grid-cols-12 gap-12 xl:gap-16 items-center">
+
+      <!-- Copy -->
+      <div class="lg:col-span-6 text-white reveal">
+        <span class="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-[12px] font-semibold text-gold-300">
+          <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+          Trusted by 12,400+ travellers since 2014
+        </span>
+
+        <h1 class="mt-6 font-display text-[2.5rem] sm:text-6xl xl:text-[4.1rem] leading-[1.05] font-bold tracking-tight">
+          Seamless Airport Pickups &amp;
+          <span class="text-gradient-gold">Unforgettable</span>
+          Sri Lanka Tours
+        </h1>
+
+        <p class="mt-6 max-w-xl text-[16px] leading-relaxed text-white/70">
+          Luxury Chauffeur Driven Vehicles &nbsp;|&nbsp; 24/7 Flight Monitoring &nbsp;|&nbsp; Transparent Pricing
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <a href="#booking" class="btn-coral inline-flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-bold text-white shadow-glow cta-glow">
+            <i data-lucide="car-front" class="h-4 w-4"></i> Book Your Transfer
+          </a>
+          <a href="#tours" class="btn-ghost inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-4 text-[15px] font-bold text-white/90">
+            <i data-lucide="map" class="h-4 w-4"></i> Explore Tour Packages
+          </a>
+        </div>
+
+        <div class="mt-12 grid grid-cols-3 gap-3 sm:gap-4 max-w-lg">
+          <div class="glass rounded-2xl px-4 py-4">
+            <div class="font-display text-2xl sm:text-3xl font-bold text-gold-400" data-count="12400" data-suffix="+">0</div>
+            <div class="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[.14em] text-white/50 font-bold">Transfers</div>
+          </div>
+          <div class="glass rounded-2xl px-4 py-4">
+            <div class="font-display text-2xl sm:text-3xl font-bold text-gold-400" data-count="4.9" data-decimals="1">0</div>
+            <div class="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[.14em] text-white/50 font-bold">Avg Rating</div>
+          </div>
+          <div class="glass rounded-2xl px-4 py-4">
+            <div class="font-display text-2xl sm:text-3xl font-bold text-gold-400" data-count="24" data-suffix="/7">0</div>
+            <div class="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[.14em] text-white/50 font-bold">Support</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== FLOATING BOOKING CARD ========== -->
+      <div id="booking" class="lg:col-span-6 reveal">
+        <div class="relative lg:animate-floaty">
+          <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-coral/30 via-gold-500/20 to-transparent blur-2xl"></div>
+
+          <div class="relative glass-light rounded-[1.75rem] p-6 sm:p-7 shadow-lux">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="font-display text-2xl font-bold text-navy-900">Get an Instant Quote</h2>
+                <p class="mt-1 text-[13px] text-navy-900/55">Fixed rates &middot; No hidden fees &middot; Free cancellation</p>
+              </div>
+              <span class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-600 ring-1 ring-emerald-500/20">
+                <i data-lucide="shield-check" class="h-3 w-3"></i> Secure
+              </span>
+            </div>
+
+            <div class="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-navy-900/5 p-1.5">
+              <button data-tab="pickup" class="tab-btn tab-active flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12.5px] sm:text-[13.5px] font-bold transition">
+                <i data-lucide="plane-landing" class="h-4 w-4"></i> Airport Pickup/Drop
+              </button>
+              <button data-tab="tour" class="tab-btn flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12.5px] sm:text-[13.5px] font-bold text-navy-900/60 transition hover:text-navy-900">
+                <i data-lucide="palmtree" class="h-4 w-4"></i> Island Tour Package
+              </button>
+            </div>
+
+            <!-- Panel: airport -->
+            <div id="panel-pickup" class="tab-panel mt-6 space-y-4">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="map-pin" class="h-3.5 w-3.5 text-coral"></i> Pick-up Location
+                  </label>
+                  <select id="fromLoc" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                    <optgroup label="Airports">
+                      <option value="CMB">Bandaranaike International Airport (CMB - Katunayake)</option>
+                      <option value="HRI">Mattala Rajapaksa International Airport (HRI - Hambantota)</option>
+                    </optgroup>
+                    <optgroup label="Cities &amp; Resorts">
+                      <option value="Colombo">Colombo</option>
+                      <option value="Negombo">Negombo</option>
+                      <option value="Kandy">Kandy</option>
+                      <option value="Galle">Galle</option>
+                      <option value="Mirissa">Mirissa</option>
+                      <option value="Ella">Ella</option>
+                      <option value="Nuwara Eliya">Nuwara Eliya</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="flag" class="h-3.5 w-3.5 text-gold-500"></i> Drop-off Location
+                  </label>
+                  <select id="toLoc" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                    <optgroup label="Cities &amp; Resorts">
+                      <option value="Colombo">Colombo</option>
+                      <option value="Negombo">Negombo</option>
+                      <option value="Kandy">Kandy</option>
+                      <option value="Galle">Galle</option>
+                      <option value="Mirissa">Mirissa</option>
+                      <option value="Ella">Ella</option>
+                      <option value="Nuwara Eliya">Nuwara Eliya</option>
+                    </optgroup>
+                    <optgroup label="Airports">
+                      <option value="CMB">Bandaranaike International Airport (CMB - Katunayake)</option>
+                      <option value="HRI">Mattala Rajapaksa International Airport (HRI - Hambantota)</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="calendar-days" class="h-3.5 w-3.5 text-coral"></i> Flight Date
+                  </label>
+                  <input id="flightDate" type="date" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition" />
+                </div>
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="clock" class="h-3.5 w-3.5 text-gold-500"></i> Arrival Time
+                  </label>
+                  <input id="flightTime" type="time" value="09:30" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition" />
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                  <i data-lucide="users" class="h-3.5 w-3.5 text-coral"></i> Passengers
+                </label>
+                <select id="paxSelect" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                  <option value="sedan">1 &ndash; 4 Passengers &middot; Luxury Sedan</option>
+                  <option value="van">5 &ndash; 8 Passengers &middot; KDH / Commuter Van</option>
+                  <option value="bus">9+ Passengers &middot; Mini Bus / Coach</option>
+                </select>
+                <p id="paxHint" class="mt-2 flex items-center gap-1.5 text-[12px] text-navy-900/50">
+                  <i data-lucide="info" class="h-3.5 w-3.5 text-gold-500 shrink-0"></i>
+                  <span>Toyota Prius / Grace / Axio &middot; 3 large suitcases &middot; Fully air-conditioned</span>
+                </p>
+
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-[11.5px] font-bold text-emerald-600 ring-1 ring-emerald-500/20"><i data-lucide="glass-water" class="h-3 w-3"></i> Complimentary cold water</span>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-gold-500/10 px-3 py-1.5 text-[11.5px] font-bold text-gold-600 ring-1 ring-gold-500/20"><i data-lucide="smartphone" class="h-3 w-3"></i> Local SIM card setup</span>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-1.5 text-[11.5px] font-bold text-coral-600 ring-1 ring-coral/20"><i data-lucide="radar" class="h-3 w-3"></i> Flight delay auto-tracking</span>
+                </div>
+              </div>
+
+              <button id="calcBtn" class="btn-coral group w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-[15px] font-bold text-white shadow-glow cta-glow">
+                <i data-lucide="calculator" class="h-4 w-4"></i>
+                Calculate &amp; View Rates
+                <i data-lucide="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1"></i>
+              </button>
+            </div>
+
+            <!-- Panel: tour -->
+            <div id="panel-tour" class="tab-panel mt-6 space-y-4 hidden">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="package" class="h-3.5 w-3.5 text-coral"></i> Tour Package
+                  </label>
+                  <select id="tourPkg" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                    <option>Cultural Triangle &mdash; Sigiriya, Dambulla &amp; Polonnaruwa</option>
+                    <option>Hill Country &amp; Tea Trails &mdash; Kandy, Nuwara Eliya &amp; Ella</option>
+                    <option>Southern Coast &amp; Whales &mdash; Galle, Mirissa &amp; Bentota</option>
+                    <option>Grand Island Circuit &mdash; Culture, Hills &amp; Coast</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="calendar-range" class="h-3.5 w-3.5 text-gold-500"></i> Duration
+                  </label>
+                  <select id="tourDur" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                    <option value="3">3 Days / 2 Nights</option>
+                    <option value="5">5 Days / 4 Nights</option>
+                    <option value="7">7 Days / 6 Nights</option>
+                    <option value="10">10 Days / 9 Nights</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="calendar-days" class="h-3.5 w-3.5 text-coral"></i> Start Date
+                  </label>
+                  <input id="tourDate" type="date" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition" />
+                </div>
+                <div>
+                  <label class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+                    <i data-lucide="users" class="h-3.5 w-3.5 text-gold-500"></i> Travellers
+                  </label>
+                  <select id="tourPax" class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition">
+                    <option value="sedan">1 &ndash; 4 Travellers &middot; Sedan</option>
+                    <option value="van">5 &ndash; 8 Travellers &middot; Van</option>
+                    <option value="bus">9+ Travellers &middot; Mini Bus</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-gold-500/10 px-3 py-1.5 text-[11.5px] font-bold text-gold-600 ring-1 ring-gold-500/20"><i data-lucide="bed-double" class="h-3 w-3"></i> Hotels included</span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-coral/10 px-3 py-1.5 text-[11.5px] font-bold text-coral-600 ring-1 ring-coral/20"><i data-lucide="user-round" class="h-3 w-3"></i> Private guide</span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-navy-900/5 px-3 py-1.5 text-[11.5px] font-bold text-navy-900/60 ring-1 ring-navy-900/10"><i data-lucide="ticket" class="h-3 w-3"></i> Entry tickets</span>
+              </div>
+
+              <button id="calcTourBtn" class="btn-coral group w-full inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-[15px] font-bold text-white shadow-glow cta-glow">
+                <i data-lucide="calculator" class="h-4 w-4"></i>
+                Calculate &amp; View Rates
+                <i data-lucide="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1"></i>
+              </button>
+            </div>
+
+            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11.5px] font-semibold text-navy-900/45">
+              <span class="inline-flex items-center gap-1"><i data-lucide="badge-check" class="h-3.5 w-3.5 text-emerald-500"></i> No prepayment</span>
+              <span class="hidden sm:block h-3 w-px bg-navy-900/15"></span>
+              <span class="inline-flex items-center gap-1"><i data-lucide="rotate-ccw" class="h-3.5 w-3.5 text-emerald-500"></i> Free cancellation</span>
+              <span class="hidden sm:block h-3 w-px bg-navy-900/15"></span>
+              <span class="inline-flex items-center gap-1"><i data-lucide="banknote" class="h-3.5 w-3.5 text-emerald-500"></i> Pay driver directly</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="relative -mb-px pointer-events-none">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none" class="w-full h-[55px] sm:h-[85px] fill-cream">
+      <path d="M0,64 C240,110 480,10 720,42 C960,74 1200,110 1440,58 L1440,100 L0,100 Z"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- ==================== TRUST BADGES ==================== -->
+<section id="transfers" class="relative -mt-2 pb-4">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="reveal rounded-3xl bg-white shadow-card ring-1 ring-navy-900/5 overflow-hidden">
+      <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-navy-900/6">
+
+        <div class="group flex items-start gap-3.5 p-5 sm:p-7 transition hover:bg-gold-500/5">
+          <span class="shrink-0 h-11 w-11 grid place-items-center rounded-2xl bg-coral/10 text-coral transition group-hover:scale-110 group-hover:bg-coral group-hover:text-white">
+            <i data-lucide="tag" class="h-5 w-5"></i>
+          </span>
+          <div>
+            <h3 class="text-[14.5px] font-bold text-navy-900 leading-snug">Fixed Rate</h3>
+            <p class="mt-1 text-[12.5px] text-navy-900/50 leading-relaxed">No hidden fees, ever</p>
+          </div>
+        </div>
+
+        <div class="group flex items-start gap-3.5 p-5 sm:p-7 transition hover:bg-gold-500/5">
+          <span class="shrink-0 h-11 w-11 grid place-items-center rounded-2xl bg-gold-500/12 text-gold-600 transition group-hover:scale-110 group-hover:bg-gold-500 group-hover:text-white">
+            <i data-lucide="radar" class="h-5 w-5"></i>
+          </span>
+          <div>
+            <h3 class="text-[14.5px] font-bold text-navy-900 leading-snug">Flight Delay Auto-Tracking</h3>
+            <p class="mt-1 text-[12.5px] text-navy-900/50 leading-relaxed">Free waiting time, we re-time your pickup</p>
+          </div>
+        </div>
+
+        <div class="group flex items-start gap-3.5 p-5 sm:p-7 transition hover:bg-gold-500/5">
+          <span class="shrink-0 h-11 w-11 grid place-items-center rounded-2xl bg-navy-900/6 text-navy-900 transition group-hover:scale-110 group-hover:bg-navy-900 group-hover:text-gold-400">
+            <i data-lucide="messages-square" class="h-5 w-5"></i>
+          </span>
+          <div>
+            <h3 class="text-[14.5px] font-bold text-navy-900 leading-snug">English Speaking Chauffeurs</h3>
+            <p class="mt-1 text-[12.5px] text-navy-900/50 leading-relaxed">Licensed guide drivers</p>
+          </div>
+        </div>
+
+        <div class="group flex items-start gap-3.5 p-5 sm:p-7 transition hover:bg-gold-500/5">
+          <span class="shrink-0 h-11 w-11 grid place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600 transition group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white">
+            <i data-lucide="snowflake" class="h-5 w-5"></i>
+          </span>
+          <div>
+            <h3 class="text-[14.5px] font-bold text-navy-900 leading-snug">100% A/C Fleet</h3>
+            <p class="mt-1 text-[12.5px] text-navy-900/50 leading-relaxed">Sanitised before every ride</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PARTNER MARQUEE ==================== -->
+<section class="py-10 sm:py-12 overflow-hidden">
+  <p class="text-center eyebrow text-navy-900/35">As featured &amp; trusted by</p>
+  <div class="marquee-mask mt-6 relative">
+    <div class="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-cream to-transparent z-10"></div>
+    <div class="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-cream to-transparent z-10"></div>
+    <div class="marquee-track gap-14 items-center opacity-45">
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">TripAdvisor</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">SriLankan Airlines</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">Booking.com</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">Cinnamon Hotels</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">SLTDA Licensed</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">GetYourGuide</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">TripAdvisor</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">SriLankan Airlines</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">Booking.com</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">Cinnamon Hotels</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">SLTDA Licensed</span>
+      <span class="font-display text-2xl font-bold text-navy-900 whitespace-nowrap">GetYourGuide</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TOP DESTINATIONS ==================== -->
+<section id="tours" class="py-16 sm:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="reveal flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+      <div class="max-w-2xl">
+        <span class="eyebrow text-coral">Curated Island Itineraries</span>
+        <h2 class="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-navy-900">
+          Sri Lanka&rsquo;s <span class="text-gradient-gold">Most Loved</span> Destinations
+        </h2>
+        <div class="divider-gold mt-5"></div>
+        <p class="mt-5 text-[15.5px] leading-relaxed text-navy-900/55">
+          Hand-crafted routes driven by chauffeur guides who know every mountain bend, hidden beach and tea estate on the island.
+        </p>
+      </div>
+      <a href="#" onclick="openConciergeDesk(event)" data-feature="Full Tour Package Catalogue" class="btn-ghost inline-flex w-fit items-center gap-2 rounded-full border border-navy-900/15 px-6 py-3.5 text-[14px] font-bold text-navy-900">
+        View All 24 Packages <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+      </a>
+    </div>
+
+    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- Card 1 (feature) -->
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card sm:col-span-2 lg:col-span-2 min-h-[380px]">
+        <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
+             data-fallback="Sigiriya Rock Fortress"
+             src="https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=1400&q=80"
+             alt="Sigiriya Rock Fortress" />
+        <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/55 to-navy-950/5"></div>
+
+        <div class="absolute top-5 left-5 flex flex-wrap gap-2">
+          <span class="glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">UNESCO Heritage</span>
+          <span class="rounded-full bg-coral px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Best Seller</span>
+        </div>
+        <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-coral" aria-label="Save">
+          <i data-lucide="heart" class="h-4 w-4"></i>
+        </button>
+
+        <div class="relative flex h-full flex-col justify-end p-6 sm:p-8">
+          <div class="flex items-center gap-3 text-white/80 text-[12.5px] font-semibold">
+            <span class="inline-flex items-center gap-1 text-gold-400">
+              <i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i>
+              <i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i>
+              <i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i>
+              <i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i>
+              <i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i>
+              <span class="ml-1 text-white">5.0</span>
+            </span>
+            <span class="h-3 w-px bg-white/25"></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 3 Days / 2 Nights</span>
+            <span class="hidden sm:inline h-3 w-px bg-white/25"></span>
+            <span class="hidden sm:inline-flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i> Cultural Triangle</span>
+          </div>
+
+          <h3 class="mt-3 font-display text-3xl sm:text-4xl font-bold text-white">Sigiriya Rock Fortress</h3>
+          <p class="mt-2 max-w-lg text-[14px] leading-relaxed text-white/65">
+            Climb the 5th-century Lion Rock at sunrise, then continue to Dambulla Cave Temple and a Minneriya elephant safari.
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-4">
+            <button class="itinerary-btn btn-coral lift inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-bold text-white" data-place="Sigiriya Rock Fortress">
+              Explore Itinerary <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </button>
+            <div class="text-white">
+              <span class="block text-[10.5px] uppercase tracking-widest text-white/45 font-bold">From</span>
+              <span class="font-display text-xl font-bold text-gold-400">$285 <span class="text-[12px] font-sans text-white/50">/ LKR 85,500</span></span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[380px]">
+        <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
+             data-fallback="Ella Nine Arch Bridge"
+             src="https://images.unsplash.com/photo-1566766189268-ecac9118f2b7?auto=format&fit=crop&w=1000&q=80"
+             alt="Nine Arch Bridge, Ella" />
+        <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/50 to-transparent"></div>
+        <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Hill Country</span>
+        <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-coral" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
+
+        <div class="relative flex h-full flex-col justify-end p-6">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
+            <span class="inline-flex items-center gap-1 text-gold-400"><i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i><span class="text-white">5.0</span></span>
+            <span class="h-3 w-px bg-white/25"></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 2 Days / 1 Night</span>
+          </div>
+          <h3 class="mt-2 font-display text-2xl font-bold text-white">Ella Gap &amp; Nine Arch</h3>
+          <p class="mt-1.5 text-[13.5px] leading-relaxed text-white/60">Nanu Oya&ndash;Ella blue train, Little Adam&rsquo;s Peak trek and Ravana Falls.</p>
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <button class="itinerary-btn lift inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-place="Ella Gap &amp; Nine Arch">
+              Explore <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+            <span class="text-right leading-tight">
+              <span class="block font-display text-lg font-bold text-gold-400">$195</span>
+              <span class="block text-[11px] text-white/45">LKR 58,500</span>
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[360px]">
+        <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
+             data-fallback="Kandy Temple of the Tooth"
+             src="https://images.unsplash.com/photo-1665849050332-8d5d7e59afb6?auto=format&fit=crop&w=1000&q=80"
+             alt="Temple of the Sacred Tooth Relic, Kandy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/50 to-transparent"></div>
+        <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Cultural Capital</span>
+        <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-coral" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
+
+        <div class="relative flex h-full flex-col justify-end p-6">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
+            <span class="inline-flex items-center gap-1 text-gold-400"><i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i><span class="text-white">5.0</span></span>
+            <span class="h-3 w-px bg-white/25"></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 2 Days / 1 Night</span>
+          </div>
+          <h3 class="mt-2 font-display text-2xl font-bold text-white">Kandy Cultural Capital</h3>
+          <p class="mt-1.5 text-[13.5px] leading-relaxed text-white/60">Temple of the Sacred Tooth Relic, Peradeniya Botanical Gardens and a Kandyan dance show.</p>
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <button class="itinerary-btn lift inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-place="Kandy Cultural Capital">
+              Explore <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+            <span class="text-right leading-tight">
+              <span class="block font-display text-lg font-bold text-gold-400">$165</span>
+              <span class="block text-[11px] text-white/45">LKR 49,500</span>
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[360px]">
+        <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
+             data-fallback="Mirissa Whale Watching"
+             src="https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=1000&q=80"
+             alt="Whale watching boat off Mirissa" />
+        <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/50 to-transparent"></div>
+        <span class="absolute top-5 left-5 rounded-full bg-gold-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-navy-950">Seasonal Nov&ndash;Apr</span>
+        <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-coral" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
+
+        <div class="relative flex h-full flex-col justify-end p-6">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
+            <span class="inline-flex items-center gap-1 text-gold-400"><i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i><span class="text-white">5.0</span></span>
+            <span class="h-3 w-px bg-white/25"></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 1 Day &middot; 05:30 start</span>
+          </div>
+          <h3 class="mt-2 font-display text-2xl font-bold text-white">Mirissa Whale Watching</h3>
+          <p class="mt-1.5 text-[13.5px] leading-relaxed text-white/60">Blue whales and spinner dolphins from Mirissa harbour, plus Galle Fort on the way back.</p>
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <button class="itinerary-btn lift inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-place="Mirissa Whale Watching">
+              Explore <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+            <span class="text-right leading-tight">
+              <span class="block font-display text-lg font-bold text-gold-400">$145</span>
+              <span class="block text-[11px] text-white/45">LKR 43,500</span>
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 5 -->
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[360px]">
+        <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
+             data-fallback="Nuwara Eliya Tea Country"
+             src="https://images.unsplash.com/photo-1586512471579-841acda96af6?auto=format&fit=crop&w=1000&q=80"
+             alt="Tea plantations in Nuwara Eliya" />
+        <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/50 to-transparent"></div>
+        <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Little England</span>
+        <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-coral" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
+
+        <div class="relative flex h-full flex-col justify-end p-6">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
+            <span class="inline-flex items-center gap-1 text-gold-400"><i data-lucide="star" class="h-3.5 w-3.5 fill-current"></i><span class="text-white">5.0</span></span>
+            <span class="h-3 w-px bg-white/25"></span>
+            <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 3 Days / 2 Nights</span>
+          </div>
+          <h3 class="mt-2 font-display text-2xl font-bold text-white">Nuwara Eliya Tea Country</h3>
+          <p class="mt-1.5 text-[13.5px] leading-relaxed text-white/60">Ceylon tea factory tour, Gregory Lake and Horton Plains World&rsquo;s End at dawn.</p>
+          <div class="mt-5 flex items-center justify-between gap-3">
+            <button class="itinerary-btn lift inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-place="Nuwara Eliya Tea Country">
+              Explore <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+            <span class="text-right leading-tight">
+              <span class="block font-display text-lg font-bold text-gold-400">$265</span>
+              <span class="block text-[11px] text-white/45">LKR 79,500</span>
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 6 : CTA tile -->
+      <article class="reveal hover-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-coral to-gold-500 p-7 shadow-card min-h-[360px] flex flex-col justify-between">
+        <div class="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/15 blur-2xl"></div>
+        <div class="relative">
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+            <i data-lucide="wand-sparkles" class="h-3 w-3"></i> Tailor-made
+          </span>
+          <h3 class="mt-4 font-display text-3xl font-bold leading-tight text-white">Design your own island route</h3>
+          <p class="mt-3 text-[14px] leading-relaxed text-white/85">
+            Tell us your arrival date, budget and interests. Our travel desk builds a private itinerary within 4 hours &mdash; free of charge.
+          </p>
+        </div>
+        <div class="relative">
+          <a href="#" onclick="openConciergeDesk(event)" data-feature="Bespoke Itinerary Design" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-navy-900 transition hover:-translate-y-1 hover:shadow-lux">
+            Request Custom Plan <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+          </a>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="reveal mt-10 flex items-start justify-center gap-2 text-center text-[13px] leading-relaxed text-navy-900/45">
+      <i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0 text-gold-500"></i>
+      <span>Package prices are per private vehicle for 2 travellers, including chauffeur guide, fuel, expressway tolls, driver accommodation and meals. Hotel nights and site entrance tickets are quoted at confirmation. Converted at LKR&nbsp;300 = USD&nbsp;1 (indicative).</span>
+    </p>
+  </div>
+</section>
+
+<!-- ==================== FLEET ==================== -->
+<section id="fleet" class="relative overflow-hidden bg-navy-900 py-16 sm:py-24 noise">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_0%,rgba(245,158,11,.16),transparent_55%)]"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_10%_100%,rgba(255,87,51,.16),transparent_55%)]"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="reveal max-w-2xl">
+      <span class="eyebrow text-gold-400">The Fleet</span>
+      <h2 class="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-white">
+        Choose Your <span class="text-gradient-gold">Comfort Level</span>
+      </h2>
+      <div class="divider-gold mt-5"></div>
+      <p class="mt-5 text-[15.5px] leading-relaxed text-white/55">
+        Every vehicle is under 5 years old, fully air-conditioned, insured for tourists and driven by an SLTDA-licensed chauffeur guide.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-6 lg:grid-cols-3">
+
+      <!-- Sedan -->
+      <div class="hover-card reveal group relative overflow-hidden rounded-3xl glass-navy p-6">
+        <div class="relative h-44 overflow-hidden rounded-2xl bg-navy-950">
+          <img loading="lazy" decoding="async" class="zoom-img h-full w-full object-cover opacity-90"
+               data-fallback="Luxury Sedan"
+               src="https://images.unsplash.com/photo-1589148938909-4d241c91ee52?auto=format&fit=crop&w=1000&q=80"
+               alt="Executive chauffeur-driven sedan" />
+          <span class="absolute left-4 top-4 rounded-full bg-navy-950/70 px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-wider text-gold-400 ring-1 ring-white/15">Most Popular</span>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="font-display text-2xl font-bold text-white">Luxury Sedan</h3>
+          <p class="mt-1 text-[13px] text-white/50">Toyota Prius / Toyota Grace / Axio</p>
+
+          <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="users" class="mx-auto h-4 w-4 text-coral"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">1&ndash;4</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Pax</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="luggage" class="mx-auto h-4 w-4 text-gold-400"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">3</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Bags</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="snowflake" class="mx-auto h-4 w-4 text-sky-300"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">A/C</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Climate</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
+            <div>
+              <span class="block text-[10px] uppercase tracking-[.16em] text-white/40 font-bold">CMB &rarr; Colombo, all-in</span>
+              <span class="font-display text-2xl font-bold text-gold-400">$43</span>
+              <span class="ml-1 text-[12px] text-white/45">/ LKR 12,900</span>
+            </div>
+            <button class="fleet-btn lift inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-vehicle="Luxury Sedan">
+              Select <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+          </div>
+
+          <button onclick="openConciergeDesk(event)" data-feature="Luxury Sedan &mdash; Full Vehicle Specification"
+                  class="lift mt-4 w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 text-[12.5px] font-bold text-white/55 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-gold-400">
+            <i data-lucide="file-text" class="h-3.5 w-3.5"></i> View Full Specs
+          </button>
+        </div>
+      </div>
+
+      <!-- Van -->
+      <div class="hover-card reveal group relative overflow-hidden rounded-3xl glass-navy p-6 lg:-translate-y-4 ring-1 ring-gold-500/30">
+        <span class="absolute right-0 top-0 rounded-bl-2xl bg-gradient-to-r from-coral to-gold-500 px-4 py-2 text-[10.5px] font-extrabold uppercase tracking-wider text-white">Family Favourite</span>
+        <div class="relative h-44 overflow-hidden rounded-2xl bg-navy-950">
+          <img loading="lazy" decoding="async" class="zoom-img h-full w-full object-cover object-[35%_60%] opacity-90"
+               data-fallback="Toyota KDH Van"
+               src="https://images.unsplash.com/photo-1650807486050-a142ea418b19?auto=format&fit=crop&w=1000&q=80"
+               alt="Toyota HiAce KDH commuter van" />
+        </div>
+
+        <div class="mt-6">
+          <h3 class="font-display text-2xl font-bold text-white">Premium Van</h3>
+          <p class="mt-1 text-[13px] text-white/50">Toyota KDH / Commuter High-Roof</p>
+
+          <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="users" class="mx-auto h-4 w-4 text-coral"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">5&ndash;8</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Pax</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="luggage" class="mx-auto h-4 w-4 text-gold-400"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">8</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Bags</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="wifi" class="mx-auto h-4 w-4 text-sky-300"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">Free</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Wi-Fi</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
+            <div>
+              <span class="block text-[10px] uppercase tracking-[.16em] text-white/40 font-bold">CMB &rarr; Colombo, all-in</span>
+              <span class="font-display text-2xl font-bold text-gold-400">$62</span>
+              <span class="ml-1 text-[12px] text-white/45">/ LKR 18,600</span>
+            </div>
+            <button class="fleet-btn btn-coral lift inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-bold text-white" data-vehicle="Premium Van">
+              Select <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+          </div>
+
+          <button onclick="openConciergeDesk(event)" data-feature="Premium Van &mdash; Full Vehicle Specification"
+                  class="lift mt-4 w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 text-[12.5px] font-bold text-white/55 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-gold-400">
+            <i data-lucide="file-text" class="h-3.5 w-3.5"></i> View Full Specs
+          </button>
+        </div>
+      </div>
+
+      <!-- SUV -->
+      <div class="hover-card reveal group relative overflow-hidden rounded-3xl glass-navy p-6">
+        <div class="relative h-44 overflow-hidden rounded-2xl bg-navy-950">
+          <img loading="lazy" decoding="async" class="zoom-img h-full w-full object-cover opacity-90"
+               data-fallback="VIP SUV"
+               src="https://images.unsplash.com/photo-1650530579355-7ad9d4766043?auto=format&fit=crop&w=1000&q=80"
+               alt="VIP Toyota Land Cruiser SUV" />
+          <span class="absolute left-4 top-4 rounded-full bg-navy-950/70 px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-wider text-gold-400 ring-1 ring-white/15">VIP Class</span>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="font-display text-2xl font-bold text-white">VIP SUV &amp; Mini Bus</h3>
+          <p class="mt-1 text-[13px] text-white/50">Prado / Montero / 29-seat Coach</p>
+
+          <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="users" class="mx-auto h-4 w-4 text-coral"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">9+</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Pax</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="luggage" class="mx-auto h-4 w-4 text-gold-400"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">12+</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Bags</div>
+            </div>
+            <div class="rounded-xl bg-white/5 py-3 ring-1 ring-white/10">
+              <i data-lucide="armchair" class="mx-auto h-4 w-4 text-sky-300"></i>
+              <div class="mt-1.5 text-[13px] font-bold text-white">Recline</div>
+              <div class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Seats</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
+            <div>
+              <span class="block text-[10px] uppercase tracking-[.16em] text-white/40 font-bold">CMB &rarr; Colombo, all-in</span>
+              <span class="font-display text-2xl font-bold text-gold-400">$88</span>
+              <span class="ml-1 text-[12px] text-white/45">/ LKR 26,400</span>
+            </div>
+            <button class="fleet-btn lift inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2.5 text-[13px] font-bold text-white ring-1 ring-white/20 transition hover:bg-coral hover:ring-coral" data-vehicle="VIP SUV">
+              Select <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </button>
+          </div>
+
+          <button onclick="openConciergeDesk(event)" data-feature="VIP SUV &amp; Mini Bus &mdash; Full Vehicle Specification"
+                  class="lift mt-4 w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/5 px-4 py-2.5 text-[12.5px] font-bold text-white/55 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-gold-400">
+            <i data-lucide="file-text" class="h-3.5 w-3.5"></i> View Full Specs
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="reveal mt-10 flex items-center justify-center gap-2 text-center text-[13px] text-white/45">
+      <i data-lucide="info" class="h-4 w-4 text-gold-400"></i>
+      Rates shown are the all-in Bandaranaike International Airport (CMB &ndash; Katunayake) &rarr; Colombo price &mdash; expressway tolls, parking, fuel, driver batta and meet &amp; greet are already included, so the figure you see is the figure you pay. Mattala Rajapaksa International Airport (HRI &ndash; Hambantota) transfers and multi-day tours are quoted per kilometre with driver accommodation and meals included. Converted at LKR&nbsp;300 = USD&nbsp;1 (indicative).
+    </p>
+  </div>
+</section>
+
+<!-- ==================== WHY CHOOSE ==================== -->
+<section class="py-16 sm:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 xl:gap-16 items-center">
+
+      <!-- Image -->
+      <div class="reveal relative">
+        <div class="relative overflow-hidden rounded-[2rem] shadow-lux">
+          <img loading="lazy" decoding="async" class="h-[420px] sm:h-[520px] w-full object-cover"
+               data-fallback="VIP Chauffeur Greeting"
+               src="https://images.unsplash.com/photo-1522255272218-7ac5249be344?auto=format&fit=crop&w=1200&q=80"
+               alt="VIP chauffeur greeting with luxury vehicle at hotel entrance" />
+          <div class="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- floating stat card -->
+        <div class="glass-light absolute -bottom-6 -right-2 sm:right-6 w-[240px] rounded-2xl p-5 shadow-lux">
+          <div class="flex items-center gap-3">
+            <span class="h-11 w-11 grid place-items-center rounded-xl bg-gradient-to-br from-coral to-gold-500 text-white">
+              <i data-lucide="thumbs-up" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <div class="font-display text-2xl font-bold text-navy-900">98.6%</div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-navy-900/45">On-time pickups</div>
+            </div>
+          </div>
+          <div class="mt-4 h-1.5 w-full rounded-full bg-navy-900/10">
+            <div class="h-full w-[98.6%] rounded-full bg-gradient-to-r from-coral to-gold-500"></div>
+          </div>
+        </div>
+
+        <!-- floating badge -->
+        <div class="glass-navy absolute -top-4 -left-2 sm:left-6 rounded-2xl px-5 py-4 shadow-lux hidden sm:block">
+          <div class="flex items-center gap-2 text-gold-400">
+            <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+            <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+            <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+            <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+            <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          </div>
+          <div class="mt-1 text-[12px] font-semibold text-white/80">2,180 verified reviews</div>
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="reveal">
+        <span class="eyebrow text-coral">Why Airport First</span>
+        <h2 class="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-navy-900">
+          The Difference Starts at <span class="text-gradient-gold">Arrivals</span>
+        </h2>
+        <div class="divider-gold mt-5"></div>
+
+        <div class="mt-9 space-y-6">
+          <div class="group flex gap-4">
+            <span class="shrink-0 h-12 w-12 grid place-items-center rounded-2xl bg-coral/10 text-coral transition group-hover:scale-110 group-hover:bg-coral group-hover:text-white">
+              <i data-lucide="plane-landing" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <h3 class="text-[16.5px] font-bold text-navy-900">Meet &amp; greet at the arrivals gate</h3>
+              <p class="mt-1.5 text-[14.5px] leading-relaxed text-navy-900/55">Your chauffeur waits just past customs with a name board, handles your luggage, and offers complimentary chilled water plus local SIM card setup before you leave the terminal.</p>
+            </div>
+          </div>
+
+          <div class="group flex gap-4">
+            <span class="shrink-0 h-12 w-12 grid place-items-center rounded-2xl bg-gold-500/12 text-gold-600 transition group-hover:scale-110 group-hover:bg-gold-500 group-hover:text-white">
+              <i data-lucide="radar" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <h3 class="text-[16.5px] font-bold text-navy-900">Flight delay auto-tracking, no waiting charges</h3>
+              <p class="mt-1.5 text-[14.5px] leading-relaxed text-navy-900/55">We track your flight number against live arrival data and re-time the pickup automatically. Delayed by six hours? Your chauffeur is still there and the quoted price does not change.</p>
+            </div>
+          </div>
+
+          <div class="group flex gap-4">
+            <span class="shrink-0 h-12 w-12 grid place-items-center rounded-2xl bg-navy-900/6 text-navy-900 transition group-hover:scale-110 group-hover:bg-navy-900 group-hover:text-gold-400">
+              <i data-lucide="receipt-text" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <h3 class="text-[16.5px] font-bold text-navy-900">One transparent price, quoted upfront</h3>
+              <p class="mt-1.5 text-[14.5px] leading-relaxed text-navy-900/55">Tolls, parking, fuel and driver batta are all included. Pay in USD, EUR, GBP or LKR &mdash; card or cash, directly to the driver.</p>
+            </div>
+          </div>
+
+          <div class="group flex gap-4">
+            <span class="shrink-0 h-12 w-12 grid place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600 transition group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white">
+              <i data-lucide="shield-check" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <h3 class="text-[16.5px] font-bold text-navy-900">SLTDA licensed &amp; fully insured</h3>
+              <p class="mt-1.5 text-[14.5px] leading-relaxed text-navy-900/55">Registered with the Sri Lanka Tourism Development Authority. Every trip carries full passenger insurance cover.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 flex flex-wrap items-center gap-4">
+          <a href="#booking" class="btn-coral inline-flex items-center gap-2 rounded-full px-7 py-4 text-[15px] font-bold text-white shadow-glow cta-glow">
+            <i data-lucide="calendar-check" class="h-4 w-4"></i> Book Transfer Now
+          </a>
+          <a href="tel:+94714784444" class="btn-ghost inline-flex items-center gap-2 rounded-full border border-navy-900/15 px-7 py-4 text-[15px] font-bold text-navy-900">
+            <i data-lucide="phone" class="h-4 w-4"></i> +94 71 478 4444
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TESTIMONIALS ==================== -->
+<section id="reviews" class="relative bg-white py-16 sm:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="reveal mx-auto max-w-2xl text-center">
+      <span class="eyebrow text-coral">Guest Reviews</span>
+      <h2 class="mt-3 font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-navy-900">
+        Travellers Who <span class="text-gradient-gold">Came Back</span>
+      </h2>
+      <div class="divider-gold mx-auto mt-5"></div>
+      <p class="mt-5 text-[15.5px] leading-relaxed text-navy-900/55">
+        Rated 4.9 out of 5 across TripAdvisor, Google and Booking.com by 2,180 verified guests.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-6 md:grid-cols-3">
+
+      <!-- Review 1 -->
+      <figure class="hover-card reveal relative rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
+        <i data-lucide="quote" class="absolute right-6 top-6 h-9 w-9 text-gold-500/20"></i>
+        <div class="flex items-center gap-1 text-gold-500">
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+        </div>
+        <blockquote class="mt-5 text-[15px] leading-relaxed text-navy-900/70">
+          &ldquo;Our flight landed three hours late at 2am and Nuwan was still standing there with the name board, smiling. He drove us to Kandy the next day and pointed out things no guidebook mentions. Faultless.&rdquo;
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3 border-t border-navy-900/8 pt-5">
+          <img loading="lazy" decoding="async" class="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow"
+               data-fallback="EH"
+               src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"
+               alt="Emily Hartley" />
+          <div class="flex-1">
+            <div class="text-[14.5px] font-bold text-navy-900">Emily Hartley</div>
+            <div class="flex items-center gap-1.5 text-[12.5px] text-navy-900/45">
+              <span class="text-[15px] leading-none">&#127468;&#127463;</span> Manchester, United Kingdom
+            </div>
+          </div>
+          <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Verified</span>
+        </figcaption>
+      </figure>
+
+      <!-- Review 2 -->
+      <figure class="hover-card reveal relative rounded-3xl bg-navy-900 p-7 md:-translate-y-4 shadow-lux">
+        <i data-lucide="quote" class="absolute right-6 top-6 h-9 w-9 text-gold-500/25"></i>
+        <div class="flex items-center gap-1 text-gold-400">
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+        </div>
+        <blockquote class="mt-5 text-[15px] leading-relaxed text-white/75">
+          &ldquo;We booked the 7-day island circuit for a family of six. The KDH van was spotless and cold, the kids had Wi-Fi the whole way, and the quoted price never moved a cent. Genuinely the best value we found.&rdquo;
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3 border-t border-white/10 pt-5">
+          <img loading="lazy" decoding="async" class="h-11 w-11 rounded-full object-cover ring-2 ring-white/20"
+               data-fallback="MO"
+               src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80"
+               alt="Marcus O'Donnell" />
+          <div class="flex-1">
+            <div class="text-[14.5px] font-bold text-white">Marcus O&rsquo;Donnell</div>
+            <div class="flex items-center gap-1.5 text-[12.5px] text-white/45">
+              <span class="text-[15px] leading-none">&#127462;&#127482;</span> Melbourne, Australia
+            </div>
+          </div>
+          <span class="rounded-full bg-gold-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gold-400">Verified</span>
+        </figcaption>
+      </figure>
+
+      <!-- Review 3 -->
+      <figure class="hover-card reveal relative rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
+        <i data-lucide="quote" class="absolute right-6 top-6 h-9 w-9 text-gold-500/20"></i>
+        <div class="flex items-center gap-1 text-gold-500">
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+          <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+        </div>
+        <blockquote class="mt-5 text-[15px] leading-relaxed text-navy-900/70">
+          &ldquo;Punctual to the minute, which for a German is the highest compliment I can give. The Ella to Nuwara Eliya drive with Sunil was the highlight of our honeymoon. We have already recommended them twice.&rdquo;
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3 border-t border-navy-900/8 pt-5">
+          <img loading="lazy" decoding="async" class="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow"
+               data-fallback="LB"
+               src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80"
+               alt="Lena Brandt" />
+          <div class="flex-1">
+            <div class="text-[14.5px] font-bold text-navy-900">Lena Brandt</div>
+            <div class="flex items-center gap-1.5 text-[12.5px] text-navy-900/45">
+              <span class="text-[15px] leading-none">&#127465;&#127466;</span> Munich, Germany
+            </div>
+          </div>
+          <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Verified</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CTA BAND ==================== -->
+<section class="px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+  <div class="reveal relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-coral via-coral to-gold-500 px-6 py-12 sm:px-12 sm:py-16 shadow-lux noise">
+    <div class="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/15 blur-3xl"></div>
+    <div class="absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-navy-950/20 blur-3xl"></div>
+
+    <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+      <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-[11.5px] font-bold uppercase tracking-wider text-white">
+          <i data-lucide="zap" class="h-3.5 w-3.5"></i> Replies within 15 minutes
+        </span>
+        <h2 class="mt-5 font-display text-3xl sm:text-4xl lg:text-[2.9rem] font-bold leading-[1.12] text-white">
+          Landing soon? Lock in your fixed rate today.
+        </h2>
+        <p class="mt-4 text-[15.5px] leading-relaxed text-white/85">
+          Send us your flight number and we will confirm your chauffeur, vehicle and price &mdash; no deposit required.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+        <a href="https://wa.me/94714784444" target="_blank" rel="noopener"
+           class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-4 text-[15px] font-bold text-navy-900 transition hover:-translate-y-1 hover:shadow-lux">
+          <i data-lucide="message-circle" class="h-4 w-4 text-emerald-600"></i> Chat on WhatsApp
+        </a>
+        <a href="#booking"
+           class="inline-flex items-center justify-center gap-2 rounded-full bg-navy-950 px-7 py-4 text-[15px] font-bold text-white transition hover:-translate-y-1 hover:shadow-lux">
+          <i data-lucide="calendar-check" class="h-4 w-4 text-gold-400"></i> Book Transfer Now
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer id="contact" class="relative overflow-hidden bg-navy-950 text-white/70 noise">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_0%,rgba(255,87,51,.14),transparent_50%)]"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-10">
+    <div class="grid gap-12 lg:grid-cols-12">
+
+      <!-- Brand -->
+      <div class="lg:col-span-4">
+        <a href="#home" class="flex items-center gap-3">
+          <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-coral to-gold-500 grid place-items-center">
+            <i data-lucide="plane-takeoff" class="h-5 w-5 text-white"></i>
+          </div>
+          <div class="leading-tight">
+            <div class="font-display text-[1.35rem] font-bold text-white">Airport<span class="text-gradient-gold"> First</span></div>
+            <div class="text-[10px] font-bold uppercase tracking-[.14em] text-white/40">Sri Lanka&rsquo;s #1 Luxury Transport</div>
+          </div>
+        </a>
+
+        <p class="mt-6 max-w-sm text-[14.5px] leading-relaxed text-white/50">
+          Chauffeur-driven airport transfers and private island tours across Sri Lanka since 2014. SLTDA licensed, fully insured, and available around the clock.
+        </p>
+
+        <div class="mt-7 space-y-3">
+          <a href="tel:+94714784444" class="flex items-center gap-3 text-[14.5px] transition hover:text-gold-400">
+            <span class="h-9 w-9 grid place-items-center rounded-xl bg-white/6 text-coral"><i data-lucide="phone" class="h-4 w-4"></i></span>
+            +94 71 478 4444
+          </a>
+          <a href="mailto:airportfirst1@gmail.com" class="flex items-center gap-3 text-[14.5px] transition hover:text-gold-400">
+            <span class="h-9 w-9 grid place-items-center rounded-xl bg-white/6 text-coral"><i data-lucide="mail" class="h-4 w-4"></i></span>
+            airportfirst1@gmail.com
+          </a>
+          <div class="flex items-center gap-3 text-[14.5px]">
+            <span class="h-9 w-9 grid place-items-center rounded-xl bg-white/6 text-coral"><i data-lucide="map-pin" class="h-4 w-4"></i></span>
+            Airport Road, Katunayake 11450, Sri Lanka
+          </div>
+        </div>
+
+        <div class="mt-7 flex items-center gap-3">
+          <a href="#" onclick="openConciergeDesk(event)" aria-label="Facebook"  class="lift h-10 w-10 grid place-items-center rounded-xl bg-white/6 hover:bg-coral hover:text-white"><i data-lucide="facebook" class="h-4 w-4"></i></a>
+          <a href="#" onclick="openConciergeDesk(event)" aria-label="Instagram" class="lift h-10 w-10 grid place-items-center rounded-xl bg-white/6 hover:bg-coral hover:text-white"><i data-lucide="instagram" class="h-4 w-4"></i></a>
+          <a href="#" onclick="openConciergeDesk(event)" aria-label="YouTube"   class="lift h-10 w-10 grid place-items-center rounded-xl bg-white/6 hover:bg-coral hover:text-white"><i data-lucide="youtube" class="h-4 w-4"></i></a>
+          <a href="#" onclick="openConciergeDesk(event)" aria-label="TripAdvisor" class="lift h-10 w-10 grid place-items-center rounded-xl bg-white/6 hover:bg-coral hover:text-white"><i data-lucide="globe" class="h-4 w-4"></i></a>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="lg:col-span-2">
+        <h3 class="text-[12px] font-extrabold uppercase tracking-[.16em] text-white">Quick Links</h3>
+        <ul class="mt-5 space-y-3 text-[14.5px]">
+          <li><a href="#home"      class="transition hover:text-gold-400 hover:pl-1">Home</a></li>
+          <li><a href="#transfers" class="transition hover:text-gold-400 hover:pl-1">Airport Transfers</a></li>
+          <li><a href="#tours"     class="transition hover:text-gold-400 hover:pl-1">Sri Lanka Tours</a></li>
+          <li><a href="#fleet"     class="transition hover:text-gold-400 hover:pl-1">Vehicle Fleet</a></li>
+          <li><a href="#reviews"   class="transition hover:text-gold-400 hover:pl-1">Reviews</a></li>
+          <li><a href="#contact"   class="transition hover:text-gold-400 hover:pl-1">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="lg:col-span-2">
+        <h3 class="text-[12px] font-extrabold uppercase tracking-[.16em] text-white">Popular Routes</h3>
+        <ul class="mt-5 space-y-3 text-[14.5px]">
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">CMB Airport &rarr; Colombo</a></li>
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">CMB Airport &rarr; Negombo</a></li>
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">CMB Airport &rarr; Kandy</a></li>
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">CMB Airport &rarr; Galle</a></li>
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">CMB Airport &rarr; Ella</a></li>
+          <li><a href="#booking" class="transition hover:text-gold-400 hover:pl-1">HRI Mattala &rarr; Yala &amp; Tissa</a></li>
+        </ul>
+      </div>
+
+      <!-- Head office &amp; airport desk -->
+      <div class="lg:col-span-4">
+        <h3 class="text-[12px] font-extrabold uppercase tracking-[.16em] text-white">Find Us</h3>
+        <div class="mt-5 group relative h-[230px] overflow-hidden rounded-2xl ring-1 ring-white/10">
+          <!-- Route illustration -->
+          <div class="absolute inset-0 bg-[#1B263F]"></div>
+          <svg class="absolute inset-0 h-full w-full opacity-40" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+                <path d="M34 0 L0 0 0 34" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="400" height="240" fill="url(#grid)"/>
+            <path d="M-10,180 C80,150 120,120 200,110 C280,100 330,70 410,40" fill="none" stroke="#F59E0B" stroke-width="3" opacity=".75"/>
+            <path d="M-10,60 C90,90 150,190 260,200 C320,206 370,220 410,214" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+            <circle cx="200" cy="110" r="26" fill="rgba(255,87,51,.18)"/>
+          </svg>
+
+          <div class="absolute inset-0 grid place-items-center">
+            <div class="text-center">
+              <span class="mx-auto grid h-12 w-12 place-items-center rounded-full bg-coral text-white shadow-glow animate-floaty">
+                <i data-lucide="map-pin" class="h-5 w-5"></i>
+              </span>
+              <div class="mt-3 text-[14px] font-bold text-white">Katunayake &middot; Colombo</div>
+              <div class="text-[12px] text-white/50">Head Office &amp; Airport Desk</div>
+            </div>
+          </div>
+
+          <a href="#" onclick="openConciergeDesk(event)" data-feature="Directions &amp; Airport Desk Map" class="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-xl glass px-4 py-3 text-[12.5px] font-semibold text-white transition group-hover:bg-white/20">
+            <span class="inline-flex items-center gap-2"><i data-lucide="navigation" class="h-3.5 w-3.5 text-gold-400"></i> Open in Google Maps</span>
+            <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i>
+          </a>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/6 px-3 py-1.5 text-[11px] font-bold text-white/70"><i data-lucide="clock" class="h-3 w-3 text-gold-400"></i> Open 24 / 7</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/6 px-3 py-1.5 text-[11px] font-bold text-white/70"><i data-lucide="credit-card" class="h-3 w-3 text-gold-400"></i> Card &amp; Cash</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-white/6 px-3 py-1.5 text-[11px] font-bold text-white/70"><i data-lucide="languages" class="h-3 w-3 text-gold-400"></i> EN / DE / FR</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-14 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px] text-white/40">
+      <p>&copy; 2026 Airport First (Pvt) Ltd. All rights reserved.</p>
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <a href="#" onclick="openConciergeDesk(event)" data-feature="Privacy Policy" class="transition hover:text-gold-400">Privacy Policy</a>
+        <a href="#" onclick="openConciergeDesk(event)" data-feature="Terms & Conditions" class="transition hover:text-gold-400">Terms &amp; Conditions</a>
+        <a href="#" onclick="openConciergeDesk(event)" data-feature="Cancellation Policy" class="transition hover:text-gold-400">Cancellation Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== FLOATING WIDGETS ==================== -->
+<a href="https://wa.me/94714784444" target="_blank" rel="noopener"
+   class="wa-float group fixed bottom-24 sm:bottom-6 right-5 sm:right-6 z-40 flex items-center gap-3 rounded-full bg-[#25D366] pl-4 pr-5 py-3.5 text-white transition hover:-translate-y-1">
+  <span class="absolute inset-0 rounded-full bg-[#25D366] animate-pulseRing"></span>
+  <i data-lucide="message-circle" class="relative h-5 w-5"></i>
+  <span class="relative hidden sm:block text-[14px] font-bold whitespace-nowrap">Chat with us</span>
+</a>
+
+<button id="toTop" aria-label="Back to top"
+        class="fixed bottom-24 sm:bottom-6 left-5 sm:left-6 z-40 hidden h-12 w-12 place-items-center rounded-full bg-navy-900 text-white shadow-lux transition hover:-translate-y-1 hover:bg-coral">
+  <i data-lucide="arrow-up" class="h-5 w-5"></i>
+</button>
+
+<!-- Mobile sticky call bar -->
+<div class="sm:hidden fixed bottom-0 inset-x-0 z-30 glass-light border-t border-navy-900/10 px-4 py-3 flex gap-3">
+  <a href="tel:+94714784444" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-navy-900 px-4 py-3 text-[14px] font-bold text-white">
+    <i data-lucide="phone" class="h-4 w-4 text-gold-400"></i> Call
+  </a>
+  <a href="#booking" class="btn-coral flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[14px] font-bold text-white">
+    <i data-lucide="calendar-check" class="h-4 w-4"></i> Book Now
+  </a>
+</div>
+
+<!-- ==================== QUOTE MODAL ==================== -->
+<div id="quoteModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+  <div id="modalBackdrop" class="absolute inset-0 bg-navy-950/70 backdrop-blur-sm"></div>
+
+  <div class="relative w-full max-w-lg animate-popIn overflow-hidden rounded-3xl bg-white shadow-lux">
+    <div class="relative bg-navy-900 px-7 py-6 noise">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_0%,rgba(255,87,51,.35),transparent_60%)]"></div>
+      <button id="modalClose" aria-label="Close" class="absolute right-5 top-5 h-9 w-9 grid place-items-center rounded-full bg-white/10 text-white transition hover:bg-coral">
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+      <div class="relative flex items-center gap-3">
+        <span class="h-11 w-11 grid place-items-center rounded-2xl bg-gradient-to-br from-coral to-gold-500 text-white">
+          <i data-lucide="receipt-text" class="h-5 w-5"></i>
+        </span>
+        <div>
+          <h3 class="font-display text-2xl font-bold text-white">Your Estimated Rate</h3>
+          <p class="text-[12.5px] text-white/50">All-inclusive &middot; Rate held for 7 days</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-7 py-6">
+      <div id="modalRoute" class="flex items-center gap-3 rounded-2xl bg-cream p-4 ring-1 ring-navy-900/6"></div>
+
+      <div class="mt-5 space-y-3 text-[14px]" id="modalLines"></div>
+
+      <div class="mt-5 flex items-end justify-between rounded-2xl bg-navy-900 px-5 py-4">
+        <div>
+          <div class="text-[10.5px] font-extrabold uppercase tracking-[.16em] text-white/45">Total (all inclusive)</div>
+          <div id="modalTotalLkr" class="mt-0.5 text-[12.5px] text-white/50"></div>
+        </div>
+        <div id="modalTotal" class="font-display text-3xl font-bold text-gold-400"></div>
+      </div>
+
+      <div class="mt-5 flex flex-col sm:flex-row gap-3">
+        <a href="https://wa.me/94714784444" target="_blank" rel="noopener"
+           class="btn-coral flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-[14.5px] font-bold text-white">
+          <i data-lucide="message-circle" class="h-4 w-4"></i> Confirm on WhatsApp
+        </a>
+        <button id="modalDismiss" class="btn-ghost flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-navy-900/15 px-5 py-3.5 text-[14.5px] font-bold text-navy-900">
+          Adjust Search
+        </button>
+      </div>
+
+      <p class="mt-4 flex items-start gap-1.5 text-[11.5px] leading-relaxed text-navy-900/40">
+        <i data-lucide="info" class="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-500"></i>
+        Rates are held for 7 days and confirmed by our dispatch desk once we receive your flight number. A night surcharge applies for pickups between 22:00 and 06:00.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== VIP CONCIERGE DESK ==================== -->
+<div id="conciergeModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4"
+     role="dialog" aria-modal="true" aria-labelledby="conciergeTitle">
+
+  <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onclick="closeConciergeDesk()"></div>
+
+  <div class="relative w-full max-w-md animate-popIn overflow-hidden rounded-3xl border border-amber-500/30 bg-slate-900 p-8 text-center shadow-lux">
+
+    <div class="pointer-events-none absolute -top-24 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-amber-500/25 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-24 -right-16 h-52 w-52 rounded-full bg-coral/20 blur-3xl"></div>
+
+    <button onclick="closeConciergeDesk()" aria-label="Close"
+            class="absolute right-5 top-5 z-10 h-9 w-9 grid place-items-center rounded-full bg-white/5 text-white/60 ring-1 ring-white/10 transition hover:bg-amber-500 hover:text-slate-900">
+      <i data-lucide="x" class="h-4 w-4"></i>
+    </button>
+
+    <div class="relative">
+      <div class="relative mx-auto h-20 w-20">
+        <span class="absolute inset-0 rounded-2xl bg-amber-500/30 blur-xl"></span>
+        <span class="relative grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-coral shadow-[0_18px_45px_-12px_rgba(245,158,11,.85)]">
+          <i data-lucide="concierge-bell" class="h-8 w-8 text-slate-900"></i>
+        </span>
+      </div>
+
+      <span class="mt-6 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-[10.5px] font-extrabold uppercase tracking-[.14em] text-amber-400">
+        <i data-lucide="crown" class="h-3 w-3"></i> Airport First &middot; 24/7 Dispatch Desk
+      </span>
+
+      <h3 id="conciergeTitle" class="mt-5 font-display text-[1.7rem] font-bold leading-tight text-white">
+        VIP Concierge Booking Required
+      </h3>
+
+      <p id="conciergeService" class="mt-2 hidden text-[11.5px] font-extrabold uppercase tracking-[.12em] text-amber-400/85"></p>
+
+      <p class="mt-4 text-[14.5px] leading-relaxed text-white/60">
+        Specialized island tours, custom fleet requests, and multi-day itinerary customizations are managed directly through our 24/7 Dispatch Desk. Contact our senior chauffeur concierge for immediate arrangement.
+      </p>
+
+      <div class="mt-7 space-y-3">
+        <a href="https://wa.me/94714784444" target="_blank" rel="noopener"
+           class="btn-coral cta-glow inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-4 text-[13px] sm:text-[14.5px] font-bold text-white">
+          <i data-lucide="message-circle" class="h-4 w-4 shrink-0"></i> Connect via WhatsApp Dispatch
+        </a>
+        <button onclick="closeConciergeDesk()"
+                class="lift inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-6 py-3.5 text-[14px] font-bold text-white/75 hover:border-amber-500/40 hover:text-amber-400">
+          <i data-lucide="arrow-left" class="h-4 w-4"></i> Back to Main Rates
+        </button>
+      </div>
+
+      <a href="tel:+94714784444" class="mt-5 inline-flex items-center justify-center gap-1.5 text-[12px] font-semibold text-white/40 transition hover:text-amber-400">
+        <i data-lucide="phone" class="h-3.5 w-3.5"></i> Or call the desk directly &middot; +94 71 478 4444
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- VIP Concierge desk ---------- */
+(function () {
+  "use strict";
+
+  var el      = function () { return document.getElementById("conciergeModal"); };
+  var feature = function () { return document.getElementById("conciergeService"); };
+
+  /**
+   * Opens the coming-soon modal.
+   * @param {Event}  event    click event — default navigation is suppressed
+   * @param {string} [name]   optional module name; falls back to data-feature / aria-label / label text
+   */
+  window.openConciergeDesk = function (event, name) {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
+
+    var box = el();
+    if (!box) return;
+
+    var trigger = event && event.currentTarget;
+    var label = name;
+
+    if (!label && trigger && trigger.getAttribute) {
+      label = trigger.getAttribute("data-feature")
+           || trigger.getAttribute("aria-label")
+           || (trigger.textContent || "").replace(/\s+/g, " ").trim();
+    }
+    if (label && label.length > 48) label = label.slice(0, 45).trim() + "…";
+
+    var f = feature();
+    if (label) { f.textContent = label; f.classList.remove("hidden"); }
+    else       { f.textContent = "";    f.classList.add("hidden"); }
+
+    box.classList.remove("hidden");
+    box.classList.add("flex");
+    document.body.style.overflow = "hidden";
+
+    if (window.lucide) lucide.createIcons();
+  };
+
+  window.closeConciergeDesk = function () {
+    var box = el();
+    if (!box || box.classList.contains("hidden")) return;
+    box.classList.add("hidden");
+    box.classList.remove("flex");
+    document.body.style.overflow = "";
+  };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" || e.key === "Esc") window.closeConciergeDesk();
+  });
+})();
+</script>
+
+<!-- ==================== TOAST ==================== -->
+<div id="toast" class="pointer-events-none fixed bottom-40 sm:bottom-6 left-1/2 z-[70] hidden -translate-x-1/2">
+  <div class="flex items-center gap-3 rounded-full bg-navy-900 px-5 py-3.5 text-white shadow-lux">
+    <span class="h-7 w-7 grid place-items-center rounded-full bg-gradient-to-br from-coral to-gold-500">
+      <i data-lucide="check" class="h-3.5 w-3.5"></i>
+    </span>
+    <span id="toastMsg" class="text-[13.5px] font-semibold whitespace-nowrap"></span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Icons ---------- */
+  const drawIcons = () => { if (window.lucide) lucide.createIcons(); };
+  drawIcons();
+
+  /* ---------- Image fallbacks (works offline / dead URLs) ---------- */
+  const palettes = [["#0F172A","#1B263F"],["#FF5733","#F59E0B"],["#134E4A","#0F172A"],["#F59E0B","#E8431F"]];
+  document.querySelectorAll("img[data-fallback]").forEach((img, i) => {
+    img.addEventListener("error", () => {
+      const label = img.getAttribute("data-fallback") || "Airport First";
+      const [a, b] = palettes[i % palettes.length];
+      const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/>' +
+        '</linearGradient></defs>' +
+        '<rect width="1200" height="800" fill="url(#g)"/>' +
+        '<circle cx="980" cy="180" r="150" fill="rgba(255,255,255,.07)"/>' +
+        '<circle cx="180" cy="700" r="220" fill="rgba(255,255,255,.05)"/>' +
+        '<path d="M0,560 C260,470 420,610 700,520 C900,458 1060,505 1200,455 L1200,800 L0,800 Z" ' +
+        'fill="rgba(255,255,255,.06)"/>' +
+        '<path d="M0,640 C300,570 480,690 760,610 C960,553 1080,590 1200,555" ' +
+        'fill="none" stroke="rgba(245,158,11,.35)" stroke-width="3"/>' +
+        '<text x="60" y="120" font-family="Helvetica,Arial,sans-serif" font-size="30" letter-spacing="6" ' +
+        'font-weight="bold" fill="rgba(255,255,255,.34)">' + label.toUpperCase().replace(/&/g, "AND") + '</text>' +
+        '<text x="60" y="160" font-family="Helvetica,Arial,sans-serif" font-size="17" letter-spacing="4" ' +
+        'fill="rgba(245,158,11,.55)">AIRPORT FIRST &#183; SRI LANKA</text></svg>';
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }, { once: true });
+  });
+
+  /* ---------- Mobile nav ---------- */
+  const navToggle = document.getElementById("navToggle");
+  const mobileNav = document.getElementById("mobileNav");
+  navToggle.addEventListener("click", () => {
+    mobileNav.classList.toggle("hidden");
+    navToggle.innerHTML = mobileNav.classList.contains("hidden")
+      ? '<i data-lucide="menu" class="h-5 w-5"></i>'
+      : '<i data-lucide="x" class="h-5 w-5"></i>';
+    drawIcons();
+  });
+  document.querySelectorAll(".mobile-link").forEach(l =>
+    l.addEventListener("click", () => {
+      mobileNav.classList.add("hidden");
+      navToggle.innerHTML = '<i data-lucide="menu" class="h-5 w-5"></i>';
+      drawIcons();
+    })
+  );
+
+  /* ---------- Header shrink + back-to-top ---------- */
+  const headerInner = document.getElementById("headerInner");
+  const header = document.getElementById("header");
+  const toTop = document.getElementById("toTop");
+  const onScroll = () => {
+    const y = window.scrollY;
+    headerInner.classList.toggle("h-16", y > 40);
+    headerInner.classList.toggle("h-20", y <= 40);
+    header.classList.toggle("shadow-card", y > 40);
+    toTop.classList.toggle("hidden", y < 500);
+    toTop.classList.toggle("grid", y >= 500);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+  /* ---------- Scroll spy ---------- */
+  const sections = ["home", "transfers", "tours", "fleet", "reviews", "contact"];
+  const navLinks = Array.from(document.querySelectorAll("header .nav-link"));
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      navLinks.forEach(l => l.classList.toggle("active", l.getAttribute("href") === "#" + e.target.id));
+    });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  sections.forEach(id => { const el = document.getElementById(id); if (el) spy.observe(el); });
+
+  /* ---------- Reveal on scroll ---------- */
+  const reveals = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((e, i) => {
+        if (!e.isIntersecting) return;
+        setTimeout(() => e.target.classList.add("in"), Math.min(i, 4) * 90);
+        obs.unobserve(e.target);
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
+    reveals.forEach(el => revealObserver.observe(el));
+    /* safety net: never leave content invisible */
+    setTimeout(() => reveals.forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add("in");
+    }), 1200);
+  } else {
+    reveals.forEach(el => el.classList.add("in"));
+  }
+
+  /* ---------- Animated counters ---------- */
+  const counterObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = parseFloat(el.dataset.count);
+      const decimals = parseInt(el.dataset.decimals || "0", 10);
+      const suffix = el.dataset.suffix || "";
+      const start = performance.now();
+      const dur = 1600;
+      const tick = now => {
+        const p = Math.min((now - start) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = target * eased;
+        el.textContent = (decimals ? val.toFixed(decimals) : Math.round(val).toLocaleString("en-US")) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      obs.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll("[data-count]").forEach(el => counterObserver.observe(el));
+
+  /* ---------- Booking tabs ---------- */
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.remove("tab-active");
+        b.classList.add("text-navy-900/60");
+      });
+      btn.classList.add("tab-active");
+      btn.classList.remove("text-navy-900/60");
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById("panel-" + btn.dataset.tab).classList.remove("hidden");
+      drawIcons();
+    });
+  });
+
+  /* ---------- Passenger hint ---------- */
+  const paxCopy = {
+    sedan: "Toyota Prius / Grace / Axio · 3 large suitcases · Fully air-conditioned",
+    van:   "Toyota KDH Commuter / HiAce High-Roof · 8 large suitcases · Free on-board Wi-Fi",
+    bus:   "Mini Bus / 29-seat Coach · 12+ suitcases · Reclining seats"
+  };
+  const paxSelect = document.getElementById("paxSelect");
+  const paxHint = document.getElementById("paxHint").querySelector("span");
+  paxSelect.addEventListener("change", () => { paxHint.textContent = paxCopy[paxSelect.value]; });
+
+  /* ---------- Default dates ---------- */
+  const iso = d => d.toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000);
+  ["flightDate", "tourDate"].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = iso(tomorrow);
+    el.min = iso(new Date());
+  });
+
+  /* ---------- Tariff engine ---------- */
+  const LKR = 300;   // indicative LKR per USD, for display only
+
+  /* Approximate lat/lon of each served point, used to derive road distance.
+     Road factor 1.4 approximates the A-road / expressway network vs straight line. */
+  const places = {
+    CMB:           { label: "Bandaranaike Intl (CMB)", lat: 7.18, lon: 79.88 },
+    HRI:           { label: "Mattala Rajapaksa Intl (HRI)", lat: 6.28, lon: 81.12 },
+    Colombo:       { label: "Colombo", lat: 6.93, lon: 79.86 },
+    Negombo:       { label: "Negombo", lat: 7.21, lon: 79.84 },
+    Kandy:         { label: "Kandy", lat: 7.29, lon: 80.64 },
+    Galle:         { label: "Galle", lat: 6.03, lon: 80.22 },
+    Mirissa:       { label: "Mirissa", lat: 5.95, lon: 80.46 },
+    Ella:          { label: "Ella", lat: 6.87, lon: 81.05 },
+    "Nuwara Eliya":{ label: "Nuwara Eliya", lat: 6.97, lon: 80.77 }
+  };
+
+  const roadKm = (a, b) => {
+    const p = places[a], q = places[b];
+    if (!p || !q) return 40;
+    const dy = (p.lat - q.lat) * 111;
+    const dx = (p.lon - q.lon) * 110;
+    return Math.round(Math.sqrt(dx * dx + dy * dy) * 1.4);
+  };
+
+  const FARE_BASE = 18, FARE_PER_KM = 0.44, FARE_MIN = 25;
+  const vehicleMult = { sedan: 1, van: 1.5, bus: 2.2 };
+  const vehicleName = { sedan: "Luxury Sedan (1–4 pax)", van: "Premium Van (5–8 pax)", bus: "Mini Bus / Coach (9+ pax)" };
+  const tourNight = { sedan: 95, van: 145, bus: 215 };
+
+  const modal = document.getElementById("quoteModal");
+  const openModal = () => { modal.classList.remove("hidden"); modal.classList.add("flex"); document.body.style.overflow = "hidden"; drawIcons(); };
+  const closeModal = () => { modal.classList.add("hidden"); modal.classList.remove("flex"); document.body.style.overflow = ""; };
+  ["modalClose", "modalBackdrop", "modalDismiss"].forEach(id => document.getElementById(id).addEventListener("click", closeModal));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+  const money = n => "$" + n.toLocaleString("en-US");
+  const routeRow = (a, b, meta) =>
+    '<span class="h-10 w-10 shrink-0 grid place-items-center rounded-xl bg-white text-coral ring-1 ring-navy-900/8"><i data-lucide="route" class="h-4 w-4"></i></span>' +
+    '<div class="min-w-0"><div class="text-[14.5px] font-bold text-navy-900 truncate">' + a + ' &rarr; ' + b + '</div>' +
+    '<div class="text-[12.5px] text-navy-900/50 truncate">' + meta + '</div></div>';
+  const line = (label, value, strong) =>
+    '<div class="flex items-center justify-between border-b border-dashed border-navy-900/10 pb-3">' +
+    '<span class="text-navy-900/55">' + label + '</span>' +
+    '<span class="font-' + (strong ? "bold" : "semibold") + ' text-navy-900">' + value + '</span></div>';
+
+  document.getElementById("calcBtn").addEventListener("click", () => {
+    const from = document.getElementById("fromLoc").value;
+    const to = document.getElementById("toLoc").value;
+    const veh = paxSelect.value;
+    const date = document.getElementById("flightDate").value;
+    const time = document.getElementById("flightTime").value;
+
+    if (from === to) { showToast("Pick-up and drop-off cannot be the same"); return; }
+
+    const km = roadKm(from, to);
+    const subtotal = Math.round(Math.max(FARE_BASE + km * FARE_PER_KM, FARE_MIN) * vehicleMult[veh]);
+    const meetGreet = 5;
+    const tolls = Math.round(subtotal * 0.08);
+    const total = subtotal + meetGreet + tolls;
+
+    document.getElementById("modalRoute").innerHTML =
+      routeRow(places[from].label, places[to].label,
+               date + " at " + time + " · " + vehicleName[veh] + " · approx. " + km + " km");
+    document.getElementById("modalLines").innerHTML =
+      line("Transfer fare (" + km + " km)", money(subtotal)) +
+      line("Meet &amp; greet, name board &amp; chilled water", money(meetGreet)) +
+      line("Expressway tolls, parking &amp; fuel", money(tolls)) +
+      line("Flight delay auto-tracking &amp; waiting time", '<span class="text-emerald-600">Included</span>') +
+      line("Local SIM card setup on arrival", '<span class="text-emerald-600">Complimentary</span>');
+    document.getElementById("modalTotal").textContent = money(total);
+    document.getElementById("modalTotalLkr").textContent = "approx. LKR " + (total * LKR).toLocaleString("en-US") + "  (@ LKR 300 = USD 1)";
+    openModal();
+  });
+
+  document.getElementById("calcTourBtn").addEventListener("click", () => {
+    const pkg = document.getElementById("tourPkg").value;
+    const days = parseInt(document.getElementById("tourDur").value, 10);
+    const veh = document.getElementById("tourPax").value;
+    const date = document.getElementById("tourDate").value;
+
+    const nights = days - 1;
+    const perNight = tourNight[veh];
+    const subtotal = perNight * nights;
+    const guide = 30 * days;
+    const entries = 45;
+    const total = subtotal + guide + entries;
+
+    document.getElementById("modalRoute").innerHTML =
+      routeRow(pkg, days + " Days", "Starting " + date + " · " + vehicleName[veh]);
+    document.getElementById("modalLines").innerHTML =
+      line("Vehicle + chauffeur (" + nights + " nights)", money(subtotal)) +
+      line("Licensed guide (" + days + " days)", money(guide)) +
+      line("Site entrance tickets", money(entries)) +
+      line("Driver accommodation &amp; meals", '<span class="text-emerald-600">Included</span>') +
+      line("Daily chilled water &amp; on-board Wi-Fi", '<span class="text-emerald-600">Complimentary</span>');
+    document.getElementById("modalTotal").textContent = money(total);
+    document.getElementById("modalTotalLkr").textContent = "approx. LKR " + (total * LKR).toLocaleString("en-US") + "  (@ LKR 300 = USD 1)";
+    openModal();
+  });
+
+  /* ---------- Toast ---------- */
+  const toast = document.getElementById("toast");
+  const toastMsg = document.getElementById("toastMsg");
+  let toastTimer;
+  function showToast(msg) {
+    toastMsg.textContent = msg;
+    toast.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add("hidden"), 2600);
+    drawIcons();
+  }
+
+  /* ---------- Card interactions ---------- */
+  /* Tour "Explore Itinerary" buttons open the coming-soon modal (module not built yet) */
+  document.querySelectorAll(".itinerary-btn").forEach(btn =>
+    btn.addEventListener("click", e =>
+      window.openConciergeDesk(e, btn.dataset.place.replace(/&amp;/g, "&") + " — Day-by-Day Itinerary")
+    )
+  );
+  document.querySelectorAll(".fleet-btn").forEach(btn =>
+    btn.addEventListener("click", () => {
+      showToast(btn.dataset.vehicle + " added to your quote");
+      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+    })
+  );
+  document.querySelectorAll(".wish").forEach(btn =>
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      const on = btn.classList.toggle("bg-coral");
+      btn.querySelector("svg").classList.toggle("fill-current", on);
+      showToast(on ? "Saved to your wishlist" : "Removed from wishlist");
+    })
+  );
+
+  /* ---------- Smooth anchor scroll ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener("click", e => {
+      const id = a.getAttribute("href");
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
