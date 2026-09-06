@@ -466,13 +466,29 @@
 </div>
 
 <!-- ==================== HEADER ==================== -->
-<header id="header" class="sticky top-0 z-50 transition-all duration-500 bg-white/85 backdrop-blur-xl border-b border-navy-900/5">
+<!-- The header background is deliberately SOLID white, not the translucent
+     bg-white/85 + backdrop-blur it used to be. The logo file is a JPEG with a
+     baked-in white rectangle, and against a tinted header that rectangle read
+     as an ugly box around the artwork. Solid white makes the two identical, so
+     the logo merges seamlessly at every scroll position.
+     (mix-blend-multiply on the <img> cannot fix this on its own: backdrop-filter
+     isolates its subtree, so the image blends only with the header's own
+     semi-transparent white — not with the page showing through it.) -->
+<header id="header" class="sticky top-0 z-50 transition-all duration-500 bg-white border-b border-navy-900/5">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div id="headerInner" class="flex items-center justify-between gap-6 h-20 transition-all duration-500">
 
-      <!-- Client-supplied logo artwork: assets/client-logo.png -->
+      <!-- Client-supplied logo artwork: assets/client-logo.png
+           The file is a JPEG, so it carries a solid white rectangle instead of
+           transparency. The header is translucent (bg-white/85 over whatever is
+           scrolling underneath), so that white would read as a box around the
+           artwork. mix-blend-multiply lets the header tint show through the
+           white — white × anything = anything — while the crimson artwork is
+           unaffected against a near-white ground. Replace the file with a
+           transparent PNG one day and this class can simply come off. -->
       <a href="#home" class="af-logo shrink-0" aria-label="Airport First - Feel the Ambience">
-        <img src="assets/client-logo.png" alt="Airport First" class="h-10 sm:h-12 w-auto object-contain">
+        <img src="assets/client-logo.png" alt="Airport First"
+             class="h-10 sm:h-12 w-auto object-contain mix-blend-multiply">
       </a>
 
       <nav class="hidden lg:flex items-center gap-7 text-[14.5px] font-semibold text-navy-900/70">
@@ -2689,7 +2705,9 @@
 <!-- ==================== TOAST ==================== -->
 <div id="toast" class="pointer-events-none fixed bottom-40 sm:bottom-6 left-1/2 z-[70] hidden -translate-x-1/2">
   <div class="flex items-center gap-3 rounded-full bg-navy-900 px-5 py-3.5 text-white shadow-lux">
-    <span class="h-7 w-7 grid place-items-center rounded-full bg-gradient-to-br from-crimson-500 to-crimson-700">
+    <!-- Badge and glyph are set by showToast(): a tick for confirmations, a
+         warning triangle for anything the guest has to correct. -->
+    <span id="toastIcon" class="h-7 w-7 grid place-items-center rounded-full bg-gradient-to-br from-crimson-500 to-crimson-700">
       <i data-lucide="check" class="h-3.5 w-3.5"></i>
     </span>
     <span id="toastMsg" class="text-[13.5px] font-semibold whitespace-nowrap"></span>
@@ -2840,9 +2858,26 @@
   /* ---------- Toast ---------- */
   const toast = document.getElementById("toast");
   const toastMsg = document.getElementById("toastMsg");
+  const toastIcon = document.getElementById("toastIcon");
   let toastTimer;
-  function showToast(msg) {
+
+  /* showToast(msg) confirms something; showToast(msg, "error") reports
+     something the guest has to fix. A tick on "that email doesn't look right"
+     reads as success at a glance, so errors get a warning triangle on an
+     amber-to-crimson badge instead — same shape, unmistakably different tone. */
+  const TOAST_TONES = {
+    info:  { badge: "from-crimson-500 to-crimson-700", icon: "check" },
+    error: { badge: "from-amber-500 to-crimson-600",   icon: "alert-triangle" }
+  };
+
+  function showToast(msg, tone) {
+    const { badge, icon } = TOAST_TONES[tone] || TOAST_TONES.info;
+
     toastMsg.textContent = msg;
+    toastIcon.className = "h-7 w-7 grid place-items-center rounded-full bg-gradient-to-br " + badge;
+    toastIcon.innerHTML = '<i data-lucide="' + icon + '" class="h-3.5 w-3.5"></i>';
+    toast.setAttribute("role", tone === "error" ? "alert" : "status");
+
     toast.classList.remove("hidden");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.add("hidden"), 3200);
@@ -2860,15 +2895,15 @@
   /* =========================================================
      DIRECT INQUIRY & DISPATCH SYSTEM  (production)
 
-     One submit fans out to three destinations:
-       1. WhatsApp  - opened first, synchronously inside the click gesture, so
-                      the guest sees zero delay and no popup blocker fires.
+     One submit confirms on the page and fans out to two destinations:
+       1. Email     - posted to send-mail.php on this host, falling back to
+                      Web3Forms where PHP is not available (see notifyByEmail).
        2. Supabase  - the inquiry row is written to `airport_inquiries`.
-       3. Email     - a notification is posted to the send-inquiry-email Edge
-                      Function, which calls Resend server-side.
 
-     Steps 2 and 3 are fire-and-forget: a failure in either is logged for the
-     operator but never blocks or interrupts the guest.
+     Both are fire-and-forget: a failure in either is logged for the operator
+     and reported honestly in the status pill, but never blocks or interrupts
+     the guest. WhatsApp is NOT opened for the guest — it is an opt-in button
+     on the success card and nothing else.
      ========================================================= */
   const DISPATCH_NUMBER = "94768071150";                        // WhatsApp business line
   const SUPABASE_URL    = "https://meoinwznmdjyjmbgjdjl.supabase.co";
@@ -3540,7 +3575,7 @@
 
     button.addEventListener("click", () => {
       if (!navigator.geolocation) {
-        showToast("This browser cannot detect location. Please type your pick-up point");
+        showToast("This browser cannot detect location. Please type your pick-up point", "error");
         input.focus();
         return;
       }
@@ -3558,7 +3593,7 @@
         if (edited) return;                        // guest started typing: leave them alone
         if (value) input.value = value;
         else input.value = previous === "Detecting location…" ? "" : previous;
-        if (message) showToast(message);
+        if (message) showToast(message, value ? undefined : "error");
       };
 
       setBusy(true);
@@ -3958,7 +3993,7 @@
       if (!file) { resetPhotoPicker(); return; }
 
       if (!/^image\//.test(file.type)) {
-        showToast("Please choose an image file");
+        showToast("Please choose an image file", "error");
         resetPhotoPicker();
         return;
       }
@@ -3978,7 +4013,7 @@
         drawIcons();
       } catch (err) {
         console.error("[AirportFirst] Photo processing failed:", err);
-        showToast("Could not read that image — please try another");
+        showToast("Could not read that image — please try another", "error");
         resetPhotoPicker();
       }
     });
@@ -3998,8 +4033,8 @@
 
       const name = document.getElementById("review_name").value.trim();
       const text = reviewText.value.trim();
-      if (!name)          { showToast("Please add your name"); document.getElementById("review_name").focus(); return; }
-      if (text.length < 12) { showToast("Please write a little more about your journey"); reviewText.focus(); return; }
+      if (!name)          { showToast("Please add your name", "error"); document.getElementById("review_name").focus(); return; }
+      if (text.length < 12) { showToast("Please write a little more about your journey", "error"); reviewText.focus(); return; }
 
       /* Free text: whatever the guest typed is what we store, with the flag
          resolved from the ISO table (aliases included) where we recognise it. */
@@ -4038,7 +4073,8 @@
       paintStars(5);
       reviewCount.textContent = "0";
       submit.disabled = false;
-      showToast(saved ? "Thank you — your review is live" : "Thank you — your review is showing, but could not be saved");
+      showToast(saved ? "Thank you — your review is live" : "Thank you — your review is showing, but could not be saved",
+                saved ? undefined : "error");
       reviewGrid.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   }
@@ -4062,7 +4098,7 @@
       showToast("Moderation mode on");
       return true;
     }
-    if (entered !== null) showToast("Incorrect PIN");
+    if (entered !== null) showToast("Incorrect PIN", "error");
     return false;
   }
 
@@ -4097,7 +4133,7 @@
       } catch (err) {
         console.error("[AirportFirst] Review delete failed:", err);
         btn.disabled = false;
-        showToast("Could not delete — sign in as staff and try again");
+        showToast("Could not delete — sign in as staff and try again", "error");
       }
     });
   }
@@ -4117,7 +4153,7 @@
     const missing = firstMissingField(payload);
     if (missing) {
       const el = document.getElementById(missing.id);
-      showToast(missing.message);
+      showToast(missing.message, "error");
       el.focus();
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -4130,7 +4166,7 @@
       markFieldInvalid(emailEl, true);
       showToast(payload.email
         ? "That email address doesn’t look right — please check it"
-        : "Please add your email address");
+        : "Please add your email address", "error");
       if (emailEl) {
         emailEl.focus();
         emailEl.scrollIntoView({ behavior: "smooth", block: "center" });
