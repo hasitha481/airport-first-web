@@ -156,11 +156,13 @@ $html = '<!doctype html><html><body style="margin:0;background:#FAFAFB;font-fami
     . 'Reply within 15 minutes to hold the best-rate guarantee.</p>'
     . '</div></div></body></html>';
 
-// Plain-text alternative, for clients that will not render HTML.
-$text = "New website inquiry\n\n";
+/* Plain-text alternative, for clients that will not render HTML. Lines are
+   joined with CRLF because quoted_printable_encode() only treats a full CRLF
+   as a hard line break — a bare \n would be encoded as a literal "=0A". */
+$text = "New website inquiry\r\n\r\n";
 foreach ($rows as $label => $value) {
     if ($value !== '') {
-        $text .= $label . ': ' . $value . "\n";
+        $text .= $label . ': ' . preg_replace('/\r\n|\r|\n/', "\r\n", $value) . "\r\n";
     }
 }
 
@@ -170,28 +172,49 @@ foreach ($rows as $label => $value) {
 
 /**
  * Sends a multipart/alternative message with PHP mail().
+ *
+ * Both parts go out quoted-printable. The HTML template is built as one
+ * unbroken string well past 3000 characters, and Exim — the MTA behind cPanel —
+ * bounces anything with a line over 2048 bytes ("message has lines too long
+ * for transport"). quoted_printable_encode() soft-wraps at 76 columns, which
+ * keeps every wire line far inside that limit.
+ *
+ * The encoding is declared on each MIME part rather than on the multipart
+ * container: a multipart body must itself stay 7bit/8bit (RFC 2045 §6.4), and
+ * encoding the whole thing would bury the boundaries where no client can see
+ * them.
  */
 function send_plain_mail(string $to, string $subject, string $html, string $text, string $replyTo): bool
 {
     $boundary = 'af-' . bin2hex(random_bytes(8));
 
-    $headers = [
+    /* header_safe() runs over every finished line, so nothing a guest typed can
+       smuggle in a CR/LF and split the header block. Joined with CRLF, with no
+       trailing break — mail() adds the blank line that ends the headers. */
+    $headers = array_map('header_safe', [
         'MIME-Version: 1.0',
         'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
         'From: ' . SITE_NAME . ' <' . MAIL_FROM . '>',
-        'Reply-To: ' . ($replyTo !== '' ? header_safe($replyTo) : MAIL_FROM),
+        'Reply-To: ' . ($replyTo !== '' ? $replyTo : MAIL_FROM),
         'X-Mailer: AirportFirst/1.0',
-    ];
+    ]);
 
     $body = "--$boundary\r\n"
         . "Content-Type: text/plain; charset=UTF-8\r\n"
-        . "Content-Transfer-Encoding: 8bit\r\n\r\n"
-        . $text . "\r\n\r\n"
+        . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
+        . quoted_printable_encode($text) . "\r\n\r\n"
         . "--$boundary\r\n"
         . "Content-Type: text/html; charset=UTF-8\r\n"
-        . "Content-Transfer-Encoding: 8bit\r\n\r\n"
-        . $html . "\r\n\r\n"
-        . "--$boundary--";
+        . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
+        . quoted_printable_encode($html) . "\r\n\r\n"
+        . "--$boundary--\r\n";
+
+    /* RFC 2047 encoded-word, folded across continuation lines. A guest can
+       fill 520 characters between the name and the two addresses, and once
+       base64 has grown a subject that long it becomes a single header line
+       past Exim's 2048-byte limit — the same bounce the body now avoids. The
+       indent is the width of the "Subject: " that mail() puts in front. */
+    $encodedSubject = mb_encode_mimeheader($subject, 'UTF-8', 'B', "\r\n", strlen('Subject: '));
 
     // -f sets the envelope sender, which stops cPanel stamping the message as
     // coming from the web user and greatly improves Gmail deliverability.
@@ -201,7 +224,7 @@ function send_plain_mail(string $to, string $subject, string $html, string $text
     // The boolean return plus error_log() below carry the failure instead.
     return @mail(
         $to,
-        '=?UTF-8?B?' . base64_encode($subject) . '?=',
+        $encodedSubject,
         $body,
         implode("\r\n", $headers),
         '-f' . MAIL_FROM
