@@ -182,8 +182,9 @@ const MAIL_FROM = 'noreply@airportfirst.vip';     // create this in cPanel first
 const SMTP_PASS = 'PUT-MAILBOX-PASSWORD-HERE';    // that mailbox's password
 ```
 
-Host, port and username come from **cPanel → Email Accounts → Connect
-Devices**. Keep the filled-in copy out of git.
+The password is the only value you need to paste: the script submits to
+`localhost` on port 587, the mail server running on the same machine, and
+authenticates as `MAIL_FROM`. Keep the filled-in copy out of git.
 
 **Upload PHPMailer alongside it.** The script has no other dependency, but it
 will not send without this one: put the library's `src` folder at
@@ -208,9 +209,10 @@ inbox reaches them directly.
   `{"ok":false,"error":"Mail server rejected the message"}`. Set
   `SMTP_DEBUG = true` and read the `[AirportFirst][smtp]` lines in **cPanel →
   Errors**: `535 Incorrect authentication data` is a wrong `SMTP_PASS` or a
-  mailbox that does not exist yet, and `Could not connect` usually means the
-  hostname resolves off-server — try `SMTP_HOST = 'localhost'`. Port 465 pairs
-  with `'ssl'`, port 587 with `'tls'`; a mismatch just hangs.
+  mailbox that does not exist yet, and `Could not connect` means nothing is
+  listening on `SMTP_PORT` — fall back to port 25 with `SMTP_SECURE = ''`,
+  which every cPanel box accepts on the loopback. Port 25 pairs with `''`, 587
+  with `'tls'`, 465 with `'ssl'`; a mismatch just hangs.
 - Every rejected inquiry is appended to `inquiries-fallback.log`, written one
   level *above* `public_html` so it is not web-readable. Nothing is ever lost
   silently. Check it if the desk reports a missing enquiry.

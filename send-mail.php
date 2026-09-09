@@ -44,9 +44,9 @@ const SITE_NAME      = 'Airport First';
 /* SMTP — cPanel > Email Accounts > Connect Devices lists all of these for the
    mailbox. Port 465 pairs with 'ssl', port 587 with 'tls'; the two are not
    interchangeable. */
-const SMTP_HOST   = 'mail.airportfirst.vip';   // 'localhost' if DNS or the certificate misbehaves
-const SMTP_PORT   = 465;
-const SMTP_SECURE = 'ssl';
+const SMTP_HOST   = 'localhost';               // the mail server on this machine; the session never leaves the box
+const SMTP_PORT   = 587;                       // 587 with 'tls'; 25 with SMTP_SECURE '' is the plain-loopback alternative
+const SMTP_SECURE = 'tls';
 const SMTP_USER   = MAIL_FROM;                 // the mailbox authenticates as the address it sends from
 const SMTP_PASS   = 'PUT-MAILBOX-PASSWORD-HERE';
 const SMTP_DEBUG  = false;                     // true logs the whole SMTP conversation to the PHP error log
@@ -171,37 +171,60 @@ foreach ($rows as $label => $value) {
         continue;
     }
     $tableRows .= sprintf(
-        '<tr>'
-        . '<td style="padding:8px 14px;color:#64748B;font-size:13px;white-space:nowrap;vertical-align:top">%s</td>'
-        . '<td style="padding:8px 14px;color:#0F172A;font-size:14px;font-weight:600">%s</td>'
-        . '</tr>',
+        '<tr><td valign="top"><strong>%s</strong></td><td valign="top">%s</td></tr>',
         htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
         nl2br(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'))
     );
 }
 
-$html = '<!doctype html><html><body style="margin:0;background:#FAFAFB;font-family:Arial,Helvetica,sans-serif">'
-    . '<div style="max-width:620px;margin:24px auto;background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:16px;overflow:hidden">'
-    . '<div style="background:#C8102E;padding:20px 24px">'
-    . '<div style="color:#fff;font-size:19px;font-weight:bold;font-style:italic">' . SITE_NAME . '</div>'
-    . '<div style="color:rgba(255,255,255,.75);font-size:10px;letter-spacing:.30em;text-transform:uppercase;margin-top:4px">Feel the Ambience</div>'
-    . '</div>'
-    . '<div style="padding:22px 10px">'
-    . '<p style="margin:0 14px 14px;color:#0F172A;font-size:15px;font-weight:bold">New website inquiry</p>'
-    . '<table style="width:100%;border-collapse:collapse">' . $tableRows . '</table>'
-    . '<p style="margin:18px 14px 0;color:#64748B;font-size:12px">'
-    . 'Reply within 15 minutes to hold the best-rate guarantee.</p>'
-    . '</div></div></body></html>';
+/* Plain HTML: a heading, one table, one closing line. The card this used to
+   send — background colours, rounded corners, a letter-spaced banner — was a
+   wall of inline CSS wrapped around three lines of content, which is the shape
+   bulk mail has, and it bought a dispatcher reading an inquiry nothing. There
+   are no images, no links and nothing loaded from another host, so there is
+   nothing here that a filter can read as tracking. */
+$html = '<!doctype html><html><body>'
+    . '<p><strong>New website inquiry</strong> — ' . SITE_NAME . '</p>'
+    . '<table cellpadding="4" cellspacing="0" border="0">' . $tableRows . '</table>'
+    . '<p>Reply within 15 minutes to hold the best-rate guarantee.</p>'
+    . '</body></html>';
 
-/* Plain-text alternative, for clients that will not render HTML. Lines are
-   joined with CRLF because quoted_printable_encode() only treats a full CRLF
-   as a hard line break — a bare \n would be encoded as a literal "=0A". */
-$text = "New website inquiry\r\n\r\n";
+/* The plain-text alternative carries the whole booking, in the same order and
+   aligned, so the message reads properly in a text-only client and does not
+   look like an HTML-only blob to a filter. Lines are joined with CRLF because
+   quoted-printable only treats a full CRLF as a hard line break — a bare \n
+   would be encoded as a literal "=0A". */
+$width = 0;
 foreach ($rows as $label => $value) {
     if ($value !== '') {
-        $text .= $label . ': ' . preg_replace('/\r\n|\r|\n/', "\r\n", $value) . "\r\n";
+        $width = max($width, strlen($label) + 2);
     }
 }
+
+$rule = str_repeat('-', 56);
+$text = 'New website inquiry — ' . SITE_NAME . "\r\n" . $rule . "\r\n\r\n";
+
+foreach ($rows as $label => $value) {
+    if ($value === '') {
+        continue;
+    }
+    $value = preg_replace('/\r\n|\r|\n/', "\r\n", $value);
+
+    /* Notes usually run to several lines: put the label on its own line and
+       indent the text under it, rather than wrapping it around a column. */
+    if (strpos($value, "\r\n") !== false) {
+        $text .= $label . ":\r\n";
+        foreach (explode("\r\n", $value) as $noteLine) {
+            $text .= '    ' . $noteLine . "\r\n";
+        }
+        continue;
+    }
+
+    $text .= str_pad($label . ':', $width) . $value . "\r\n";
+}
+
+$text .= "\r\n" . $rule . "\r\n"
+    . "Reply within 15 minutes to hold the best-rate guarantee.\r\n";
 
 // ---------------------------------------------------------------------------
 // Deliver
@@ -231,13 +254,26 @@ function send_smtp_mail(string $to, string $subject, string $html, string $text,
 
     try {
         $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->Port       = SMTP_PORT;
-        $mail->SMTPSecure = SMTP_SECURE;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
-        $mail->Timeout    = 20;        // a wedged handshake must not hold the guest's browser open
+        $mail->Host        = SMTP_HOST;
+        $mail->Port        = SMTP_PORT;
+        $mail->SMTPSecure  = SMTP_SECURE;
+        $mail->SMTPAutoTLS = SMTP_SECURE !== '';   // on port 25 there is nothing to upgrade to
+        $mail->SMTPAuth    = true;
+        $mail->Username    = SMTP_USER;
+        $mail->Password    = SMTP_PASS;
+        $mail->Timeout     = 20;       // a wedged handshake must not hold the guest's browser open
+
+        /* The server's certificate is issued for the domain, not for
+           'localhost', so verifying it fails on a connection that never leaves
+           the machine. Relaxed for the loopback only — a remote SMTP_HOST is
+           still verified in full. */
+        if (SMTP_HOST === 'localhost' || SMTP_HOST === '127.0.0.1') {
+            $mail->SMTPOptions = ['ssl' => [
+                'verify_peer'       => false,
+                'verify_peer_name'  => false,
+                'allow_self_signed' => true,
+            ]];
+        }
 
         /* Any SMTP chatter goes to the PHP error log. It must never reach the
            response body, which has to stay parseable JSON for index.html. */
@@ -301,12 +337,14 @@ respond(200, ['ok' => true]);
  *
  *   535 Incorrect authentication data  — SMTP_PASS is wrong, or the mailbox
  *       does not exist yet (cPanel > Email Accounts).
- *   Could not connect to SMTP host     — the hostname resolves off-server or
- *       the port is firewalled. Try SMTP_HOST 'localhost', which stays inside
- *       the machine, before trying the IP.
- *   certificate verify failed          — the hostname does not match the
- *       server's certificate. 'localhost' avoids this too.
+ *   Could not connect to SMTP host     — nothing is listening on SMTP_PORT.
+ *       Try port 25 with SMTP_SECURE '', which every cPanel box accepts on the
+ *       loopback, or mail.airportfirst.vip on 465 with 'ssl' if the local
+ *       server is genuinely off.
+ *   SMTP connect() failed after STARTTLS — the local certificate was rejected;
+ *       check that SMTP_HOST is spelled 'localhost' exactly, since that is
+ *       what relaxes verification above.
  *
- * Port 465 wants SMTP_SECURE 'ssl'; port 587 wants 'tls'. They are not
- * interchangeable — a mismatch just hangs until Timeout.
+ * Port 25 wants SMTP_SECURE '', 587 wants 'tls' and 465 wants 'ssl'. They are
+ * not interchangeable — a mismatch just hangs until Timeout.
  */
