@@ -9,11 +9,15 @@
  * UPLOAD: place this file in the same folder as index.html (usually
  * public_html/). Nothing else to configure beyond the two constants below.
  *
- * FROM ADDRESS: currently the tester's own Gmail, for dev convenience.
- * BEFORE GO-LIVE set MAIL_FROM back to a mailbox on the site's own domain
- * (create inquiries@airportfirst.lk in cPanel > Email Accounts). Sending "from"
- * a gmail.com address fails Gmail's SPF/DMARC checks, so live mail sent this
- * way is very likely to be filtered as spoofed.
+ * ADDRESSES: mail always leaves as MAIL_FROM, a mailbox on the site's own
+ * domain, because that is the only domain this server is allowed to send for.
+ * A guest's Gmail (or the dispatch desk's) in the From line fails Gmail's
+ * SPF/DMARC checks and gets bounced or filtered as spoofed. The guest stays
+ * reachable through Reply-To instead, which no SPF check looks at.
+ *
+ * SETUP: create MAIL_FROM in cPanel > Email Accounts before go-live, and make
+ * sure the domain's SPF record covers this server. MAIL_TO is only where the
+ * mail lands, so it can stay a Gmail address.
  *
  * SMTP: PHP mail() is fine on most cPanel plans. If your host disables it, or
  * delivery to Gmail is unreliable, install PHPMailer and swap send_plain_mail()
@@ -25,9 +29,10 @@ declare(strict_types=1);
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const MAIL_TO   = 'mhasitha481@gmail.com';
-const MAIL_FROM = 'mhasitha481@gmail.com';        // TESTING — restore inquiries@airportfirst.lk for go-live
-const SITE_NAME = 'Airport First';
+const MAIL_TO        = 'mhasitha481@gmail.com';       // TESTING — client's airportfirst1@gmail.com for go-live
+const MAIL_FROM      = 'noreply@airportfirst.vip';    // must be a real mailbox on the sending domain
+const MAIL_FROM_NAME = 'Airport First Dispatch';
+const SITE_NAME      = 'Airport First';
 
 // ---------------------------------------------------------------------------
 // Plumbing
@@ -188,16 +193,28 @@ function send_plain_mail(string $to, string $subject, string $html, string $text
 {
     $boundary = 'af-' . bin2hex(random_bytes(8));
 
+    /* From is always the local mailbox, never anything the guest submitted:
+       it is the one address this server can pass SPF for. */
+    $headers = [
+        'MIME-Version: 1.0',
+        'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
+        'From: ' . MAIL_FROM_NAME . ' <' . MAIL_FROM . '>',
+    ];
+
+    /* Reply-To carries the guest's address, and only ever the guest's. With no
+       email from them the header is left off rather than pointed back at
+       MAIL_FROM, which is an unattended mailbox — their phone number is in the
+       body. */
+    if ($replyTo !== '') {
+        $headers[] = 'Reply-To: ' . $replyTo;
+    }
+
+    $headers[] = 'X-Mailer: AirportFirst/1.0';
+
     /* header_safe() runs over every finished line, so nothing a guest typed can
        smuggle in a CR/LF and split the header block. Joined with CRLF, with no
        trailing break — mail() adds the blank line that ends the headers. */
-    $headers = array_map('header_safe', [
-        'MIME-Version: 1.0',
-        'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
-        'From: ' . SITE_NAME . ' <' . MAIL_FROM . '>',
-        'Reply-To: ' . ($replyTo !== '' ? $replyTo : MAIL_FROM),
-        'X-Mailer: AirportFirst/1.0',
-    ]);
+    $headers = array_map('header_safe', $headers);
 
     $body = "--$boundary\r\n"
         . "Content-Type: text/plain; charset=UTF-8\r\n"
@@ -216,8 +233,10 @@ function send_plain_mail(string $to, string $subject, string $html, string $text
        indent is the width of the "Subject: " that mail() puts in front. */
     $encodedSubject = mb_encode_mimeheader($subject, 'UTF-8', 'B', "\r\n", strlen('Subject: '));
 
-    // -f sets the envelope sender, which stops cPanel stamping the message as
-    // coming from the web user and greatly improves Gmail deliverability.
+    // -f sets the envelope sender to the same local mailbox as the From line.
+    // SPF is checked against this address, so keeping the two aligned is what
+    // makes the message pass; it also stops cPanel stamping the mail as coming
+    // from the web user.
     //
     // Deliberately silenced: on a host with display_errors on, a mail()
     // warning would print raw HTML ahead of our JSON and corrupt the response.
@@ -267,13 +286,13 @@ respond(200, ['ok' => true]);
  *
  *   $mail = new PHPMailer\PHPMailer\PHPMailer(true);
  *   $mail->isSMTP();
- *   $mail->Host       = 'mail.airportfirst.lk';   // cPanel > Email Accounts > Connect Devices
+ *   $mail->Host       = 'mail.airportfirst.vip';  // cPanel > Email Accounts > Connect Devices
  *   $mail->SMTPAuth   = true;
  *   $mail->Username   = MAIL_FROM;
  *   $mail->Password   = 'the mailbox password';   // keep outside the web root if you can
  *   $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
  *   $mail->Port       = 465;
- *   $mail->setFrom(MAIL_FROM, SITE_NAME);
+ *   $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
  *   $mail->addAddress(MAIL_TO);
  *   if ($guestEmail !== '') { $mail->addReplyTo($guestEmail); }
  *   $mail->Subject = $subject;
