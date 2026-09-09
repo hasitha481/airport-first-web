@@ -3,11 +3,14 @@
  * Airport First — inquiry mailer
  * -----------------------------------------------------------------------------
  * Receives the JSON payload posted by index.html and emails it to the dispatch
- * desk. Runs on stock cPanel PHP: no Composer, no API key, no third-party
- * account.
+ * desk over authenticated SMTP, using the site's own cPanel mailbox. No API
+ * key and no third-party account: the only dependency is PHPMailer.
  *
  * UPLOAD: place this file in the same folder as index.html (usually
- * public_html/). Nothing else to configure beyond the two constants below.
+ * public_html/), and put PHPMailer beside it as PHPMailer/src/*.php --
+ * download the release zip from github.com/PHPMailer/PHPMailer and upload the
+ * src folder, or run `composer require phpmailer/phpmailer` if the plan has
+ * Composer, in which case vendor/autoload.php is picked up instead.
  *
  * ADDRESSES: mail always leaves as MAIL_FROM, a mailbox on the site's own
  * domain, because that is the only domain this server is allowed to send for.
@@ -19,12 +22,16 @@
  * sure the domain's SPF record covers this server. MAIL_TO is only where the
  * mail lands, so it can stay a Gmail address.
  *
- * SMTP: PHP mail() is fine on most cPanel plans. If your host disables it, or
- * delivery to Gmail is unreliable, install PHPMailer and swap send_plain_mail()
- * for the SMTP block sketched at the bottom of this file.
+ * PASSWORD: SMTP_PASS below is a placeholder. Paste the mailbox password from
+ * cPanel > Email Accounts before uploading, and keep the filled-in copy out of
+ * git. PHP source is executed rather than served, so the password is not
+ * readable over the web unless PHP itself stops running.
  */
 
 declare(strict_types=1);
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -33,6 +40,31 @@ const MAIL_TO        = 'mhasitha481@gmail.com';       // TESTING — client's ai
 const MAIL_FROM      = 'noreply@airportfirst.vip';    // must be a real mailbox on the sending domain
 const MAIL_FROM_NAME = 'Airport First Dispatch';
 const SITE_NAME      = 'Airport First';
+
+/* SMTP — cPanel > Email Accounts > Connect Devices lists all of these for the
+   mailbox. Port 465 pairs with 'ssl', port 587 with 'tls'; the two are not
+   interchangeable. */
+const SMTP_HOST   = 'mail.airportfirst.vip';   // 'localhost' if DNS or the certificate misbehaves
+const SMTP_PORT   = 465;
+const SMTP_SECURE = 'ssl';
+const SMTP_USER   = MAIL_FROM;                 // the mailbox authenticates as the address it sends from
+const SMTP_PASS   = 'PUT-MAILBOX-PASSWORD-HERE';
+const SMTP_DEBUG  = false;                     // true logs the whole SMTP conversation to the PHP error log
+
+/* No Composer on a stock cPanel account, so PHPMailer is loaded from whichever
+   of these is actually present. A missing library is reported by
+   send_smtp_mail() rather than being fatal here, so the inquiry still reaches
+   the fallback log. */
+foreach ([
+    __DIR__ . '/vendor/autoload.php',
+    __DIR__ . '/PHPMailer/src/Exception.php',
+    __DIR__ . '/PHPMailer/src/PHPMailer.php',
+    __DIR__ . '/PHPMailer/src/SMTP.php',
+] as $dependency) {
+    if (is_readable($dependency)) {
+        require_once $dependency;
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Plumbing
@@ -176,89 +208,76 @@ foreach ($rows as $label => $value) {
 // ---------------------------------------------------------------------------
 
 /**
- * Sends a multipart/alternative message with PHP mail().
+ * Hands the message to PHPMailer over authenticated SMTP.
  *
- * Both parts go out quoted-printable. The HTML template is built as one
- * unbroken string well past 3000 characters, and Exim — the MTA behind cPanel —
- * bounces anything with a line over 2048 bytes ("message has lines too long
- * for transport"). quoted_printable_encode() soft-wraps at 76 columns, which
- * keeps every wire line far inside that limit.
+ * mail() dropped the message into the local queue as the web user, so it left
+ * unauthenticated and unsigned and Gmail filed it as spam. Submitting it to the
+ * mailbox's own SMTP account instead means the server signs it with the
+ * domain's DKIM key and sends it as a sender it recognises.
  *
- * The encoding is declared on each MIME part rather than on the multipart
- * container: a multipart body must itself stay 7bit/8bit (RFC 2045 §6.4), and
- * encoding the whole thing would bury the boundaries where no client can see
- * them.
+ * The encoding work done for mail() carries over rather than being repeated by
+ * hand: PHPMailer encodes both parts quoted-printable (76-column soft breaks,
+ * so nothing approaches Exim's 2048-byte line ceiling), normalises every break
+ * to CRLF, and folds the RFC 2047 subject onto continuation lines itself.
  */
-function send_plain_mail(string $to, string $subject, string $html, string $text, string $replyTo): bool
+function send_smtp_mail(string $to, string $subject, string $html, string $text, string $replyTo): bool
 {
-    $boundary = 'af-' . bin2hex(random_bytes(8));
-
-    /* From is always the local mailbox, never anything the guest submitted:
-       it is the one address this server can pass SPF for. */
-    $headers = [
-        'MIME-Version: 1.0',
-        'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
-        'From: ' . MAIL_FROM_NAME . ' <' . MAIL_FROM . '>',
-    ];
-
-    /* Reply-To carries the guest's address, and only ever the guest's. With no
-       email from them the header is left off rather than pointed back at
-       MAIL_FROM, which is an unattended mailbox — their phone number is in the
-       body. */
-    if ($replyTo !== '') {
-        $headers[] = 'Reply-To: ' . $replyTo;
+    if (!class_exists(PHPMailer::class)) {
+        error_log('[AirportFirst] PHPMailer missing — upload its src/ folder to ' . __DIR__ . '/PHPMailer/');
+        return false;
     }
 
-    $headers[] = 'X-Mailer: AirportFirst/1.0';
+    $mail = new PHPMailer(true);   // true = throw on failure instead of returning false
 
-    /* header_safe() runs over every finished line, so nothing a guest typed can
-       smuggle in a CR/LF and split the header block. Joined with CRLF, with no
-       trailing break — mail() adds the blank line that ends the headers. */
-    $headers = array_map('header_safe', $headers);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->Port       = SMTP_PORT;
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASS;
+        $mail->Timeout    = 20;        // a wedged handshake must not hold the guest's browser open
 
-    $body = "--$boundary\r\n"
-        . "Content-Type: text/plain; charset=UTF-8\r\n"
-        . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
-        . quoted_printable_encode($text) . "\r\n\r\n"
-        . "--$boundary\r\n"
-        . "Content-Type: text/html; charset=UTF-8\r\n"
-        . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
-        . quoted_printable_encode($html) . "\r\n\r\n"
-        . "--$boundary--\r\n";
+        /* Any SMTP chatter goes to the PHP error log. It must never reach the
+           response body, which has to stay parseable JSON for index.html. */
+        $mail->SMTPDebug   = SMTP_DEBUG ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
+        $mail->Debugoutput = static function (string $line, int $level): void {
+            error_log('[AirportFirst][smtp] ' . rtrim($line));
+        };
 
-    /* RFC 2047 encoded-word, folded across continuation lines. A guest can
-       fill 520 characters between the name and the two addresses, and once
-       base64 has grown a subject that long it becomes a single header line
-       past Exim's 2048-byte limit — the same bounce the body now avoids. The
-       indent is the width of the "Subject: " that mail() puts in front. */
-    $encodedSubject = mb_encode_mimeheader($subject, 'UTF-8', 'B', "\r\n", strlen('Subject: '));
+        $mail->CharSet  = PHPMailer::CHARSET_UTF8;
+        $mail->Encoding = PHPMailer::ENCODING_QUOTED_PRINTABLE;
 
-    // -f sets the envelope sender to the same local mailbox as the From line.
-    // SPF is checked against this address, so keeping the two aligned is what
-    // makes the message pass; it also stops cPanel stamping the mail as coming
-    // from the web user.
-    //
-    // Deliberately silenced: on a host with display_errors on, a mail()
-    // warning would print raw HTML ahead of our JSON and corrupt the response.
-    // The boolean return plus error_log() below carry the failure instead.
-    return @mail(
-        $to,
-        $encodedSubject,
-        $body,
-        implode("\r\n", $headers),
-        '-f' . MAIL_FROM
-    );
+        /* From stays the authenticated mailbox — the address the session logs
+           in as, the one SPF and DKIM cover, and nothing a guest can steer. */
+        $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+        $mail->Sender = MAIL_FROM;              // envelope sender, which is what SPF checks
+        $mail->addAddress($to);
+        if ($replyTo !== '') {
+            $mail->addReplyTo($replyTo);        // the guest, and only ever the guest
+        }
+        $mail->XMailer = 'AirportFirst/1.0';
+
+        $mail->Subject = $subject;              // PHPMailer encodes and folds this
+        $mail->isHTML(true);
+        $mail->Body    = $html;
+        $mail->AltBody = $text;
+
+        return $mail->send();
+    } catch (Throwable $e) {
+        /* ErrorInfo carries the SMTP reply ("535 Incorrect authentication
+           data", "Could not connect"), which is what you need to see in the
+           cPanel error log when a deploy comes up silent. */
+        error_log('[AirportFirst] SMTP send failed: ' . ($mail->ErrorInfo !== '' ? $mail->ErrorInfo : $e->getMessage()));
+        return false;
+    }
 }
 
-try {
-    $sent = send_plain_mail(MAIL_TO, $subject, $html, $text, $guestEmail);
-} catch (Throwable $e) {
-    error_log('[AirportFirst] mail() threw: ' . $e->getMessage());
-    $sent = false;
-}
+$sent = send_smtp_mail(MAIL_TO, $subject, $html, $text, $guestEmail);
 
 if (!$sent) {
-    error_log('[AirportFirst] mail() refused the message for ' . MAIL_TO);
+    error_log('[AirportFirst] SMTP would not take the message for ' . MAIL_TO);
 
     /* Keep a copy on disk so no inquiry is lost when the mail server is down.
        It holds guest contact details, so it is written one level ABOVE the web
@@ -275,29 +294,19 @@ if (!$sent) {
 respond(200, ['ok' => true]);
 
 /* -----------------------------------------------------------------------------
- * SMTP alternative
+ * If SMTP will not connect
  * -----------------------------------------------------------------------------
- * If mail() is disabled on your plan, upload PHPMailer and replace the
- * send_plain_mail() call above with:
+ * Set SMTP_DEBUG to true and read the [AirportFirst][smtp] lines in cPanel >
+ * Errors, then work down this list:
  *
- *   require __DIR__ . '/PHPMailer/src/PHPMailer.php';
- *   require __DIR__ . '/PHPMailer/src/SMTP.php';
- *   require __DIR__ . '/PHPMailer/src/Exception.php';
+ *   535 Incorrect authentication data  — SMTP_PASS is wrong, or the mailbox
+ *       does not exist yet (cPanel > Email Accounts).
+ *   Could not connect to SMTP host     — the hostname resolves off-server or
+ *       the port is firewalled. Try SMTP_HOST 'localhost', which stays inside
+ *       the machine, before trying the IP.
+ *   certificate verify failed          — the hostname does not match the
+ *       server's certificate. 'localhost' avoids this too.
  *
- *   $mail = new PHPMailer\PHPMailer\PHPMailer(true);
- *   $mail->isSMTP();
- *   $mail->Host       = 'mail.airportfirst.vip';  // cPanel > Email Accounts > Connect Devices
- *   $mail->SMTPAuth   = true;
- *   $mail->Username   = MAIL_FROM;
- *   $mail->Password   = 'the mailbox password';   // keep outside the web root if you can
- *   $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
- *   $mail->Port       = 465;
- *   $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
- *   $mail->addAddress(MAIL_TO);
- *   if ($guestEmail !== '') { $mail->addReplyTo($guestEmail); }
- *   $mail->Subject = $subject;
- *   $mail->isHTML(true);
- *   $mail->Body    = $html;
- *   $mail->AltBody = $text;
- *   $mail->send();
+ * Port 465 wants SMTP_SECURE 'ssl'; port 587 wants 'tls'. They are not
+ * interchangeable — a mismatch just hangs until Timeout.
  */

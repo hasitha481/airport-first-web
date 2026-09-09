@@ -172,13 +172,26 @@ Two things worth knowing when testing:
   is rejected by the API and the pill stays amber — which is the honest
   outcome, since no mail was sent.
 
-**One setting before launch.** Open `send-mail.php` and set `MAIL_FROM` to a
-real mailbox on your own domain:
+**Two settings before launch.** `send-mail.php` sends through PHPMailer over
+authenticated SMTP, so it needs the mailbox's own credentials. Open the file
+and fill in the password, and point `MAIL_TO` at the client:
 
 ```php
-const MAIL_TO   = 'mhasitha481@gmail.com';   // TESTING — set to airportfirst1@gmail.com for go-live
-const MAIL_FROM = 'inquiries@airportfirst.lk';   // create this in cPanel first
+const MAIL_TO   = 'mhasitha481@gmail.com';        // TESTING — airportfirst1@gmail.com for go-live
+const MAIL_FROM = 'noreply@airportfirst.vip';     // create this in cPanel first
+const SMTP_PASS = 'PUT-MAILBOX-PASSWORD-HERE';    // that mailbox's password
 ```
+
+Host, port and username come from **cPanel → Email Accounts → Connect
+Devices**. Keep the filled-in copy out of git.
+
+**Upload PHPMailer alongside it.** The script has no other dependency, but it
+will not send without this one: put the library's `src` folder at
+`public_html/PHPMailer/src/`. Download the release zip from
+[github.com/PHPMailer/PHPMailer](https://github.com/PHPMailer/PHPMailer/releases),
+or run `composer require phpmailer/phpmailer` if the plan has Composer — a
+`vendor/autoload.php` is picked up instead. If the library is missing, every
+inquiry answers `500` and is written to the fallback log described below.
 
 Create it under **cPanel → Email Accounts**. Sending "from" a Gmail address you
 do not control is the usual reason these mails land in spam or bounce; the
@@ -191,10 +204,13 @@ inbox reaches them directly.
 
 - `GET send-mail.php` → `405` with JSON. If you see PHP source instead, PHP is
   not enabled for the folder.
-- If `mail()` is disabled on your plan, the response is
-  `{"ok":false,"error":"Mail server rejected the message"}`. Switch to SMTP
-  using the PHPMailer block at the bottom of the script — host, port and
-  password come from **cPanel → Email Accounts → Connect Devices**.
+- A refused SMTP session answers
+  `{"ok":false,"error":"Mail server rejected the message"}`. Set
+  `SMTP_DEBUG = true` and read the `[AirportFirst][smtp]` lines in **cPanel →
+  Errors**: `535 Incorrect authentication data` is a wrong `SMTP_PASS` or a
+  mailbox that does not exist yet, and `Could not connect` usually means the
+  hostname resolves off-server — try `SMTP_HOST = 'localhost'`. Port 465 pairs
+  with `'ssl'`, port 587 with `'tls'`; a mismatch just hangs.
 - Every rejected inquiry is appended to `inquiries-fallback.log`, written one
   level *above* `public_html` so it is not web-readable. Nothing is ever lost
   silently. Check it if the desk reports a missing enquiry.
@@ -203,8 +219,10 @@ inbox reaches them directly.
 
 Fields are length-capped, control characters stripped, and CR/LF removed from
 every field except the notes, so nothing reaching a mail header can carry a
-newline (the header-injection vector). The subject is base64-encoded and the
-HTML body is escaped.
+newline (the header-injection vector). PHPMailer encodes and folds the subject
+and the HTML body is escaped. The `From` line is hardcoded to `MAIL_FROM`, the
+mailbox SMTP authenticates as, so nothing a guest submits can appear there —
+their address only ever reaches `Reply-To`.
 
 ## 4. Submit flow
 
