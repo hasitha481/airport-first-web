@@ -22,10 +22,15 @@
  * sure the domain's SPF record covers this server. MAIL_TO is only where the
  * mail lands, so it can stay a Gmail address.
  *
- * PASSWORD: SMTP_PASS below is a placeholder. Paste the mailbox password from
- * cPanel > Email Accounts before uploading, and keep the filled-in copy out of
- * git. PHP source is executed rather than served, so the password is not
- * readable over the web unless PHP itself stops running.
+ * PASSWORD: the mailbox password is NOT in this file. It is read from
+ * ../airportfirst-smtp.php, one level above public_html, where Apache cannot
+ * serve it and no commit can carry it. See SMTP_PASS below.
+ *
+ * WHAT GUARDS THIS ENDPOINT: it answers POST only, from this site's own origin
+ * only, at a capped rate per caller, on a body it size-checks before parsing.
+ * Every field is validated for shape as well as length, CR/LF can never reach
+ * a mail header, and every failure answers with a fixed sentence while the
+ * detail goes to the PHP error log.
  */
 
 declare(strict_types=1);
@@ -42,14 +47,41 @@ const MAIL_FROM_NAME = 'Airport First Dispatch';
 const SITE_NAME      = 'Airport First';
 
 /* SMTP — cPanel > Email Accounts > Connect Devices lists all of these for the
-   mailbox. Port 465 pairs with 'ssl', port 587 with 'tls'; the two are not
-   interchangeable. */
+   mailbox. Port 25 pairs with '', 587 with 'tls', 465 with 'ssl'. */
 const SMTP_HOST   = 'localhost';               // the mail server on this machine; the session never leaves the box
 const SMTP_PORT   = 587;                       // 587 with 'tls'; 25 with SMTP_SECURE '' is the plain-loopback alternative
 const SMTP_SECURE = 'tls';
 const SMTP_USER   = MAIL_FROM;                 // the mailbox authenticates as the address it sends from
-const SMTP_PASS   = 'PUT-MAILBOX-PASSWORD-HERE';
 const SMTP_DEBUG  = false;                     // true logs the whole SMTP conversation to the PHP error log
+
+/* Only this site may post here. A request carrying someone else's Origin, or
+   no Origin and no Referer at all, is refused: the page is static, so there is
+   no session to hang a CSRF token on, and matching the origin is what a static
+   form can do. The server's own hostname is accepted too, so a temporary cPanel
+   URL or a staging domain works without editing this list. */
+const ALLOWED_HOSTS = ['airportfirst.vip', 'www.airportfirst.vip'];
+
+/* Anti-flood. A guest sends one inquiry; these numbers only bite a script.
+   Both are per caller: one submission every RATE_BURST seconds, and at most
+   RATE_MAX inside RATE_WINDOW. */
+const RATE_WINDOW = 600;                       // seconds in the sliding window
+const RATE_MAX    = 5;                         // submissions allowed per window
+const RATE_BURST  = 20;                        // seconds between two submissions
+const RATE_SALT   = 'airport-first/throttle';  // only seasons the hash of an IP
+
+const MAX_BODY_BYTES = 16384;                  // a full inquiry is well under 2 KB
+
+/* The password lives outside the web root and outside git, in a file that
+   returns it:
+
+       <?php return 'the mailbox password';
+
+   Put it at ../airportfirst-smtp.php — one level ABOVE public_html, beside the
+   fallback log, where Apache has nothing to serve and no commit can pick it
+   up. Without it authentication fails, the inquiry is kept in the fallback
+   log, and the error log says so in as many words. */
+$smtpPasswordFile = dirname(__DIR__) . '/airportfirst-smtp.php';
+define('SMTP_PASS', is_readable($smtpPasswordFile) ? trim((string) require $smtpPasswordFile) : '');
 
 /* No Composer on a stock cPanel account, so PHPMailer is loaded from whichever
    of these is actually present. A missing library is reported by
@@ -72,6 +104,14 @@ foreach ([
 
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-store');             // a route that handles guest contact details
+
+/* Nothing about this server's internals belongs in an HTTP response: a warning
+   printed ahead of the JSON would leak paths and break the parse in index.html
+   at the same time. Everything is logged instead. */
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+error_reporting(E_ALL);
 
 /** Send a JSON response and stop. */
 function respond(int $status, array $body): void
@@ -81,14 +121,197 @@ function respond(int $status, array $body): void
     exit;
 }
 
+/** Text from the caller must not be able to forge extra lines in the log. */
+function log_safe(string $value, int $max = 120): string
+{
+    return substr(preg_replace('/[^\x20-\x7E]/', '.', $value) ?? '', 0, $max);
+}
+
+/* An uncaught throwable or a fatal would otherwise print a stack trace, with
+   absolute paths in it, straight into the response body. Both are answered
+   with the same sentence every other failure gets. */
+set_exception_handler(static function (Throwable $e): void {
+    error_log('[AirportFirst] uncaught ' . get_class($e) . ': ' . $e->getMessage()
+        . ' in ' . $e->getFile() . ':' . $e->getLine());
+    respond(500, ['ok' => false, 'error' => 'The dispatch desk could not be reached']);
+});
+
+register_shutdown_function(static function (): void {
+    $fatal = error_get_last();
+    if ($fatal === null
+        || !in_array($fatal['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+        return;
+    }
+    error_log('[AirportFirst] fatal: ' . $fatal['message'] . ' in ' . $fatal['file'] . ':' . $fatal['line']);
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+    echo json_encode(['ok' => false, 'error' => 'The dispatch desk could not be reached']);
+});
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     respond(405, ['ok' => false, 'error' => 'Method not allowed']);
 }
 
+// ---------------------------------------------------------------------------
+// Who is calling
+// ---------------------------------------------------------------------------
+
+/** The host the browser says it is posting from: Origin, or Referer if absent. */
+function request_host(): string
+{
+    foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $header) {
+        $value = (string) ($_SERVER[$header] ?? '');
+        if ($value === '') {
+            continue;
+        }
+        $host = parse_url($value, PHP_URL_HOST);
+        if (is_string($host) && $host !== '') {
+            return strtolower($host);
+        }
+    }
+    return '';
+}
+
+$origin   = request_host();
+$allowed  = ALLOWED_HOSTS;
+$selfHost = strtolower(explode(':', (string) ($_SERVER['HTTP_HOST'] ?? ''))[0]);
+if ($selfHost !== '') {
+    $allowed[] = $selfHost;
+}
+
+/* Browsers send Origin on every POST, so a blank one is a script rather than a
+   guest. If a proxy in front of the site ever strips it, this is the line to
+   relax — not the list above. */
+if ($origin === '' || !in_array($origin, $allowed, true)) {
+    error_log('[AirportFirst] refused a post from origin "' . log_safe($origin) . '"');
+    respond(403, ['ok' => false, 'error' => 'Request rejected']);
+}
+
+/**
+ * A stable, non-identifying key for the caller.
+ *
+ * Cloudflare fronts this domain, so REMOTE_ADDR is an edge address and the
+ * guest's own arrives in CF-Connecting-IP. That header is trusted for
+ * throttling and nothing else — the worst a forged one can do is spend someone
+ * else's allowance. The result is hashed, so the store never holds an IP.
+ */
+function client_key(): string
+{
+    $ip   = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $edge = (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? '');
+    if ($edge !== '' && filter_var($edge, FILTER_VALIDATE_IP) !== false) {
+        $ip = $edge;
+    }
+    return hash('sha256', RATE_SALT . '|' . $ip);
+}
+
+/** Counters live above the web root when that is writable, /tmp otherwise. */
+function throttle_dir(): ?string
+{
+    foreach ([dirname(__DIR__) . '/af-throttle', sys_get_temp_dir() . '/af-throttle'] as $dir) {
+        if ((is_dir($dir) || @mkdir($dir, 0700, true)) && is_writable($dir)) {
+            return $dir;
+        }
+    }
+    return null;
+}
+
+/** Drop counters nobody has touched in a day, now and then rather than always. */
+function throttle_sweep(string $dir, int $now): void
+{
+    if (random_int(1, 50) !== 1) {
+        return;
+    }
+    foreach ((array) glob($dir . '/*') as $file) {
+        if (is_string($file) && is_file($file) && (int) @filemtime($file) < $now - 86400) {
+            @unlink($file);
+        }
+    }
+}
+
+/**
+ * Sliding window per caller: 0 when the request may proceed, otherwise the
+ * seconds left to wait.
+ *
+ * A store that cannot be written fails open — a broken counter must not stop a
+ * real guest booking a car — and says so in the error log.
+ */
+function throttle_retry_after(): int
+{
+    $dir = throttle_dir();
+    if ($dir === null) {
+        error_log('[AirportFirst] no writable throttle store — rate limiting is off');
+        return 0;
+    }
+
+    $handle = @fopen($dir . '/' . client_key(), 'c+');
+    if ($handle === false) {
+        error_log('[AirportFirst] could not open the throttle counter — rate limiting is off');
+        return 0;
+    }
+
+    flock($handle, LOCK_EX);
+    $now    = time();
+    $stamps = [];
+    foreach (explode(',', (string) stream_get_contents($handle)) as $token) {
+        $stamp = (int) $token;
+        if ($stamp > $now - RATE_WINDOW) {
+            $stamps[] = $stamp;
+        }
+    }
+
+    $retry = 0;
+    if ($stamps !== [] && $now - max($stamps) < RATE_BURST) {
+        $retry = RATE_BURST - ($now - max($stamps));
+    } elseif (count($stamps) >= RATE_MAX) {
+        $retry = RATE_WINDOW - ($now - min($stamps));
+    }
+
+    if ($retry <= 0) {
+        $retry    = 0;
+        $stamps[] = $now;          // only a request we are letting through counts
+    }
+
+    ftruncate($handle, 0);
+    rewind($handle);
+    fwrite($handle, implode(',', $stamps));
+    fflush($handle);
+    flock($handle, LOCK_UN);
+    fclose($handle);
+
+    throttle_sweep($dir, $now);
+
+    return $retry;
+}
+
+$retryAfter = throttle_retry_after();
+if ($retryAfter > 0) {
+    header('Retry-After: ' . $retryAfter);
+    respond(429, ['ok' => false, 'error' => 'Too many requests — please try again in a moment']);
+}
+
+// ---------------------------------------------------------------------------
+// Read the request
+// ---------------------------------------------------------------------------
+
 /* Accepts the JSON body the page sends, and falls back to a normal form POST
    so the endpoint also works from a plain <form> without JavaScript. */
-$raw   = file_get_contents('php://input') ?: '';
-$input = json_decode($raw, true);
+$raw = (string) file_get_contents('php://input');
+
+if (strlen($raw) > MAX_BODY_BYTES) {
+    error_log('[AirportFirst] refused a ' . strlen($raw) . '-byte body');
+    respond(413, ['ok' => false, 'error' => 'Request too large']);
+}
+
+/* Invalid UTF-8 would make every /u pattern below fail silently and return
+   null, so it is refused here rather than half-processed. */
+if ($raw !== '' && !mb_check_encoding($raw, 'UTF-8')) {
+    respond(400, ['ok' => false, 'error' => 'Malformed request']);
+}
+
+$input = json_decode($raw, true, 8);           // shallow: the payload is one flat object
 if (!is_array($input)) {
     $input = $_POST;
 }
@@ -96,14 +319,22 @@ if (!is_array($input) || $input === []) {
     respond(400, ['ok' => false, 'error' => 'Empty request']);
 }
 
+// ---------------------------------------------------------------------------
+// Validate
+// ---------------------------------------------------------------------------
+
 /**
  * Trim, cap length and strip control characters from a submitted value.
  * Line breaks are removed from every field except the notes, so nothing that
  * reaches a mail header can carry a CR/LF (the header-injection vector).
+ * Anything that is not a scalar, or not valid UTF-8, becomes an empty string.
  */
 function field(array $src, string $key, int $max = 300, bool $multiline = false): string
 {
     $value = isset($src[$key]) && is_scalar($src[$key]) ? (string) $src[$key] : '';
+    if ($value === '' || !mb_check_encoding($value, 'UTF-8')) {
+        return '';
+    }
     $strip = $multiline
         ? '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u'          // keep \r\n
         : '/[\x00-\x1F\x7F]/u';                          // drop \r\n too
@@ -115,6 +346,62 @@ function field(array $src, string $key, int $max = 300, bool $multiline = false)
 function header_safe(string $value): string
 {
     return trim(str_replace(["\r", "\n", "%0a", "%0d"], ' ', $value));
+}
+
+/** A person's name or a place name carries no markup and no link. */
+function is_clean_line(string $value): bool
+{
+    return strpos($value, '<') === false
+        && strpos($value, '>') === false
+        && stripos($value, '://') === false;
+}
+
+/** How many links a value carries. Bots fill every box with them. */
+function count_links(string $value): int
+{
+    return (int) preg_match_all('~(https?://|www\.)~i', $value);
+}
+
+/**
+ * The form posts an <input type="date">, which is always YYYY-MM-DD, so
+ * anything else is refused rather than guessed: 03/04/2026 is the 3rd of April
+ * to a guest from Colombo and the 4th of March to one from Chicago, and a car
+ * sent on the wrong day is worse than a form that asks again.
+ */
+function clean_date(string $value): ?string
+{
+    if ($value === '') {
+        return '';
+    }
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) !== 1) {
+        return null;
+    }
+    return checkdate((int) $m[2], (int) $m[3], (int) $m[1]) ? $value : null;
+}
+
+/** <input type="time"> posts 24-hour HH:MM; a typed "9:30 pm" is normalised. */
+function clean_time(string $value): ?string
+{
+    if ($value === '') {
+        return '';
+    }
+    if (preg_match('/^(\d{1,2}):([0-5]\d)\s*([APap][Mm])?$/', $value, $m) !== 1) {
+        return null;
+    }
+    $hour   = (int) $m[1];
+    $suffix = strtolower($m[3] ?? '');
+    if ($suffix === 'pm' && $hour < 12) {
+        $hour += 12;
+    } elseif ($suffix === 'am' && $hour === 12) {
+        $hour = 0;
+    }
+    return $hour <= 23 ? sprintf('%02d:%s', $hour, $m[2]) : null;
+}
+
+/** One plain sentence for the guest; specifics go to the log, never the body. */
+function reject(string $message): void
+{
+    respond(422, ['ok' => false, 'error' => $message]);
 }
 
 $data = [
@@ -134,10 +421,70 @@ $data = [
 
 // A name and some way to reply are the minimum worth emailing about.
 if ($data['name'] === '' || ($data['phone'] === '' && $data['email'] === '')) {
-    respond(422, ['ok' => false, 'error' => 'Name and a phone or email are required']);
+    reject('Name and a phone or email are required');
 }
 
-$guestEmail = filter_var($data['email'], FILTER_VALIDATE_EMAIL) ? $data['email'] : '';
+if (mb_strlen($data['name']) < 2 || !is_clean_line($data['name'])) {
+    reject('That name does not look right');
+}
+
+if ($data['phone'] !== ''
+    && (preg_match('~^[0-9+()/.\- ]{7,40}$~', $data['phone']) !== 1
+        || preg_match_all('/\d/', $data['phone']) < 7)) {
+    reject('That phone number does not look right');
+}
+
+if ($data['email'] !== '' && filter_var($data['email'], FILTER_VALIDATE_EMAIL) === false) {
+    reject('That email address does not look right');
+}
+
+foreach (['pickup' => 'Pick-up', 'dropoff' => 'Drop-off', 'vehicle' => 'Vehicle'] as $key => $label) {
+    if ($data[$key] !== '' && !is_clean_line($data[$key])) {
+        reject($label . ' should be a place or a vehicle name');
+    }
+}
+
+$date = clean_date($data['date']);
+if ($date === null) {
+    reject('Use the date picker — the date should look like 2026-09-12');
+}
+$data['date'] = $date;
+
+$time = clean_time($data['time']);
+if ($time === null) {
+    reject('The arrival time should look like 09:30');
+}
+$data['time'] = $time;
+
+if ($data['pax'] !== ''
+    && (preg_match('/^\d{1,2}$/', $data['pax']) !== 1
+        || (int) $data['pax'] < 1 || (int) $data['pax'] > 60)) {
+    reject('Passengers should be a number between 1 and 60');
+}
+
+if ($data['flight'] !== '' && preg_match('/^[A-Za-z0-9][A-Za-z0-9 \-]{0,11}$/', $data['flight']) !== 1) {
+    reject('That flight number does not look right');
+}
+
+/* Link spam. A guest describing a trip does not need two links; a bot posting
+   an advert always does. */
+$links = 0;
+foreach ($data as $value) {
+    $links += count_links($value);
+}
+if ($links > 2) {
+    error_log('[AirportFirst] dropped a submission carrying ' . $links . ' links');
+    reject('Please describe the trip without links');
+}
+
+/* The source label is ours, not the guest's: it is the one field the page
+   fills in by itself, so anything unexpected is dropped rather than forwarded
+   into the mail. */
+if (preg_match('/^[a-z0-9\-]{1,60}$/i', $data['source']) !== 1) {
+    $data['source'] = '';
+}
+
+$guestEmail = $data['email'];
 
 // ---------------------------------------------------------------------------
 // Compose
@@ -250,6 +597,12 @@ function send_smtp_mail(string $to, string $subject, string $html, string $text,
         return false;
     }
 
+    if (SMTP_PASS === '') {
+        error_log('[AirportFirst] no SMTP password — create ' . dirname(__DIR__)
+            . '/airportfirst-smtp.php, a PHP file that returns the mailbox password as a string');
+        return false;
+    }
+
     $mail = new PHPMailer(true);   // true = throw on failure instead of returning false
 
     try {
@@ -335,8 +688,10 @@ respond(200, ['ok' => true]);
  * Set SMTP_DEBUG to true and read the [AirportFirst][smtp] lines in cPanel >
  * Errors, then work down this list:
  *
- *   535 Incorrect authentication data  — SMTP_PASS is wrong, or the mailbox
- *       does not exist yet (cPanel > Email Accounts).
+ *   535 Incorrect authentication data  — the password in
+ *       ../airportfirst-smtp.php is wrong, or the mailbox does not exist yet
+ *       (cPanel > Email Accounts).
+ *   no SMTP password                   — that file is missing or unreadable.
  *   Could not connect to SMTP host     — nothing is listening on SMTP_PORT.
  *       Try port 25 with SMTP_SECURE '', which every cPanel box accepts on the
  *       loopback, or mail.airportfirst.vip on 465 with 'ssl' if the local

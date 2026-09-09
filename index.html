@@ -3229,7 +3229,7 @@
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-  const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   const routeRow = (title, meta) =>
     '<span class="h-10 w-10 shrink-0 grid place-items-center rounded-xl bg-white text-crimson ring-1 ring-navy-900/8"><i data-lucide="route" class="h-4 w-4"></i></span>' +
@@ -3351,7 +3351,7 @@
   const afOpenLists = [];
 
   const afNormalise = s => String(s || "").toLowerCase().trim();
-  const afEscape = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const afEscape = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   /* Prefix matches rank above mid-word matches, so typing "kan" offers Kandy
      before Heritance Kandalama. */
@@ -3766,7 +3766,10 @@
     const stars = Math.max(1, Math.min(5, Number(review.rating) || 5));
     const name = escapeHtml(review.name || "Traveller");
     const country = escapeHtml(review.country || "");
-    const flag = review.flag || flagFor(review.country);
+    /* Every value out of the reviews table is escaped before it reaches
+       innerHTML: the anon key that may insert a row is public, so a row is
+       untrusted input like any other. */
+    const flag = escapeHtml(review.flag || flagFor(review.country));
     /* Accepts an uploaded photo (data: URI written by the compressor below) or
        a remote URL from an older row; anything else gets the default avatar. */
     const avatar = review.avatar_url && /^(data:image\/|https?:\/\/)/i.test(review.avatar_url)
@@ -3786,7 +3789,7 @@
         escapeHtml(review.review || "") + '&rdquo;</blockquote>' +
       '<figcaption class="mt-6 flex items-center gap-3 border-t border-navy-900/8 pt-5">' +
         '<img loading="lazy" decoding="async" class="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow" ' +
-             'src="' + escapeHtml(avatar) + '" alt="" onerror="this.src=\'' + defaultAvatar(review.name) + '\'" />' +
+             'src="' + escapeHtml(avatar) + '" alt="" onerror="this.src=\'' + escapeHtml(defaultAvatar(review.name)) + '\'" />' +
         '<div class="flex-1 min-w-0">' +
           '<div class="text-[14.5px] font-bold text-navy-900 truncate">' + name + '</div>' +
           '<div class="flex items-center gap-1.5 text-[12.5px] text-navy-900/45">' +

@@ -173,18 +173,25 @@ Two things worth knowing when testing:
   outcome, since no mail was sent.
 
 **Two settings before launch.** `send-mail.php` sends through PHPMailer over
-authenticated SMTP, so it needs the mailbox's own credentials. Open the file
-and fill in the password, and point `MAIL_TO` at the client:
+authenticated SMTP as the mailbox itself. One setting is in the file:
 
 ```php
 const MAIL_TO   = 'mhasitha481@gmail.com';        // TESTING — airportfirst1@gmail.com for go-live
 const MAIL_FROM = 'noreply@airportfirst.vip';     // create this in cPanel first
-const SMTP_PASS = 'PUT-MAILBOX-PASSWORD-HERE';    // that mailbox's password
 ```
 
-The password is the only value you need to paste: the script submits to
-`localhost` on port 587, the mail server running on the same machine, and
-authenticates as `MAIL_FROM`. Keep the filled-in copy out of git.
+**The other is the password, and it does not go in this file.** Create
+`airportfirst-smtp.php` one level *above* `public_html`, containing one line:
+
+```php
+<?php return 'the mailbox password';
+```
+
+That is outside the web root, so Apache has nothing to serve, and outside the
+repository, so no commit can carry it. `send-mail.php` reads it at startup; if
+it is missing, mail fails, the inquiry is kept in the fallback log, and the
+error log says which file to create. The script authenticates as `MAIL_FROM`
+against `localhost` on port 587 — nothing else needs configuring.
 
 **Upload PHPMailer alongside it.** The script has no other dependency, but it
 will not send without this one: put the library's `src` folder at
@@ -219,12 +226,42 @@ inbox reaches them directly.
 
 ### Security notes
 
-Fields are length-capped, control characters stripped, and CR/LF removed from
-every field except the notes, so nothing reaching a mail header can carry a
-newline (the header-injection vector). PHPMailer encodes and folds the subject
-and the HTML body is escaped. The `From` line is hardcoded to `MAIL_FROM`, the
-mailbox SMTP authenticates as, so nothing a guest submits can appear there —
-their address only ever reaches `Reply-To`.
+**Who may post.** The endpoint answers `POST` only, and only when `Origin` (or
+`Referer`, if a browser sent no `Origin`) is one of `ALLOWED_HOSTS` or the
+server's own hostname. A post from another site, or from a bare `curl` with no
+origin at all, gets `403`. The page is static, so there is no session to hang a
+CSRF token on; matching the origin is the equivalent a static form can offer.
+
+**How often.** One submission per caller every 20 seconds, and at most 5 in 10
+minutes, answered with `429` and a `Retry-After`. Counters live in
+`af-throttle/` above the web root, keyed by a hash of the caller's IP rather
+than the address itself, and are swept after a day. Behind Cloudflare the
+guest's address is read from `CF-Connecting-IP`, which is trusted for
+throttling and nothing else. If the store cannot be written the limiter fails
+open and logs it — a broken counter must never stop a real booking.
+
+**What gets through.** The body is refused over 16 KB, refused if it is not
+valid UTF-8, and parsed at a shallow depth. Every field is then checked for
+shape, not just length: the email against `FILTER_VALIDATE_EMAIL`, the phone
+against a digits-and-punctuation pattern with at least 7 digits, the date
+against `YYYY-MM-DD` and a real calendar (an ambiguous `03/04/2026` is refused
+rather than guessed), the time normalised to 24-hour, passengers to 1–60, and
+names, places and the vehicle refused if they carry `<`, `>` or `://`. More
+than two links across the whole payload is treated as spam.
+
+**Mail headers.** Control characters are stripped from every field and CR/LF
+from all but the notes, so nothing reaching a header can carry a newline (the
+header-injection vector); PHPMailer strips them again on the subject and
+validates every address. A `Bcc:` smuggled into a name arrives as literal text
+in the subject, not as a header. The `From` line is hardcoded to `MAIL_FROM`,
+the mailbox SMTP authenticates as, so nothing a guest submits can appear
+there — their address only ever reaches `Reply-To`, and only after validating.
+
+**What the caller is told.** Every failure answers with one fixed sentence.
+`display_errors` is off and an exception handler plus a shutdown handler catch
+anything that escapes, so a stack trace or a server path can never reach the
+response body — the detail goes to the PHP error log, where text from the
+request is stripped of control characters first so it cannot forge log lines.
 
 ## 4. Submit flow
 

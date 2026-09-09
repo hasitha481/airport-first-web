@@ -1,2 +1,8 @@
 # Runtime spillover from send-mail.php (contains guest contact details)
 inquiries-fallback.log
+
+# The SMTP mailbox password, if a copy ever lands in the project folder.
+airportfirst-smtp.php
+
+# Rate-limit counters written by send-mail.php.
+af-throttle/
