@@ -1,5 +1,5 @@
 -- Airport First — inquiry capture and guest reviews
--- Run in the Supabase SQL editor (project: meoinwznmdjyjmbgjdjl).
+-- Run in the Supabase SQL editor (project: xugzwpsviggvswkvzqiu).
 --
 -- Safe to re-run: every object is created with IF NOT EXISTS / OR REPLACE, and
 -- every policy, trigger and constraint is dropped before it is recreated.

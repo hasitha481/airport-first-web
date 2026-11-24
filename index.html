@@ -52,7 +52,7 @@
                    fallback, and Nominatim for "Use current location".
      frame-ancestors cannot be set from a meta tag; .htaccess sends
      X-Frame-Options instead. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://meoinwznmdjyjmbgjdjl.supabase.co wss://meoinwznmdjyjmbgjdjl.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://xugzwpsviggvswkvzqiu.supabase.co wss://xugzwpsviggvswkvzqiu.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -880,6 +880,12 @@
                  class="btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-xl border border-navy-900/12 px-6 py-3.5 text-[14px] font-bold text-navy-900">
                 <i data-lucide="phone-call" class="h-4 w-4"></i> Prefer to talk? Call the desk
               </a>
+
+              <p class="text-center text-[11.5px] leading-relaxed text-navy-900/45">
+                By sending a request you agree to our
+                <a href="#privacy" data-legal="privacy" class="font-semibold text-crimson-500 hover:underline">Privacy Policy</a>
+                and <a href="#terms" data-legal="terms" class="font-semibold text-crimson-500 hover:underline">Terms of Use</a>.
+              </p>
             </form>
 
             <div class="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11.5px] font-semibold text-navy-900/45">
@@ -2623,7 +2629,10 @@
 
     <div class="mt-14 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-7 text-[13px] text-white/40">
       <p>&copy; 2026 Airport First (Pvt) Ltd. All rights reserved.</p>
-      <!-- Privacy Policy / Terms / Cancellation Policy: add links here once the client supplies the documents. -->
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <a href="#privacy" data-legal="privacy" class="transition hover:text-crimson-300">Privacy Policy</a>
+        <a href="#terms" data-legal="terms" class="transition hover:text-crimson-300">Terms of Use</a>
+      </div>
       <p>WTC West Tower, 37th Floor, Colombo 00100 &middot; <a href="tel:+94714784444" class="transition hover:text-crimson-300">+94 71 478 4444</a></p>
     </div>
   </div>
@@ -2960,6 +2969,179 @@
 })();
 </script>
 
+<!-- ==================== PRIVACY POLICY & TERMS ==================== -->
+<!-- Opened by any element with data-legal="privacy" or data-legal="terms".
+     Describes what this site actually does with data; update it if the
+     inquiry pipeline, hosting or third-party sources change. -->
+<div id="legalModal" class="fixed inset-0 z-[85] hidden items-center justify-center overflow-y-auto p-4"
+     role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+  <div data-legal-close class="absolute inset-0 bg-navy-950/70 backdrop-blur-sm"></div>
+
+  <div class="relative my-auto flex max-h-[90vh] w-full max-w-2xl animate-popIn flex-col overflow-hidden rounded-3xl bg-white shadow-lux">
+
+    <div class="border-b border-navy-900/8 px-7 pt-7 pb-5">
+      <button type="button" data-legal-close aria-label="Close"
+              class="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-navy-900/5 text-navy-900/50 transition hover:bg-crimson hover:text-white">
+        <i data-lucide="x" class="h-4 w-4"></i>
+      </button>
+      <div class="text-[11px] font-extrabold uppercase tracking-[.16em] text-crimson-500">Airport First (Pvt) Ltd</div>
+      <h3 id="legalTitle" class="mt-1.5 font-display text-[1.6rem] font-semibold text-navy-900">Privacy &amp; Terms</h3>
+      <div class="mt-4 inline-flex rounded-full bg-navy-900/5 p-1 text-[13px] font-bold" role="tablist">
+        <button type="button" role="tab" data-legal-tab="privacy" class="legal-tab rounded-full px-4 py-2 transition">Privacy Policy</button>
+        <button type="button" role="tab" data-legal-tab="terms" class="legal-tab rounded-full px-4 py-2 transition">Terms of Use</button>
+      </div>
+    </div>
+
+    <div id="legalBody" class="overflow-y-auto px-7 py-6 text-[14px] leading-relaxed text-navy-900/70">
+
+      <!-- ---------- Privacy Policy ---------- -->
+      <section data-legal-panel="privacy" class="legal-copy space-y-4">
+        <p class="text-[12.5px] text-navy-900/45">Effective 24 November 2026</p>
+
+        <h4>Who we are</h4>
+        <p>This website is operated by Airport First (Pvt) Ltd, WTC West Tower, 37th Floor, World Trade Center,
+          Colombo 00100, Sri Lanka (&ldquo;Airport First&rdquo;, &ldquo;we&rdquo;). We are responsible for the personal
+          information you share with us through this site.</p>
+
+        <h4>What we collect</h4>
+        <ul>
+          <li><strong>Inquiries:</strong> your name, phone or WhatsApp number, email address, pick-up and drop-off
+            locations, travel date and time, flight number, passenger count, vehicle preference and any notes.</li>
+          <li><strong>Reviews:</strong> your name, country, rating, review text and, if you choose, a small photo.
+            Approved reviews are shown publicly on this site.</li>
+          <li><strong>Messages:</strong> anything you send us by email, phone or WhatsApp.</li>
+          <li><strong>Location (optional):</strong> only if you tap &ldquo;use my current location&rdquo;. Your
+            coordinates are sent to OpenStreetMap&rsquo;s Nominatim service to find the nearest address, which is
+            placed in the pick-up field for you to check.</li>
+        </ul>
+
+        <h4>How we use it</h4>
+        <p>To reply to your inquiry, prepare a quote, arrange and carry out your transport, share the necessary trip
+          details with the chauffeur assigned to you, and meet our legal and accounting obligations. We do not sell
+          your information or use it for third-party advertising.</p>
+
+        <h4>Where it is kept</h4>
+        <p>Inquiries are emailed to our dispatch team through our own mail server and stored in a secure cloud
+          database (Supabase). Access is limited to authorised Airport First staff. If you choose to contact us on
+          WhatsApp, that conversation is also subject to WhatsApp&rsquo;s own terms.</p>
+
+        <h4>Third-party services</h4>
+        <p>To display this site, your browser loads fonts from Google Fonts, images from Unsplash and scripts from
+          jsDelivr and Tailwind CSS. These providers receive your IP address as part of a normal web request. We do
+          not use advertising or analytics cookies; the site uses your browser&rsquo;s storage only for essential
+          functions.</p>
+
+        <h4>How long we keep it</h4>
+        <p>For as long as needed to handle your inquiry and any resulting booking, and to meet legal and accounting
+          requirements. After that it is deleted.</p>
+
+        <h4>Your choices and rights</h4>
+        <p>You may ask to see, correct or delete the personal information we hold about you, or withdraw your consent,
+          by writing to <a href="mailto:airportfirst1@gmail.com">airportfirst1@gmail.com</a>. We handle personal data in
+          line with applicable Sri Lankan law, including the Personal Data Protection Act, No. 9 of 2022.</p>
+
+        <h4>Changes</h4>
+        <p>We may update this policy from time to time. The effective date above shows the latest version.</p>
+      </section>
+
+      <!-- ---------- Terms of Use ---------- -->
+      <section data-legal-panel="terms" class="legal-copy hidden space-y-4">
+        <p class="text-[12.5px] text-navy-900/45">Effective 24 November 2026</p>
+
+        <h4>About these terms</h4>
+        <p>These terms apply to your use of this website and to inquiries made through it with Airport First (Pvt) Ltd.
+          Your booking confirmation sets out the specific details of your journey and takes precedence where it
+          differs.</p>
+
+        <h4>Inquiries, quotes and bookings</h4>
+        <p>Submitting the form is a request, not a confirmed booking. A booking is confirmed only when we confirm it in
+          writing by email or WhatsApp, with the agreed vehicle, route, time and price. Information and descriptions
+          on this site are a general guide; your quote and confirmation are what apply.</p>
+
+        <h4>Changes and cancellations</h4>
+        <p>Please tell us about any change to your plans as early as possible. Cancellation terms are stated in your
+          booking confirmation.</p>
+
+        <h4>Your responsibilities</h4>
+        <p>Please give accurate contact, flight and pick-up details, be ready at the agreed time and place, and tell us
+          in advance about extra luggage, child seats or accessibility needs. Passengers must follow the
+          chauffeur&rsquo;s reasonable safety instructions and local law, including wearing seat belts.</p>
+
+        <h4>Our responsibilities</h4>
+        <p>We provide professional chauffeurs and suitable, insured vehicles, and coordinate your journey 24/7. We are
+          not responsible for delays or changes caused by events outside our reasonable control, such as flight
+          changes, traffic, weather or road closures, but we will do our best to keep you informed and on your way.</p>
+
+        <h4>Reviews</h4>
+        <p>Reviews must be honest, about your own experience and free of offensive or unlawful content. We read every
+          review before publishing it and may decline or remove any that do not meet these terms.</p>
+
+        <h4>Law and contact</h4>
+        <p>These terms are governed by the laws of Sri Lanka. Questions? Contact us at
+          <a href="mailto:airportfirst1@gmail.com">airportfirst1@gmail.com</a> or
+          <a href="tel:+94714784444">+94 71 478 4444</a>.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<style>
+  .legal-copy h4 { margin-top: 1.25rem; font-size: 14.5px; font-weight: 700; color: #0F172A; }
+  .legal-copy h4:first-of-type { margin-top: .5rem; }
+  .legal-copy ul { list-style: disc; padding-left: 1.2rem; }
+  .legal-copy li + li { margin-top: .4rem; }
+  .legal-copy a { color: #C8102E; font-weight: 600; }
+  .legal-tab { color: rgba(15,23,42,.55); }
+  .legal-tab.is-active { background: #fff; color: #0F172A; box-shadow: 0 2px 10px -4px rgba(15,23,42,.18); }
+</style>
+
+<script>
+/* ---------- Privacy & Terms ---------- */
+(function () {
+  "use strict";
+  var modal = document.getElementById("legalModal");
+  if (!modal) return;
+
+  function show(which) {
+    modal.querySelectorAll("[data-legal-panel]").forEach(function (p) {
+      p.classList.toggle("hidden", p.getAttribute("data-legal-panel") !== which);
+    });
+    modal.querySelectorAll("[data-legal-tab]").forEach(function (t) {
+      var on = t.getAttribute("data-legal-tab") === which;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.getElementById("legalBody").scrollTop = 0;
+  }
+
+  function open(which) {
+    show(which === "terms" ? "terms" : "privacy");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.body.style.overflow = "hidden";
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function close() {
+    if (modal.classList.contains("hidden")) return;
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("click", function (e) {
+    var opener = e.target.closest("[data-legal]");
+    if (opener) { e.preventDefault(); open(opener.getAttribute("data-legal")); return; }
+    var tab = e.target.closest("[data-legal-tab]");
+    if (tab) { show(tab.getAttribute("data-legal-tab")); return; }
+    if (e.target.closest("[data-legal-close]")) close();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+
+  window.airportFirstLegal = { open: open, close: close };
+})();
+</script>
+
 <!-- ==================== TOAST ==================== -->
 <div id="toast" class="pointer-events-none fixed bottom-40 sm:bottom-6 left-1/2 z-[70] hidden -translate-x-1/2">
   <div class="flex items-center gap-3 rounded-full bg-navy-900 px-5 py-3.5 text-white shadow-lux">
@@ -3164,9 +3346,10 @@
      on the success card and nothing else.
      ========================================================= */
   const DISPATCH_NUMBER = "94714784444";                        // WhatsApp business line
-  const SUPABASE_URL    = "https://meoinwznmdjyjmbgjdjl.supabase.co";
-  const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lb2lud3pubWRqeWptYmdqZGpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3OTE2MTMsImV4cCI6MjA3MjM2NzYxM30.4i4k3s1S2t7I4T10_x1j3a4k_L5o";
+  const SUPABASE_URL    = "https://xugzwpsviggvswkvzqiu.supabase.co";
+  /* Publishable (public) key: safe in the browser, because what it can do is
+     limited by the row-level security policies in supabase/schema.sql. */
+  const SUPABASE_ANON_KEY = "sb_publishable_V79ntexMq7t1K4TA56QoNA_VrNuzvGQ";
   const INQUIRY_TABLE   = "airport_inquiries";
   const NOTIFY_EMAIL    = "airportfirst1@gmail.com";
 
@@ -3901,7 +4084,7 @@
      visitor who forges the flag still gets a 401 from the database.
      ========================================================= */
   const REVIEW_TABLE = "airport_reviews";
-  const ADMIN_PIN = "4784";                 // moderation PIN, see note above
+  const ADMIN_PIN = "837513";                 // moderation PIN, see note above
   const reviewGrid = document.getElementById("reviewGrid");
 
   /* Elegant default avatar: initials on a brand-toned disc, drawn inline so it

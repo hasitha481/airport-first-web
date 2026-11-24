@@ -68,8 +68,8 @@ Hardcoded and live in the page:
 
 | Credential | Value | Public? |
 |---|---|---|
-| Supabase project URL | `https://meoinwznmdjyjmbgjdjl.supabase.co` | Yes |
-| Supabase anon key | `eyJhbGciOi…` | Yes — protected by RLS |
+| Supabase project URL | `https://xugzwpsviggvswkvzqiu.supabase.co` (also in the CSP `connect-src`, twice) | Yes |
+| Supabase publishable key | `sb_publishable_…` | Yes — protected by RLS |
 
 There is **no Google Maps key and no maps billing**. Location suggestions come
 from `AF_LOCATIONS`, a plain array near the bottom of `index.html`, rendered by

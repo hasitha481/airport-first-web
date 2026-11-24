@@ -6,3 +6,6 @@ airportfirst-smtp.php
 
 # Rate-limit counters written by send-mail.php.
 af-throttle/
+
+# Upload bundle for cPanel, rebuilt from the tracked root files.
+site-files/
