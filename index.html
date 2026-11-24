@@ -3487,12 +3487,12 @@
       <div class="lg:col-span-2">
         <h3 class="text-[12px] font-extrabold uppercase tracking-[.16em] text-white">Popular Routes</h3>
         <ul class="mt-5 space-y-3 text-[14.5px]">
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Colombo</a></li>
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Negombo</a></li>
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Kandy</a></li>
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Galle</a></li>
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Ella</a></li>
-          <li><a href="#booking" class="transition hover:text-crimson-300 hover:pl-1">HRI Mattala &rarr; Yala &amp; Tissa</a></li>
+          <li><a href="#booking" data-route-from="Bandaranaike International Airport (CMB)" data-route-to="Colombo" class="route-btn transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Colombo</a></li>
+          <li><a href="#booking" data-route-from="Bandaranaike International Airport (CMB)" data-route-to="Negombo" class="route-btn transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Negombo</a></li>
+          <li><a href="#booking" data-route-from="Bandaranaike International Airport (CMB)" data-route-to="Kandy" class="route-btn transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Kandy</a></li>
+          <li><a href="#booking" data-route-from="Bandaranaike International Airport (CMB)" data-route-to="Galle" class="route-btn transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Galle</a></li>
+          <li><a href="#booking" data-route-from="Bandaranaike International Airport (CMB)" data-route-to="Ella" class="route-btn transition hover:text-crimson-300 hover:pl-1">CMB Airport &rarr; Ella</a></li>
+          <li><a href="#booking" data-route-from="Mattala Rajapaksa International Airport (HRI)" data-route-to="Yala National Park (Tissamaharama)" class="route-btn transition hover:text-crimson-300 hover:pl-1">HRI Mattala &rarr; Yala &amp; Tissa</a></li>
         </ul>
       </div>
 
@@ -5724,6 +5724,13 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const payload = collectInquiry();
 
     const missing = firstMissingField(payload);
+    const dateEl = document.getElementById("inquiry_date");
+    if (!missing && dateEl && dateEl.min && payload.date && payload.date < dateEl.min) {
+      showToast("Please choose a travel date from today onwards", "error");
+      dateEl.focus();
+      dateEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (missing) {
       const el = document.getElementById(missing.id);
       showToast(missing.message, "error");
@@ -5853,6 +5860,30 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
     })
   );
+
+  /* Footer "Popular Routes" fill in the pick-up and drop-off, then go to the form. */
+  document.querySelectorAll(".route-btn").forEach(link =>
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const pickup = document.getElementById("inquiry_pickup");
+      const dropoff = document.getElementById("inquiry_dropoff");
+      if (pickup) pickup.value = link.dataset.routeFrom || "";
+      if (dropoff) dropoff.value = link.dataset.routeTo || "";
+      showToast("Route added — " + (link.dataset.routeTo || "") + ". Add your date and details");
+      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      const nameField = document.getElementById("inquiry_name");
+      if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
+    })
+  );
+
+  /* Travel dates cannot be in the past (local date, not UTC). */
+  (function () {
+    const date = document.getElementById("inquiry_date");
+    if (!date) return;
+    const now = new Date();
+    const pad = v => String(v).padStart(2, "0");
+    date.min = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+  })();
 
   /* Fleet "Request This Vehicle" pre-selects the vehicle,
      then sends the guest to the inquiry form to finish in one step. */
