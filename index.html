@@ -7,6 +7,20 @@
 <meta name="description" content="Airport First - Feel the Ambience. Chauffeur-driven airport transfers, corporate and executive transport, and curated Sri Lanka tours. 24/7 flight monitoring, fixed transparent rates, SLTDA licensed." />
 <meta name="theme-color" content="#C8102E" />
 
+<!-- Content-Security-Policy. Lists every host the page talks to; anything else
+     is refused by the browser. When you add a third-party script, image host or
+     API, add its origin to the matching directive or it will silently fail.
+       script-src  'unsafe-inline' is required by the inline <script> blocks and
+                   the on*="" handlers in the markup. The two jsDelivr entries
+                   are path-pinned to the exact package versions loaded below.
+       style-src   'unsafe-inline' is required by the Tailwind CDN, which writes
+                   its CSS into a <style> element at runtime.
+       connect-src send-mail.php (self), Supabase (REST + realtime), Web3Forms
+                   fallback, and Nominatim for "Use current location".
+     frame-ancestors cannot be set from a meta tag; .htaccess sends
+     X-Frame-Options instead. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://meoinwznmdjyjmbgjdjl.supabase.co wss://meoinwznmdjyjmbgjdjl.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -53,7 +67,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<!-- Pinned with Subresource Integrity: if the CDN ever serves different bytes,
+     the browser refuses to run them. To upgrade, change the version in the URL
+     AND in the CSP above, and take the new hash from
+     https://data.jsdelivr.com/v1/packages/npm/lucide@<version>?structure=flat -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@1.79.0/dist/umd/lucide.min.js"
+        integrity="sha256-Yhq8T5T/0fpE2WFBbhFiUCktRRXQoxoA7BR58aJOuQA="
+        crossorigin="anonymous"></script>
 
 <!-- Location suggestions are served by the built-in Sri Lanka autocomplete at the
      bottom of this file: no Google Maps dependency, no API key, no billing, and
@@ -61,7 +81,9 @@
 
 <!-- Supabase JS client (inquiry persistence). The anon key is a public,
      row-level-security-scoped key and is safe to ship in the browser. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+        integrity="sha256-hZaWX+kY5lZgChtWjToWj1wNPSKmAIhrtvRKZVXbAec="
+        crossorigin="anonymous"></script>
 
 <!-- Inquiry emails are delivered by send-mail.php on the same cPanel host:
      no third-party mail service, no API key, no SDK to load. -->
