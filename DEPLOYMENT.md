@@ -96,14 +96,37 @@ into e.g. `Current Location: Kuliyapitiya, Kurunegala`. Two deployment notes:
 
 ## 2. Database
 
-Run `supabase/schema.sql` in the SQL editor. It creates two tables with their
+Run `supabase/schema.sql` in the SQL editor. It is safe to re-run over an
+existing project. It creates a staff allow-list and two tables with their
 row-level security policies:
 
-- `airport_inquiries` — the anon key may **insert only**, so the website can
-  file an inquiry but nobody can read guest contact details without an
-  authenticated session.
-- `airport_reviews` — anon may **read published rows and insert**; only an
-  **authenticated** session may delete or unpublish.
+- `staff` + `is_staff()` — **signed in is not staff.** With the public anon
+  key anyone can register an account unless sign-ups are off, so every
+  privileged policy checks this list rather than "is authenticated".
+- `airport_inquiries` — the public may **insert only**; reading, updating and
+  deleting guest contact details is **staff only**. A trigger sets
+  `created_at` and `handled` itself, so a caller cannot backdate a row or hide
+  it from the queue.
+- `airport_reviews` — the public may **read approved rows and submit**; every
+  submission arrives with `published = false` (forced by a trigger, so even a
+  stale cached page cannot publish). Approving, editing and deleting is
+  **staff only**.
+
+Both tables carry size caps, and `avatar_url` only accepts the small inline
+`data:image/…;base64` image the page produces, never a remote URL. The caps are
+added `NOT VALID`, so rows already in the database are not rechecked.
+
+**After running it, once:**
+
+1. **Authentication → Sign In / Providers:** turn off *Allow new users to sign
+   up*.
+2. **Authentication → Users:** create the owner's account, then add it to the
+   allow-list in the SQL editor:
+
+   ```sql
+   insert into public.staff (user_id)
+   select id from auth.users where email = 'owner@example.com';
+   ```
 
 `avatar_url` holds either nothing (the page then draws an initials avatar) or a
 `data:image/jpeg;base64,…` string. Guest photos are cropped square, resized to
@@ -114,15 +137,18 @@ no storage bucket is needed, and rows stay small. Measured on a 3000×2000,
 
 ### Review moderation
 
+New reviews are **not shown on the site until approved.** The guest is told
+"your review will appear once it has been approved". To approve one, open
+**Table Editor → `airport_reviews`** in the Supabase dashboard, find rows with
+`published = false`, and set `published` to `true` (or delete the row). The
+dashboard bypasses row-level security, so no admin page is needed.
+
 `?admin=true` plus the PIN in `ADMIN_PIN` reveals a delete control on each
 review card. **That flag is presentation only** — it is client-side and anyone
-can set it. The actual boundary is the delete policy above: a visitor who
-forges the flag still gets a 401 from Postgres, and the page shows
-"Could not delete — sign in as staff and try again".
-
-For true owner-only moderation, sign the owner in with Supabase Auth and let
-the page use that session; the PIN is a convenience lock on the UI, not
-security. Change `ADMIN_PIN` before launch.
+can set it. The page never signs anyone in, so that button always gets refused
+by the delete policy above, and the page shows "Could not delete — sign in as
+staff and try again". Moderate from the dashboard. Change `ADMIN_PIN` before
+launch.
 
 ## 3. Email notifications
 

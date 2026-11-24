@@ -4050,35 +4050,47 @@
         rating: Number(ratingField.value) || 5,
         review: text,
         avatar_url: uploadedAvatar,      /* compressed data: URL, or null for the default avatar */
-        published: true
+        /* Every review waits for staff approval. The database enforces this
+           (supabase/schema.sql) whatever is sent here; saying so keeps the
+           request honest. */
+        published: false
       };
 
       const submit = document.getElementById("reviewSubmit");
       submit.disabled = true;
 
-      let saved = null;
+      /* Plain insert, no .select(): an unpublished row is not readable by the
+         public key, so asking for it back would turn a successful submission
+         into an RLS error. */
+      let saved = false;
       try {
         if (!supabaseClient) throw new Error("Supabase client unavailable");
-        const { data, error } = await supabaseClient.from(REVIEW_TABLE).insert([payload]).select().single();
+        const { error } = await supabaseClient.from(REVIEW_TABLE).insert([payload]);
         if (error) throw error;
-        saved = data;
+        saved = true;
       } catch (err) {
         console.error("[AirportFirst] Review insert failed:", err);
       }
 
-      /* The guest sees their review either way; if the database was
-         unreachable it simply is not persisted for other visitors. */
-      prependReview(saved || payload);
+      submit.disabled = false;
+
+      /* Not sent: keep the modal open with everything they wrote, so trying
+         again is one click rather than retyping the review. */
+      if (!saved) {
+        showToast("Sorry — your review could not be sent. Please try again", "error");
+        return;
+      }
+
+      /* Nothing is added to the grid: a review only appears once it has been
+         approved, so showing it now would tell the guest it is live when it
+         is not. */
       closeReviewModal();
       reviewForm.reset();
       resetPhotoPicker();
       if (countryFlag) countryFlag.textContent = "🌍";
       paintStars(5);
       reviewCount.textContent = "0";
-      submit.disabled = false;
-      showToast(saved ? "Thank you — your review is live" : "Thank you — your review is showing, but could not be saved",
-                saved ? undefined : "error");
-      reviewGrid.scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast("Thank you — your review will appear once it has been approved");
     });
   }
 
