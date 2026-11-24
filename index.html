@@ -3789,7 +3789,7 @@
         escapeHtml(review.review || "") + '&rdquo;</blockquote>' +
       '<figcaption class="mt-6 flex items-center gap-3 border-t border-navy-900/8 pt-5">' +
         '<img loading="lazy" decoding="async" class="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow" ' +
-             'src="' + escapeHtml(avatar) + '" alt="" onerror="this.src=\'' + escapeHtml(defaultAvatar(review.name)) + '\'" />' +
+             'src="' + escapeHtml(avatar) + '" alt="" />' +
         '<div class="flex-1 min-w-0">' +
           '<div class="text-[14.5px] font-bold text-navy-900 truncate">' + name + '</div>' +
           '<div class="flex items-center gap-1.5 text-[12.5px] text-navy-900/45">' +
@@ -3803,6 +3803,19 @@
           'data-delete-review="' + escapeHtml(review.id) + '" aria-label="Delete this review">' +
           '<i data-lucide="trash-2" class="h-3.5 w-3.5"></i> Delete</button>'
         : "");
+
+    /* A photo that fails to load falls back to the initials avatar. Attached
+       here rather than as an inline onerror="" attribute: inside an attribute
+       the browser decodes &#39; back to a quote before the JavaScript is
+       parsed, so escaping cannot keep text out of the code there. The SVG's
+       own quotes broke that inline handler, so the fallback never ran. */
+    const img = figure.querySelector("img");
+    if (img) {
+      const fallback = defaultAvatar(review.name);
+      img.addEventListener("error", () => {
+        if (img.src !== fallback) img.src = fallback;   // once only: no loop if this fails too
+      }, { once: true });
+    }
 
     return figure;
   }

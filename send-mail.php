@@ -192,17 +192,27 @@ if ($origin === '' || !in_array($origin, $allowed, true)) {
 /**
  * A stable, non-identifying key for the caller.
  *
- * Cloudflare fronts this domain, so REMOTE_ADDR is an edge address and the
- * guest's own arrives in CF-Connecting-IP. That header is trusted for
- * throttling and nothing else — the worst a forged one can do is spend someone
- * else's allowance. The result is hashed, so the store never holds an IP.
+ * Only REMOTE_ADDR is used: it is the address of the TCP connection, which the
+ * caller cannot choose. Headers such as CF-Connecting-IP or X-Forwarded-For are
+ * deliberately ignored. The site is not behind a proxy, so any such header was
+ * written by the caller, and trusting it would let a script send a new made-up
+ * address with every request and get a fresh allowance each time.
+ *
+ * If the site is ever put behind Cloudflare, read CF-Connecting-IP only when
+ * REMOTE_ADDR is inside Cloudflare's published ranges — never unconditionally.
+ *
+ * IPv6 callers are keyed on their /64, since one subscriber usually holds the
+ * whole block and could otherwise rotate through it. The result is hashed, so
+ * the store never holds an IP.
  */
 function client_key(): string
 {
-    $ip   = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-    $edge = (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? '');
-    if ($edge !== '' && filter_var($edge, FILTER_VALIDATE_IP) !== false) {
-        $ip = $edge;
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
+        $packed = inet_pton($ip);
+        if ($packed !== false) {
+            $ip = bin2hex(substr($packed, 0, 8)) . '::/64';
+        }
     }
     return hash('sha256', RATE_SALT . '|' . $ip);
 }

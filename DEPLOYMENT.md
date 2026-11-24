@@ -16,17 +16,16 @@ Node, no third-party mail account.
 > | Displayed phone (top bar, header, why-choose, footer, mobile bar, modals) | `0768071150` | `+94 71 478 4444` |
 > | `NOTIFY_EMAIL` (`index.html`) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
 > | `MAIL_TO` (`send-mail.php`) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
-> | `DEFAULT_TO` (`supabase/functions/send-inquiry-email/index.ts`) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
+> | `MAIL_TO` (`supabase/functions/send-inquiry-email/index.ts`, disabled) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
 > | All `mailto:` links and displayed email | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
 >
 > To restore, search the project for `0768071150`, `94768071150` and
 > `mhasitha481@gmail.com` and swap each back.
 >
 > **Still on the client's domain:** `MAIL_FROM` in `send-mail.php` (and
-> `FROM_ADDRESS` in the Edge Function) is `inquiries@airportfirst.lk`. That is a
-> *sender*, not a recipient — no inquiry can reach the client through it — but on
-> a test host where that mailbox does not exist, `mail()` may be rejected or
-> filtered. Point it at a mailbox on the test domain while testing.
+> `FROM_ADDRESS` in the Edge Function) is `noreply@airportfirst.vip`. That is a
+> *sender*, not a recipient — no inquiry can reach the client through it — but
+> the mailbox must exist in cPanel or SMTP authentication fails.
 
 ## 0. What to upload
 
@@ -41,8 +40,13 @@ assets/
 ```
 
 `supabase/` is only needed if you later move the database or mailer off cPanel;
-it is not required for the site to run, and the shipped `.htaccess` 404s it if
-uploaded by accident.
+it is not required for the site to run, so don't upload it. (The shipped
+`.htaccess` 404s it only when the site sits at the domain root.)
+
+The Edge Function in `supabase/functions/send-inquiry-email/` is **disabled**:
+it answers every request with `410` until `ENABLED` is set to `true` in the
+file. If it was ever deployed, remove it with
+`supabase functions delete send-inquiry-email`.
 
 ### The logo
 
@@ -261,10 +265,14 @@ CSRF token on; matching the origin is the equivalent a static form can offer.
 **How often.** One submission per caller every 20 seconds, and at most 5 in 10
 minutes, answered with `429` and a `Retry-After`. Counters live in
 `af-throttle/` above the web root, keyed by a hash of the caller's IP rather
-than the address itself, and are swept after a day. Behind Cloudflare the
-guest's address is read from `CF-Connecting-IP`, which is trusted for
-throttling and nothing else. If the store cannot be written the limiter fails
-open and logs it — a broken counter must never stop a real booking.
+than the address itself, and are swept after a day. The address is the
+connection's own (`REMOTE_ADDR`); headers like `CF-Connecting-IP` and
+`X-Forwarded-For` are ignored, because without a proxy in front they come from
+the caller, who could invent a new one per request to dodge the limit. IPv6
+callers are counted per /64. If the site is ever put behind Cloudflare, trust
+`CF-Connecting-IP` only when `REMOTE_ADDR` is in Cloudflare's published ranges.
+If the store cannot be written the limiter fails open and logs it — a broken
+counter must never stop a real booking.
 
 **What gets through.** The body is refused over 16 KB, refused if it is not
 valid UTF-8, and parsed at a shallow depth. Every field is then checked for

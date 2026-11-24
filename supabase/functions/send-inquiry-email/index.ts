@@ -1,150 +1,172 @@
 /**
- * send-inquiry-email
+ * send-inquiry-email — DISABLED
  * -----------------------------------------------------------------------------
- * Receives an inquiry from the website form and emails the dispatch desk via
- * Resend.
+ * Not used by the site: inquiries are mailed by send-mail.php on the cPanel
+ * host. This function is kept only for a possible move off cPanel, and it
+ * answers every request with 410 Gone until ENABLED below is set to true.
  *
- * The Resend API key lives here as a function secret, never in index.html:
- * Resend does not accept cross-origin calls from a browser, and a key shipped
- * in page source can be read by anyone and used to send mail as this domain.
+ * If it was ever deployed, delete it from the project as well:
+ *   supabase functions delete send-inquiry-email
  *
- * Deploy:
+ * Before enabling it, note what an earlier version got wrong and this one
+ * fixes: the recipient came from the request body and any website could call
+ * it, which made it an open mail relay for anyone holding the public anon key.
+ * Now the recipient is fixed, only this site's origins are allowed, field
+ * sizes are capped, and errors say nothing about the internals.
+ *
+ * Deploy (only once ENABLED is true):
  *   supabase functions deploy send-inquiry-email
  *   supabase secrets set RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
  */
 
-const RESEND_ENDPOINT = "https://api.resend.com/emails";
-const FROM_ADDRESS = "Airport First <inquiries@airportfirst.lk>"; // must be a verified Resend domain
-const DEFAULT_TO = "mhasitha481@gmail.com";
+const ENABLED = false;
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+const RESEND_ENDPOINT = "https://api.resend.com/emails";
+const FROM_ADDRESS = "Airport First <noreply@airportfirst.vip>"; // must be a verified Resend domain
+const MAIL_TO = "mhasitha481@gmail.com"; // TESTING — airportfirst1@gmail.com for go-live. Never taken from the request.
+
+const ALLOWED_ORIGINS = ["https://airportfirst.vip", "https://www.airportfirst.vip"];
+const MAX_BODY_BYTES = 16384;
+
+const FIELD_LIMITS: Record<string, number> = {
+  name: 120, phone: 60, email: 160, pickup: 200, dropoff: 200, date: 40,
+  time: 40, flight: 40, pax: 20, vehicle: 120, notes: 1200, source: 60,
 };
 
-interface Inquiry {
-  name?: string;
-  phone?: string;
-  email?: string;
-  pickup?: string;
-  dropoff?: string;
-  date?: string;
-  time?: string;
-  flight?: string;
-  pax?: string;
-  vehicle?: string;
-  notes?: string;
-  source?: string;
-  created_at?: string;
+const LABELS: Array<[string, string]> = [
+  ["name", "Name"],
+  ["phone", "Phone / WhatsApp"],
+  ["email", "Email"],
+  ["pickup", "Pick-up"],
+  ["dropoff", "Drop-off"],
+  ["date", "Date"],
+  ["time", "Arrival time"],
+  ["flight", "Flight number"],
+  ["pax", "Passengers"],
+  ["vehicle", "Vehicle"],
+  ["notes", "Notes"],
+  ["source", "Source"],
+];
+
+const EMAIL_RE = /^[^\s@<>"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
+
+function corsHeaders(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
 }
 
-const escapeHtml = (value: unknown): string =>
-  String(value ?? "").replace(/[&<>"]/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string)
+function json(status: number, body: unknown, origin: string | null): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+  });
+}
+
+const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string)
   );
 
-function renderEmail(inquiry: Inquiry): string {
-  const rows: Array<[string, string | undefined]> = [
-    ["Name", inquiry.name],
-    ["Phone / WhatsApp", inquiry.phone],
-    ["Email", inquiry.email],
-    ["Pick-up", inquiry.pickup],
-    ["Drop-off", inquiry.dropoff],
-    ["Date", inquiry.date],
-    ["Arrival time", inquiry.time],
-    ["Flight number", inquiry.flight],
-    ["Passengers", inquiry.pax],
-    ["Vehicle preference", inquiry.vehicle],
-    ["Notes", inquiry.notes],
-    ["Source", inquiry.source],
-  ];
+/** Strings only, trimmed, capped; line breaks survive in the notes alone. */
+function clean(input: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, max] of Object.entries(FIELD_LIMITS)) {
+    const raw = input[key];
+    if (typeof raw !== "string" && typeof raw !== "number") continue;
+    let value = String(raw).trim();
+    value = key === "notes"
+      ? value.replace(/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/g, " ")
+      : value.replace(/[\x00-\x1F\x7F]/g, " ");
+    value = value.slice(0, max).trim();
+    if (value) out[key] = value;
+  }
+  return out;
+}
 
-  const body = rows
-    .filter(([, value]) => value)
-    .map(
-      ([label, value]) =>
-        `<tr>
-           <td style="padding:8px 14px;color:#64748B;font-size:13px;white-space:nowrap">${escapeHtml(label)}</td>
-           <td style="padding:8px 14px;color:#0F172A;font-size:14px;font-weight:600">${escapeHtml(value)}</td>
-         </tr>`
+function renderEmail(inquiry: Record<string, string>): string {
+  const rows = LABELS
+    .filter(([key]) => inquiry[key])
+    .map(([key, label]) =>
+      `<tr><td valign="top"><strong>${escapeHtml(label)}</strong></td>` +
+      `<td valign="top">${escapeHtml(inquiry[key]).replace(/\r?\n/g, "<br>")}</td></tr>`
     )
     .join("");
-
-  return `<!doctype html>
-<html><body style="margin:0;background:#FAFAFB;font-family:'Plus Jakarta Sans',Inter,Arial,sans-serif">
-  <div style="max-width:620px;margin:24px auto;background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:16px;overflow:hidden">
-    <div style="background:#C8102E;padding:20px 24px">
-      <div style="color:#fff;font-size:19px;font-weight:800;font-style:italic">Airport First</div>
-      <div style="color:rgba(255,255,255,.75);font-size:10px;letter-spacing:.34em;text-transform:uppercase;margin-top:4px">Feel the Ambience</div>
-    </div>
-    <div style="padding:22px 10px">
-      <p style="margin:0 14px 14px;color:#0F172A;font-size:15px;font-weight:700">New website inquiry</p>
-      <table style="width:100%;border-collapse:collapse">${body}</table>
-      <p style="margin:18px 14px 0;color:#64748B;font-size:12px">
-        Reply within 15 minutes to hold the best-rate guarantee.
-      </p>
-    </div>
-  </div>
-</body></html>`;
+  return `<!doctype html><html><body>` +
+    `<p><strong>New website inquiry</strong> — Airport First</p>` +
+    `<table cellpadding="4" cellspacing="0" border="0">${rows}</table>` +
+    `<p>Reply within 15 minutes to hold the best-rate guarantee.</p>` +
+    `</body></html>`;
 }
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get("Origin");
+
+  if (!ENABLED) {
+    return json(410, { ok: false, error: "This endpoint is not in use" }, origin);
+  }
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS_HEADERS });
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
   }
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    return json(405, { ok: false, error: "Method not allowed" }, origin);
+  }
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+    return json(403, { ok: false, error: "Request rejected" }, origin);
   }
 
   const apiKey = Deno.env.get("RESEND_API_KEY");
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "RESEND_API_KEY is not set" }), {
-      status: 500,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    console.error("[send-inquiry-email] RESEND_API_KEY is not set");
+    return json(500, { ok: false, error: "The dispatch desk could not be reached" }, origin);
   }
 
   try {
-    const { to, inquiry } = (await req.json()) as { to?: string; inquiry: Inquiry };
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+      return json(413, { ok: false, error: "Request too large" }, origin);
+    }
+    const parsed = JSON.parse(raw);
+    /* Older callers wrapped the fields as { inquiry: {...} }; accept both. A
+       `to` in the body is ignored: the recipient is MAIL_TO and nothing else. */
+    const source = parsed && typeof parsed === "object"
+      ? (parsed.inquiry && typeof parsed.inquiry === "object" ? parsed.inquiry : parsed)
+      : {};
+    const inquiry = clean(source as Record<string, unknown>);
 
-    const subject = `New inquiry — ${inquiry?.name ?? "Website guest"} · ${
-      inquiry?.pickup ?? "?"
-    } to ${inquiry?.dropoff ?? "?"}`;
+    if (!inquiry.name || (!inquiry.phone && !inquiry.email)) {
+      return json(422, { ok: false, error: "Name and a phone or email are required" }, origin);
+    }
+
+    const replyTo = inquiry.email && EMAIL_RE.test(inquiry.email) ? inquiry.email : undefined;
+    const subject = `New inquiry — ${inquiry.name} · ${inquiry.pickup ?? "?"} to ${inquiry.dropoff ?? "?"}`;
 
     const resendResponse = await fetch(RESEND_ENDPOINT, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: FROM_ADDRESS,
-        to: [to ?? DEFAULT_TO],
-        reply_to: inquiry?.email || undefined,
+        to: [MAIL_TO],
+        reply_to: replyTo,
         subject,
-        html: renderEmail(inquiry ?? {}),
+        html: renderEmail(inquiry),
       }),
     });
 
-    const result = await resendResponse.json();
     if (!resendResponse.ok) {
-      return new Response(JSON.stringify({ error: "Resend rejected the message", result }), {
-        status: 502,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-      });
+      console.error("[send-inquiry-email] Resend refused:", resendResponse.status, await resendResponse.text());
+      return json(502, { ok: false, error: "Mail server rejected the message" }, origin);
     }
-
-    return new Response(JSON.stringify({ ok: true, id: result?.id }), {
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    return json(200, { ok: true }, origin);
   } catch (error) {
-    return new Response(JSON.stringify({ error: String(error) }), {
-      status: 400,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    });
+    console.error("[send-inquiry-email] bad request:", error);
+    return json(400, { ok: false, error: "Malformed request" }, origin);
   }
 });
