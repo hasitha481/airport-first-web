@@ -3,29 +3,24 @@
 Static page plus one small PHP mailer. Built for cPanel; no build step, no
 Node, no third-party mail account.
 
-> ### ⚠ FULLY ISOLATED FOR TESTING — restore before go-live
+> ### Live contact details
 >
-> Every contact channel, backend **and** visible copy, points at the tester.
-> Nothing a visitor can tap reaches the client.
+> Every contact channel now points at the client. Change them together.
 >
-> | Where | Testing value | Go-live value |
-> |---|---|---|
-> | `DISPATCH_NUMBER` (`index.html`) | `94768071150` | `94714784444` |
-> | All `wa.me/…` links | `94768071150` | `94714784444` |
-> | All `tel:+…` links | `+94768071150` | `+94714784444` |
-> | Displayed phone (top bar, header, why-choose, footer, mobile bar, modals) | `0768071150` | `+94 71 478 4444` |
-> | `NOTIFY_EMAIL` (`index.html`) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
-> | `MAIL_TO` (`send-mail.php`) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
-> | `MAIL_TO` (`supabase/functions/send-inquiry-email/index.ts`, disabled) | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
-> | All `mailto:` links and displayed email | `mhasitha481@gmail.com` | `airportfirst1@gmail.com` |
+> | Where | Value |
+> |---|---|
+> | Company | Airport First (Pvt) Ltd &mdash; WTC West Tower, 37th Floor, Colombo 00100 |
+> | `DISPATCH_NUMBER` (`index.html`), all `wa.me/…` and `tel:` links | `94714784444` / `+94714784444` |
+> | Displayed phone | `+94 71 478 4444` |
+> | `NOTIFY_EMAIL` (`index.html`), `mailto:` links, displayed email | `airportfirst1@gmail.com` |
+> | `MAIL_TO` (`send-mail.php`, and the disabled Edge Function) | `airportfirst1@gmail.com` |
+> | Instagram | `https://www.instagram.com/airportfirst/` |
+> | Facebook | **search link for now** &mdash; replace with the page's own URL (search `FACEBOOK_URL` in `index.html`) |
+> | Structured data (`application/ld+json` in `<head>`) | repeats the company name, address, phone and email &mdash; keep in step |
 >
-> To restore, search the project for `0768071150`, `94768071150` and
-> `mhasitha481@gmail.com` and swap each back.
->
-> **Still on the client's domain:** `MAIL_FROM` in `send-mail.php` (and
-> `FROM_ADDRESS` in the Edge Function) is `noreply@airportfirst.vip`. That is a
-> *sender*, not a recipient — no inquiry can reach the client through it — but
-> the mailbox must exist in cPanel or SMTP authentication fails.
+> **Sender:** `MAIL_FROM` in `send-mail.php` is `noreply@airportfirst.vip`. It
+> is only the sender; the mailbox must exist in cPanel or SMTP authentication
+> fails.
 
 ## 0. What to upload
 

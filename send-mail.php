@@ -41,7 +41,7 @@ use PHPMailer\PHPMailer\SMTP;
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const MAIL_TO        = 'mhasitha481@gmail.com';       // TESTING — client's airportfirst1@gmail.com for go-live
+const MAIL_TO        = 'airportfirst1@gmail.com';     // live dispatch inbox
 const MAIL_FROM      = 'noreply@airportfirst.vip';    // must be a real mailbox on the sending domain
 const MAIL_FROM_NAME = 'Airport First Dispatch';
 const SITE_NAME      = 'Airport First';

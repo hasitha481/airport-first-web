@@ -23,7 +23,7 @@ const ENABLED = false;
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const FROM_ADDRESS = "Airport First <noreply@airportfirst.vip>"; // must be a verified Resend domain
-const MAIL_TO = "mhasitha481@gmail.com"; // TESTING — airportfirst1@gmail.com for go-live. Never taken from the request.
+const MAIL_TO = "airportfirst1@gmail.com"; // live dispatch inbox. Never taken from the request.
 
 const ALLOWED_ORIGINS = ["https://airportfirst.vip", "https://www.airportfirst.vip"];
 const MAX_BODY_BYTES = 16384;
