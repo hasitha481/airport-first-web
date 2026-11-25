@@ -758,10 +758,11 @@
        style-src   'unsafe-inline' is required by the Tailwind CDN, which writes
                    its CSS into a <style> element at runtime.
        connect-src send-mail.php (self), Supabase (REST + realtime), Web3Forms
-                   fallback, and Nominatim for "Use current location".
+                   fallback, Photon for place suggestions, and Nominatim for
+                   "Use current location".
      frame-ancestors cannot be set from a meta tag; .htaccess sends
      X-Frame-Options instead. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://xugzwpsviggvswkvzqiu.supabase.co wss://xugzwpsviggvswkvzqiu.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://xugzwpsviggvswkvzqiu.supabase.co wss://xugzwpsviggvswkvzqiu.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org https://photon.komoot.io; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -951,7 +952,7 @@
   @keyframes scrollX { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ---------- Sri Lanka location autocomplete ----------
-     Self-contained dropdown: no external API, no key, no network request.
+     Built-in place list plus a live, Sri Lanka-only Photon lookup. No API key.
      The input itself is never disabled or read-only; the list only suggests. */
   .af-ac { position: relative; }
   .af-ac-field { position: relative; }
@@ -971,7 +972,7 @@
     margin: 0;
     padding: 6px;
     list-style: none;
-    max-height: 250px;
+    max-height: 340px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
@@ -1050,6 +1051,14 @@
     white-space: nowrap;
   }
   @media (max-width: 480px) { .af-ac-kind { display: none; } }
+  .af-ac-ico svg { display: block; }
+  .af-ac-text { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; }
+  .af-ac-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; color: #0F172A; }
+  .af-ac-sub { margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 500; color: #64748B; }
+  .af-ac-group { padding: 10px 10px 4px; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #94A3B8; }
+  .af-ac-status { display: flex; align-items: center; gap: 8px; padding: 10px; font-size: 12.5px; color: #64748B; }
+  .af-ac-attrib { padding: 8px 10px 4px; border-top: 1px solid rgba(15,23,42,.06); margin-top: 4px; font-size: 10.5px; color: #94A3B8; }
+  .af-ac-spin { width: 12px; height: 12px; border-radius: 99px; border: 2px solid rgba(200,16,46,.2); border-top-color: #C8102E; animation: afSpin .8s linear infinite; }
 
   /* ---------- Success mark ----------
      The ring sweeps in, then the tick draws itself. Both are pure stroke
@@ -3853,6 +3862,9 @@
           <li><strong>Reviews:</strong> your name, country, rating, review text and, if you choose, a small photo.
             Approved reviews are shown publicly on this site.</li>
           <li><strong>Messages:</strong> anything you send us by email, phone or WhatsApp.</li>
+          <li><strong>Place search:</strong> as you type in the pick-up or drop-off field, the text is sent to
+            Photon, an OpenStreetMap-based search service run by komoot, to suggest matching places in Sri Lanka.
+            Nothing else from the form is sent.</li>
           <li><strong>Location (optional):</strong> only if you tap &ldquo;use my current location&rdquo;. Your
             coordinates are sent to OpenStreetMap&rsquo;s Nominatim service to find the nearest address, which is
             placed in the pick-up field for you to check.</li>
@@ -4903,83 +4915,136 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
      is a plain user-initiated <a target="_blank">. */
 
   /* =========================================================
-     SRI LANKA LOCATION AUTOCOMPLETE  (self-contained, zero-cost)
+     SRI LANKA LOCATION AUTOCOMPLETE  (free, no API key)
 
-     No Google Maps, no API key, no billing and no network request: the list
-     below is the whole data source. The inputs remain ordinary editable text
-     fields at all times — the dropdown only offers suggestions, and a guest
-     can always type a hotel, address or village that is not on the list.
+     Two sources, merged into one dropdown:
+       1. AF_LOCATIONS — 280 Sri Lankan towns, airports, stations,
+          landmarks and hotels, matched instantly from 2 characters.
+       2. Photon (photon.komoot.io), a free OpenStreetMap search built for
+          type-ahead, queried 300 ms after typing stops (3+ characters) and
+          restricted to Sri Lanka, so any village, street or hotel can appear.
+     Nominatim is deliberately NOT used here: its usage policy forbids
+     search-as-you-type. It is only used once, for the GPS button below.
+
+     The inputs stay plain editable text fields: a guest can always type an
+     address that neither source knows.
      ========================================================= */
-  const AF_LOCATIONS = [
-    /* Airports */
-    { name: "Bandaranaike International Airport (CMB)", kind: "Airport", icon: "✈" },
-    { name: "Jaffna International Airport",             kind: "Airport", icon: "✈" },
-    { name: "Mattala Rajapaksa International Airport (HRI)", kind: "Airport", icon: "✈" },
+  const AF_DISTRICTS = ["Colombo","Gampaha","Kalutara","Kandy","Matale","Nuwara Eliya","Galle","Matara","Hambantota","Jaffna","Kilinochchi","Mannar","Vavuniya","Mullaitivu","Batticaloa","Ampara","Trincomalee","Kurunegala","Puttalam","Anuradhapura","Polonnaruwa","Badulla","Monaragala","Ratnapura","Kegalle"];
+  const AF_PROVINCES = ["Western","Western","Western","Central","Central","Central","Southern","Southern","Southern","Northern","Northern","Northern","Northern","Northern","Eastern","Eastern","Eastern","North Western","North Western","North Central","North Central","Uva","Uva","Sabaragamuwa","Sabaragamuwa"];
+  const AF_KINDS = ["Airport","Station","City","Town","Area","Landmark","Hotel"];
+  /* [name, district index, kind index, "aliases, comma separated"?] */
+  const AF_PLACE_DATA = [["Bandaranaike International Airport (CMB)",1,0,"katunayake airport,colombo airport,cmb,bia"],["Ratmalana Airport (RML)",0,0,"ratmalana,rml"],["Mattala Rajapaksa International Airport (HRI)",8,0,"mattala,hri"],["Jaffna International Airport (JAF)",9,0,"palaly,jaf"],["Colombo Fort Railway Station",0,1,"fort station"],["Kandy Railway Station",3,1],["Peradeniya Junction Railway Station",3,1],["Hatton Railway Station",5,1],["Nanu Oya Railway Station",5,1,"nuwara eliya station"],["Haputale Railway Station",21,1],["Ella Railway Station",21,1],["Badulla Railway Station",21,1],["Galle Railway Station",6,1],["Matara Railway Station",7,1],["Anuradhapura Railway Station",19,1],["Jaffna Railway Station",9,1],["Colombo",0,2,"colombo city"],["Colombo Fort",0,4,"fort"],["Kollupitiya",0,4,"colpetty,colombo 3"],["Bambalapitiya",0,4,"colombo 4"],["Wellawatte",0,4,"colombo 6"],["Borella",0,4,"colombo 8"],["Rajagiriya",0,3],["Battaramulla",0,3],["Sri Jayawardenepura Kotte",0,2,"kotte"],["Nugegoda",0,3],["Maharagama",0,3],["Dehiwala",0,3],["Mount Lavinia",0,3,"mt lavinia"],["Moratuwa",0,2],["Piliyandala",0,3],["Homagama",0,3],["Malabe",0,3],["Kaduwela",0,3],["Avissawella",0,3],["Padukka",0,3],["Negombo",1,2],["Katunayake",1,3],["Seeduwa",1,3],["Ja-Ela",1,3,"jaela"],["Kandana",1,3],["Wattala",1,3],["Kelaniya",1,3],["Kiribathgoda",1,3],["Kadawatha",1,3],["Ragama",1,3],["Gampaha",1,2],["Minuwangoda",1,3],["Divulapitiya",1,3],["Nittambuwa",1,3],["Veyangoda",1,3],["Mirigama",1,3],["Panadura",2,3],["Wadduwa",2,3],["Kalutara",2,2],["Beruwala",2,3],["Aluthgama",2,3],["Horana",2,3],["Matugama",2,3],["Bandaragama",2,3],["Bentota",6,3],["Induruwa",6,3],["Kosgoda",6,3],["Ahungalla",6,3],["Ambalangoda",6,3],["Hikkaduwa",6,3],["Galle",6,2],["Unawatuna",6,3],["Habaraduwa",6,3],["Koggala",6,3],["Ahangama",6,3],["Elpitiya",6,3],["Baddegama",6,3],["Weligama",7,3],["Mirissa",7,3],["Polhena",7,3],["Matara",7,2],["Dikwella",7,3],["Akuressa",7,3],["Kamburupitiya",7,3],["Tangalle",8,3,"tangalla"],["Beliatta",8,3],["Ambalantota",8,3],["Hambantota",8,2],["Tissamaharama",8,3,"tissa"],["Kirinda",8,3],["Weeraketiya",8,3],["Kandy",3,2,"maha nuwara"],["Peradeniya",3,3],["Katugastota",3,3],["Akurana",3,3],["Digana",3,3],["Kundasale",3,3],["Teldeniya",3,3],["Pilimathalawa",3,3],["Kadugannawa",3,3],["Gampola",3,3],["Nawalapitiya",3,3],["Matale",4,2],["Dambulla",4,3],["Sigiriya",4,3],["Galewela",4,3],["Naula",4,3],["Rattota",4,3],["Ukuwela",4,3],["Nuwara Eliya",5,2],["Hatton",5,3],["Talawakelle",5,3],["Nanu Oya",5,3],["Kotagala",5,3],["Maskeliya",5,3],["Dalhousie (Nallathanniya)",5,3,"nallathanniya"],["Bogawantalawa",5,3],["Ginigathena",5,3],["Ragala",5,3],["Badulla",21,2],["Ella",21,3],["Bandarawela",21,3],["Haputale",21,3],["Diyatalawa",21,3],["Welimada",21,3],["Demodara",21,3],["Passara",21,3],["Mahiyanganaya",21,3],["Monaragala",22,3,"moneragala"],["Wellawaya",22,3],["Kataragama",22,3],["Buttala",22,3],["Bibile",22,3],["Siyambalanduwa",22,3],["Ratnapura",23,2],["Kuruwita",23,3],["Eheliyagoda",23,3],["Pelmadulla",23,3],["Balangoda",23,3],["Embilipitiya",23,3],["Udawalawe",23,3,"uda walawe"],["Kalawana",23,3],["Rakwana",23,3],["Kegalle",24,2],["Mawanella",24,3],["Rambukkana",24,3],["Pinnawala",24,3],["Warakapola",24,3],["Ruwanwella",24,3],["Yatiyantota",24,3],["Kitulgala",24,3],["Dehiowita",24,3],["Kurunegala",17,2],["Kuliyapitiya",17,3],["Pannala",17,3],["Narammala",17,3],["Alawwa",17,3],["Polgahawela",17,3],["Mawathagama",17,3],["Wariyapola",17,3],["Hettipola",17,3],["Giriulla",17,3],["Dambadeniya",17,3],["Nikaweratiya",17,3],["Ibbagamuwa",17,3],["Melsiripura",17,3],["Galgamuwa",17,3],["Maho",17,3],["Puttalam",18,2],["Chilaw",18,3],["Wennappuwa",18,3],["Marawila",18,3],["Dankotuwa",18,3],["Nattandiya",18,3],["Madampe",18,3],["Kalpitiya",18,3],["Anamaduwa",18,3],["Anuradhapura",19,2],["Mihintale",19,3],["Kekirawa",19,3],["Habarana",19,3],["Tambuttegama",19,3],["Eppawala",19,3],["Medawachchiya",19,3],["Polonnaruwa",20,2],["Kaduruwela",20,3],["Hingurakgoda",20,3],["Minneriya",20,3],["Giritale",20,3],["Medirigiriya",20,3],["Trincomalee",16,2,"trinco"],["Uppuveli",16,3],["Nilaveli",16,3],["Kuchchaveli",16,3],["Kinniya",16,3],["Kantale",16,3],["Batticaloa",14,2],["Pasikudah",14,3,"passikudah"],["Kalkudah",14,3],["Valaichchenai",14,3],["Eravur",14,3],["Kattankudy",14,3],["Ampara",15,3],["Arugam Bay",15,3,"pottuvil point"],["Pottuvil",15,3],["Kalmunai",15,3],["Akkaraipattu",15,3],["Panama",15,3],["Jaffna",9,2,"yalpanam"],["Nallur",9,3],["Point Pedro",9,3],["Chavakachcheri",9,3],["Kankesanthurai",9,3,"kks"],["Velvettithurai",9,3],["Karainagar",9,3],["Kilinochchi",10,3],["Paranthan",10,3],["Mannar",11,3],["Talaimannar",11,3],["Vavuniya",12,2],["Mullaitivu",13,3],["World Trade Center Colombo",0,5,"wtc,world trade centre"],["Galle Face Green",0,5],["Gangaramaya Temple",0,5],["Lotus Tower",0,5,"nelum kuluna"],["Port City Colombo",0,5],["Kelaniya Raja Maha Vihara",1,5,"kelaniya temple"],["Sigiriya Rock Fortress",4,5,"lion rock"],["Pidurangala Rock",4,5],["Dambulla Cave Temple",4,5,"golden temple dambulla"],["Knuckles Mountain Range",4,5,"knuckles"],["Temple of the Sacred Tooth Relic",3,5,"dalada maligawa,temple of the tooth"],["Royal Botanical Gardens, Peradeniya",3,5,"peradeniya gardens"],["Adam's Peak (Sri Pada)",5,5,"adams peak,sri pada"],["Horton Plains National Park",5,5,"worlds end"],["Seetha Amman Kovil",5,5,"seetha eliya"],["Gregory Lake",5,5],["Nine Arches Bridge",21,5,"nine arch bridge"],["Little Adam's Peak",21,5,"little adams peak"],["Ella Rock",21,5],["Ravana Falls",21,5],["Lipton's Seat",21,5,"liptons seat"],["Galle Fort",6,5,"dutch fort"],["Pinnawala Elephant Orphanage",24,5],["Sinharaja Forest Reserve",23,5,"sinharaja"],["Udawalawe National Park",23,5],["Yala National Park",8,5,"yala safari"],["Bundala National Park",8,5],["Minneriya National Park",20,5],["Polonnaruwa Ancient City",20,5],["Ruwanwelisaya",19,5],["Wilpattu National Park",19,5],["Ethagala (Elephant Rock)",17,5,"kurunegala rock"],["Koneswaram Temple",16,5],["Pigeon Island National Park",16,5],["Nallur Kandaswamy Kovil",9,5,"nallur temple"],["Gal Oya National Park",15,5],["Cinnamon Grand Colombo",0,6],["Cinnamon Lakeside Colombo",0,6],["Shangri-La Colombo",0,6,"shangrila"],["Hilton Colombo",0,6],["The Kingsbury Colombo",0,6,"kingsbury"],["Galle Face Hotel",0,6],["Taj Samudra Colombo",0,6],["Mount Lavinia Hotel",0,6],["Jetwing Blue",1,6,"negombo"],["Heritance Negombo",1,6],["Cinnamon Bentota Beach",6,6],["Heritance Ahungalla",6,6],["Jetwing Lighthouse",6,6],["Amangalla",6,6],["Shangri-La Hambantota",8,6],["Jetwing Yala",8,6],["Cinnamon Wild Yala",8,6],["Earl's Regency Kandy",3,6,"earls regency"],["Amaya Hills Kandy",3,6],["Heritance Kandalama",4,6,"kandalama"],["Jetwing Vil Uyana",4,6],["Cinnamon Lodge Habarana",19,6],["The Grand Hotel Nuwara Eliya",5,6],["Heritance Tea Factory",5,6],["98 Acres Resort Ella",21,6,"98 acres"],["Trinco Blu by Cinnamon",16,6],["Jetwing Jaffna",9,6]];
 
-    /* Major cities & regions */
-    { name: "Colombo",       kind: "City", icon: "◉" },
-    { name: "Kandy",         kind: "City", icon: "◉" },
-    { name: "Galle",         kind: "City", icon: "◉" },
-    { name: "Negombo",       kind: "City", icon: "◉" },
-    { name: "Ella",          kind: "City", icon: "◉" },
-    { name: "Nuwara Eliya",  kind: "City", icon: "◉" },
-    { name: "Sigiriya",      kind: "City", icon: "◉" },
-    { name: "Mirissa",       kind: "City", icon: "◉" },
-    { name: "Arugam Bay",    kind: "City", icon: "◉" },
-    { name: "Anuradhapura",  kind: "City", icon: "◉" },
-    { name: "Polonnaruwa",   kind: "City", icon: "◉" },
-    { name: "Jaffna",        kind: "City", icon: "◉" },
-    { name: "Trincomalee",   kind: "City", icon: "◉" },
-    { name: "Bentota",       kind: "City", icon: "◉" },
-    { name: "Hikkaduwa",     kind: "City", icon: "◉" },
-    { name: "Dambulla",      kind: "City", icon: "◉" },
-    { name: "Tangalle",      kind: "City", icon: "◉" },
-
-    /* Key landmarks & hotels */
-    { name: "Kurunegala Ethagala (Elephant Rock & Giant Buddha)", kind: "Landmark", icon: "▲" },
-    { name: "Temple of the Tooth (Kandy)",  kind: "Landmark", icon: "▲" },
-    { name: "Galle Fort",                   kind: "Landmark", icon: "▲" },
-    { name: "Nine Arches Bridge (Ella)",    kind: "Landmark", icon: "▲" },
-    { name: "Cinnamon Grand Colombo",       kind: "Hotel",    icon: "★" },
-    { name: "Heritance Kandalama",          kind: "Hotel",    icon: "★" },
-    { name: "Shangri-La Colombo",           kind: "Hotel",    icon: "★" }
-  ];
-
-  const AF_MAX_SUGGESTIONS = 6;
-
-  /* Only one suggestion list may be open at a time: on touch devices the blur
-     that would close the other one can arrive late, or not at all. */
-  const afOpenLists = [];
-
-  const afNormalise = s => String(s || "").toLowerCase().trim();
+  const afFold = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’'`]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const afNormalise = afFold;
   const afEscape = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* Prefix matches rank above mid-word matches, so typing "kan" offers Kandy
-     before Heritance Kandalama. */
-  function afSearchLocations(query) {
-    const q = afNormalise(query);
-    if (!q) return AF_LOCATIONS.slice(0, AF_MAX_SUGGESTIONS);
+  const AF_LOCATIONS = AF_PLACE_DATA.map(([name, d, k, aliases]) => {
+    const district = AF_DISTRICTS[d], province = AF_PROVINCES[d], kind = AF_KINDS[k];
+    const isPlace = kind === "City" || kind === "Town" || kind === "Area";
+    return {
+      name, kind, district, province,
+      sub: district + " District, " + province + " Province",
+      /* What goes into the field: towns carry their district so the desk
+         knows which "Kotte" or "Panama" is meant. */
+      value: isPlace && name !== district ? name + ", " + district + " District" : name,
+      folded: afFold(name),
+      words: afFold(name).split(" "),
+      aliases: (aliases || "").split(",").map(afFold).filter(Boolean),
+      districtFolded: afFold(district),
+    };
+  });
 
+  const AF_KIND_RANK = { Airport: 0, City: 1, Town: 2, Area: 3, Landmark: 4, Station: 5, Hotel: 6 };
+  const AF_POPULAR = ["Bandaranaike International Airport (CMB)", "Colombo", "Kandy", "Galle", "Negombo", "Ella", "Sigiriya"];
+  const AF_MAX_LOCAL = 7;
+  const AF_MAX_REMOTE = 5;
+
+  /* Name prefix > word prefix > alias > anywhere in the name > district.
+     So "kul" puts Kuliyapitiya first, and "kurunegala" still lists the towns
+     of Kurunegala District after the city itself. */
+  function afSearchLocations(query) {
+    const q = afFold(query);
+    if (q.length < 2) return AF_POPULAR.map(n => AF_LOCATIONS.find(p => p.name === n)).filter(Boolean);
     const scored = [];
-    for (const place of AF_LOCATIONS) {
-      const index = afNormalise(place.name).indexOf(q);
-      if (index === -1) continue;
-      scored.push({ place, index });
+    for (const p of AF_LOCATIONS) {
+      let s = -1;
+      if (p.folded.startsWith(q)) s = 0;
+      else if (p.words.some(w => w.startsWith(q)) || p.folded.includes(" " + q)) s = 1;
+      else if (p.aliases.some(a => a.startsWith(q) || a.includes(" " + q))) s = 1.5;
+      else if (p.folded.replace(/ /g, "").includes(q.replace(/ /g, ""))) s = 2;
+      else if (p.districtFolded.startsWith(q)) s = 3;
+      if (s >= 0) scored.push({ p, s });
     }
-    scored.sort((a, b) => a.index - b.index || a.place.name.localeCompare(b.place.name));
-    return scored.slice(0, AF_MAX_SUGGESTIONS).map(s => s.place);
+    scored.sort((a, b) => a.s - b.s || AF_KIND_RANK[a.p.kind] - AF_KIND_RANK[b.p.kind] || a.p.name.length - b.p.name.length);
+    return scored.slice(0, AF_MAX_LOCAL).map(x => x.p);
   }
 
   /* Highlights the typed fragment inside the suggestion label. */
   function afHighlight(name, query) {
-    const q = afNormalise(query);
-    if (!q) return afEscape(name);
-    const at = afNormalise(name).indexOf(q);
+    const q = String(query || "").trim().toLowerCase();
+    if (q.length < 2) return afEscape(name);
+    const at = name.toLowerCase().indexOf(q);
     if (at === -1) return afEscape(name);
-    return afEscape(name.slice(0, at)) +
-           "<mark>" + afEscape(name.slice(at, at + q.length)) + "</mark>" +
-           afEscape(name.slice(at + q.length));
+    return afEscape(name.slice(0, at)) + "<mark>" + afEscape(name.slice(at, at + q.length)) + "</mark>" + afEscape(name.slice(at + q.length));
   }
+
+  /* ---------- Live lookup: Photon, Sri Lanka only ---------- */
+  const AF_PHOTON = "https://photon.komoot.io/api/";
+  const afRemoteCache = new Map();
+
+  function afTitle(s) { return String(s || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
+
+  function afPhotonPlace(f) {
+    const p = f.properties || {};
+    if (p.countrycode !== "LK") return null;
+    const name = p.name || [p.housenumber, p.street].filter(Boolean).join(" ");
+    if (!name || /[<>]|:\/\//.test(name)) return null;
+    const area = [p.city || p.town || p.village || p.locality, p.district || p.county, p.state]
+      .filter((v, i, a) => v && v !== name && a.indexOf(v) === i);
+    const kind = p.osm_key === "tourism" && /hotel|resort|guest_house|hostel/.test(p.osm_value) ? "Hotel"
+      : p.osm_key === "aeroway" ? "Airport"
+      : p.osm_key === "railway" ? "Station"
+      : /city|town|village|hamlet|suburb|locality|neighbourhood/.test(p.osm_value) ? "Town"
+      : p.osm_key === "highway" || p.type === "street" ? "Street"
+      : p.osm_key === "shop" ? "Shop"
+      : p.osm_key === "tourism" || p.osm_key === "historic" ? "Attraction"
+      : p.osm_key === "natural" || p.osm_key === "water" || p.osm_key === "waterway" ? "Nature"
+      : p.osm_key === "building" || p.osm_value === "yes" ? "Building"
+      : afTitle(p.osm_value || "Place");
+    const primaryArea = area[0] || "";
+    const value = (primaryArea && !name.includes(primaryArea) ? name + ", " + primaryArea : name).slice(0, 190);
+    return { name, kind, sub: area.join(", ") || "Sri Lanka", value, remote: true };
+  }
+
+  async function afRemoteSearch(query, signal) {
+    const key = afFold(query);
+    if (afRemoteCache.has(key)) return afRemoteCache.get(key);
+    const url = AF_PHOTON + "?q=" + encodeURIComponent(query.trim()) +
+      "&limit=8&lang=en&lat=7.8731&lon=80.7718&bbox=79.5,5.9,81.9,9.9";
+    const response = await fetch(url, { signal, headers: { "Accept": "application/json" } });
+    if (!response.ok) throw new Error("Photon HTTP " + response.status);
+    const json = await response.json();
+    const places = (json.features || []).map(afPhotonPlace).filter(Boolean);
+    afRemoteCache.set(key, places);
+    return places;
+  }
+
+  /* ---------- Icons (inline, so suggestions never wait on the icon library) ---------- */
+  const AF_SVG = d => '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + "</svg>";
+  const AF_ICONS = {
+    Airport: AF_SVG('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>'),
+    Station: AF_SVG('<path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/>'),
+    Hotel: AF_SVG('<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>'),
+    Landmark: AF_SVG('<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>'),
+    Pin: AF_SVG('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),
+  };
+  const afIcon = kind => AF_ICONS[kind] || AF_ICONS.Pin;
+
+  /* Only one suggestion list may be open at a time: on touch devices the blur
+     that would close the other one can arrive late, or not at all. */
+  const afOpenLists = [];
 
   function initLocationAutocomplete(input) {
     const list = document.getElementById(input.getAttribute("aria-controls"));
@@ -4990,30 +5055,27 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
        no-JS visitor still gets native suggestions. */
     input.removeAttribute("list");
 
-    let matches = [];
-    let active = -1;
+    let local = [], remote = [], matches = [];
+    let active = -1, loading = false, slow = false, timer = 0, controller = null, lastQuery = "";
 
-    /* The list is anchored to the field in CSS, so it tracks the input on its
-       own. Script only keeps it inside the viewport: flip it above the field
-       when there is not enough room underneath, and clamp its height to the
-       space actually available (never more than the 250px cap) so on a short
-       phone screen it scrolls rather than running off the bottom. */
-    const MAX_DROPDOWN_HEIGHT = 250;
+    /* Keep the list inside the viewport: flip above the field when there is
+       not enough room underneath, and clamp its height to the space available. */
+    const MAX_DROPDOWN_HEIGHT = 340;
     const GUTTER = 12;
-
     const position = () => {
       if (list.hidden) return;
       const rect = input.getBoundingClientRect();
       const below = window.innerHeight - rect.bottom - GUTTER - 6;
       const above = rect.top - GUTTER - 6;
-      const flip = below < 150 && above > below;
-
+      const flip = below < 180 && above > below;
       list.classList.toggle("is-above", flip);
-      list.style.maxHeight =
-        Math.max(120, Math.min(MAX_DROPDOWN_HEIGHT, flip ? above : below)) + "px";
+      list.style.maxHeight = Math.max(140, Math.min(MAX_DROPDOWN_HEIGHT, flip ? above : below)) + "px";
     };
 
     const close = () => {
+      clearTimeout(timer);
+      if (controller) controller.abort();
+      loading = false;
       list.hidden = true;
       list.innerHTML = "";
       input.setAttribute("aria-expanded", "false");
@@ -5023,36 +5085,84 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       window.removeEventListener("resize", position);
     };
 
+    const row = (place, i) =>
+      '<li class="af-ac-item" role="option" id="' + list.id + "_opt" + i + '" aria-selected="' + (i === active) + '" data-index="' + i + '">' +
+        '<span class="af-ac-ico" aria-hidden="true">' + afIcon(place.kind) + "</span>" +
+        '<span class="af-ac-text"><span class="af-ac-name">' + afHighlight(place.name, input.value) + "</span>" +
+        '<span class="af-ac-sub">' + afEscape(place.sub) + "</span></span>" +
+        '<span class="af-ac-kind">' + afEscape(place.kind) + "</span>" +
+      "</li>";
+
     const paint = () => {
-      list.innerHTML = matches.map((place, i) =>
-        '<li class="af-ac-item" role="option" id="' + list.id + '_opt' + i + '"' +
-        ' aria-selected="' + (i === active) + '" data-index="' + i + '">' +
-        '<span class="af-ac-ico" aria-hidden="true">' + place.icon + '</span>' +
-        '<span>' + afHighlight(place.name, input.value) + '</span>' +
-        '<span class="af-ac-kind">' + afEscape(place.kind) + '</span>' +
-        '</li>'
-      ).join("");
+      matches = local.concat(remote);
+      const q = afFold(input.value);
+      let html = "";
+      if (q.length < 2 && local.length) html += '<li class="af-ac-group" role="presentation">Popular pick-up points</li>';
+      html += local.map((p, i) => row(p, i)).join("");
+      if (remote.length) {
+        html += '<li class="af-ac-group" role="presentation">More places in Sri Lanka</li>';
+        html += remote.map((p, i) => row(p, local.length + i)).join("");
+      }
+      if (loading) html += '<li class="af-ac-status" role="presentation"><span class="af-ac-spin" aria-hidden="true"></span> Searching all of Sri Lanka&hellip;</li>';
+      if (slow && !remote.length && !loading) html += '<li class="af-ac-status" role="presentation">Live search is slow right now &mdash; pick a place above, or type the address in full.</li>';
+      if (!matches.length && !loading && !slow) html += '<li class="af-ac-status" role="presentation">No match yet &mdash; keep typing, or use the address as written.</li>';
+      if (remote.length) html += '<li class="af-ac-attrib" role="presentation">Places from &copy; OpenStreetMap contributors &middot; Photon</li>';
+      list.innerHTML = html;
       if (active >= 0) {
         input.setAttribute("aria-activedescendant", list.id + "_opt" + active);
-        const el = list.children[active];
+        const el = document.getElementById(list.id + "_opt" + active);
         if (el) el.scrollIntoView({ block: "nearest" });
       } else {
         input.removeAttribute("aria-activedescendant");
       }
     };
 
-    const open = () => {
-      afOpenLists.forEach(fn => { if (fn !== close) fn(); });
-      matches = afSearchLocations(input.value);
-      if (!matches.length) { close(); return; }
-      active = -1;
+    const show = () => {
+      if (list.hidden) {
+        afOpenLists.forEach(fn => { if (fn !== close) fn(); });
+        list.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+        window.addEventListener("scroll", position, true);
+        window.addEventListener("resize", position);
+      }
       paint();
-      list.hidden = false;
-      input.setAttribute("aria-expanded", "true");
       position();
-      /* capture:true so the flip is re-evaluated inside scrollable parents too */
-      window.addEventListener("scroll", position, true);
-      window.addEventListener("resize", position);
+    };
+
+    const lookup = () => {
+      const query = input.value;
+      const q = afFold(query);
+      clearTimeout(timer);
+      if (controller) controller.abort();
+      local = afSearchLocations(query);
+      active = -1;
+      slow = false;
+      if (q.length < 3) { remote = []; loading = false; show(); return; }
+
+      /* Keep the previous live results on screen until the new ones arrive,
+         but drop any that no longer match what is typed. */
+      remote = remote.filter(p => afFold(p.name).includes(q));
+      loading = true;
+      show();
+      lastQuery = q;
+      timer = setTimeout(async () => {
+        controller = new AbortController();
+        let timedOut = false;
+        const giveUp = setTimeout(() => { timedOut = true; controller.abort(); }, 10000);
+        try {
+          const found = await afRemoteSearch(query, controller.signal);
+          if (lastQuery !== q) return;
+          const known = new Set(local.map(p => afFold(p.name)));
+          remote = found.filter(p => !known.has(afFold(p.name))).slice(0, AF_MAX_REMOTE);
+        } catch (err) {
+          if (err.name !== "AbortError") console.info("[AirportFirst] Live place search unavailable:", err.message);
+          if (timedOut || err.name !== "AbortError") slow = true;
+          remote = [];
+        } finally {
+          clearTimeout(giveUp);
+          if (lastQuery === q) { loading = false; if (!list.hidden) paint(); }
+        }
+      }, 300);
     };
 
     afOpenLists.push(close);
@@ -5060,42 +5170,40 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const choose = i => {
       const place = matches[i];
       if (!place) return;
-      input.value = place.name;
+      input.value = place.value || place.name;
       close();
       input.dispatchEvent(new Event("change", { bubbles: true }));
       input.focus();
     };
 
-    input.addEventListener("input", open);
-    input.addEventListener("focus", open);
+    input.addEventListener("input", lookup);
+    input.addEventListener("focus", lookup);
 
     input.addEventListener("keydown", e => {
       if (list.hidden) {
-        if (e.key === "ArrowDown") { open(); e.preventDefault(); }
+        if (e.key === "ArrowDown") { lookup(); e.preventDefault(); }
         return;
       }
-      if (e.key === "ArrowDown") {
+      if (e.key === "ArrowDown" && matches.length) {
         active = (active + 1) % matches.length; paint(); e.preventDefault();
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === "ArrowUp" && matches.length) {
         active = (active - 1 + matches.length) % matches.length; paint(); e.preventDefault();
       } else if (e.key === "Enter") {
         /* Enter only commits a highlighted suggestion; otherwise the typed
            text stands and the form submits as normal. */
         if (active > -1) { choose(active); e.preventDefault(); }
         else close();
-      } else if (e.key === "Escape") {
-        close();
-      } else if (e.key === "Tab") {
+      } else if (e.key === "Escape" || e.key === "Tab") {
         close();
       }
     });
 
-    /* mousedown fires before blur, so the click is not lost to the input losing focus. */
-    list.addEventListener("mousedown", e => {
+    /* pointerdown covers mouse, touch and pen, and fires before blur, so the
+       choice is not lost to the input losing focus. */
+    list.addEventListener("pointerdown", e => {
       const item = e.target.closest(".af-ac-item");
-      if (!item) return;
       e.preventDefault();
-      choose(Number(item.dataset.index));
+      if (item) choose(Number(item.dataset.index));
     });
 
     list.addEventListener("mousemove", e => {
@@ -5105,8 +5213,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       if (i !== active) { active = i; paint(); }
     });
 
-    input.addEventListener("blur", () => setTimeout(close, 120));
-    document.addEventListener("click", e => {
+    input.addEventListener("blur", () => setTimeout(close, 150));
+    document.addEventListener("pointerdown", e => {
       if (e.target !== input && !list.contains(e.target)) close();
     });
   }

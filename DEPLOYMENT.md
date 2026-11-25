@@ -71,12 +71,24 @@ Hardcoded and live in the page:
 | Supabase project URL | `https://xugzwpsviggvswkvzqiu.supabase.co` (also in the CSP `connect-src`, twice) | Yes |
 | Supabase publishable key | `sb_publishable_…` | Yes — protected by RLS |
 
-There is **no Google Maps key and no maps billing**. Location suggestions come
-from `AF_LOCATIONS`, a plain array near the bottom of `index.html`, rendered by
-a self-contained dropdown: no third-party request, nothing to rate-limit, and
-nothing to restrict in a cloud console. To add a hotel or landmark, append one
-`{ name, kind, icon }` entry to that array and mirror it in the `#af-locations`
-datalist (the no-JS fallback).
+There is **no Google Maps key and no maps billing**. The pick-up and drop-off
+suggestions merge two free sources:
+
+1. **`AF_PLACE_DATA`** in `index.html`: 280 Sri Lankan towns, airports,
+   railway stations, landmarks and hotels, each with district and province,
+   matched instantly from 2 typed characters. To add one, append
+   `["Name", districtIndex, kindIndex, "alias, alias"]`. The district and
+   kind indexes come from `AF_DISTRICTS` and `AF_KINDS` just above it.
+2. **Photon** (`photon.komoot.io`), a free OpenStreetMap search built for
+   type-ahead, queried 300 ms after typing stops (3+ characters), limited to
+   Sri Lanka's bounding box and to results whose country code is `LK`. It
+   surfaces any village, street or hotel not in the list. The dropdown
+   credits OpenStreetMap, as the data licence requires, and the CSP's
+   `connect-src` allows the host.
+
+Nominatim is used only for the single reverse lookup behind "Use current
+location": its usage policy does not allow search-as-you-type. If Photon is
+slow or down, the built-in list still works and the dropdown says so.
 
 The two location fields are always ordinary `<input type="text">` — never
 disabled or read-only — so a guest can type any address the list does not know.
@@ -354,10 +366,10 @@ mailer will 501 because Python does not execute PHP.
 
 - **Tailwind runs from the CDN.** Fine for launch; for best performance build
   the stylesheet with the Tailwind CLI and ship a static `.css`.
-- **Location list is curated, not exhaustive.** The dropdown suggests 27 known
-  Sri Lankan airports, cities, landmarks and hotels; anything else is typed
-  free-hand and passes through to WhatsApp and Supabase unchanged. Extend
-  `AF_LOCATIONS` as the desk notices repeat destinations.
+- **Place search relies on a free public service.** Photon's public server is
+  free with fair-use limits and no uptime guarantee. If traffic grows a lot,
+  self-host Photon or move to a paid geocoder. Free-typed addresses always pass
+  through to the email and Supabase unchanged.
 - **A transparent or reversed logo would improve the footer.** The current file
   is a white-background JPEG, so it sits on a white plate there (see §0).
 - **Destination photography is stock.** The cards use Unsplash imagery chosen
