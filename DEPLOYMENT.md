@@ -245,6 +245,44 @@ script also passes `-f` so the envelope sender matches, which Gmail checks.
 `Reply-To` is set to the guest's email when they gave one, so replying from the
 inbox reaches them directly.
 
+### Keeping inquiry mail out of spam — check before go-live
+
+In **cPanel → Email → Email Deliverability**, find `airportfirst.vip` and make
+sure **SPF** and **DKIM** both show as valid. If either says "Problems exist",
+use the **Repair** button (or copy the suggested records into the DNS zone if
+the domain's DNS is hosted elsewhere, such as Cloudflare). Adding a simple
+**DMARC** record helps as well:
+
+```
+_dmarc.airportfirst.vip  TXT  "v=DMARC1; p=none; rua=mailto:airportfirst1@gmail.com"
+```
+
+The mailer already does its part: `From` is always
+`"Airport First Dispatch" <noreply@airportfirst.vip>` (the authenticated
+mailbox), `Reply-To` is the guest's validated address, and each message has a
+unique `Message-ID` on airportfirst.vip, a `Date`, `MIME-Version`, a plain
+subject line, and a plain-text part that matches the HTML part. After go-live,
+send one test inquiry and, in Gmail, open **⋮ → Show original**: SPF, DKIM
+and DMARC should all say `PASS`.
+
+### What the desk receives
+
+Each inquiry email lists the booking, including **Est. distance** (for example
+`~116 km (approx. 2h 40m) by road, CMB Airport to Kandy`), and a green
+**Reply to Guest on WhatsApp** button. It opens a chat with the guest's number
+(Sri Lankan `07…` numbers are converted to `+94`), pre-filled with their name,
+route, distance and vehicle; add the price and tap send. The same distance
+line is appended to the inquiry's `notes` in Supabase and to the guest's
+WhatsApp copy.
+
+The distance is measured in the browser: coordinates come from the place
+dropdown (or a Photon lookup of the typed place, or GPS), and the road route
+comes from the public OSRM server (`router.project-osrm.org`), with a
+straight-line × 1.3 estimate if OSRM is slow. Pick-up defaults to CMB when left
+empty. OSRM times exclude traffic, so treat them as a guide when quoting.
+The public OSRM server is a free demo service without guarantees; for heavy
+traffic, self-host OSRM or use a paid routing API.
+
 ### Checks
 
 - `GET send-mail.php` → `405` with JSON. If you see PHP source instead, PHP is
