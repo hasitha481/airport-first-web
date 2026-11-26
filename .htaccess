@@ -20,6 +20,9 @@ RedirectMatch 404 ^/supabase/
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # The "Use my current location" button needs geolocation on this site.
+    # Allowed for our own pages only. (A <meta> tag cannot set this policy.)
+    Header always set Permissions-Policy "geolocation=(self)"
 </IfModule>
 
 # Long cache for static assets, none for the page itself.

@@ -2,6 +2,15 @@
 <html lang="en" class="scroll-smooth">
 <head>
 <meta charset="UTF-8" />
+<script>
+  /* Always serve the live site over HTTPS. Browsers refuse GPS (and treat the
+     page as insecure) on plain http://. Done here rather than in .htaccess
+     because Cloudflare sits in front: the server cannot always tell which
+     scheme the visitor used, and a server-side redirect can loop. */
+  if (location.protocol === "http:" && !/^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$|\.test$/.test(location.hostname)) {
+    location.replace("https://" + location.host + location.pathname + location.search + location.hash);
+  }
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Airport First &ndash; Your Trusted Transportation Partner in Sri Lanka</title>
 <meta name="description" content="Private CMB airport transfers, chauffeur-driven car hire, corporate transport in Colombo and tailor-made Sri Lanka tours. Airport First (Pvt) Ltd &ndash; 18+ years, 24/7 support. Feel the ambience." />
@@ -5483,6 +5492,14 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         input.focus();
         return;
       }
+      /* Browsers only allow GPS on HTTPS (and localhost). On http:// they report
+         it as "permission denied", which would send the guest hunting through
+         settings for a problem that is not theirs, so say what it really is. */
+      if (!window.isSecureContext) {
+        showToast("GPS requires HTTPS (live domain). Please type your location.", "error");
+        input.focus();
+        return;
+      }
       if (Date.now() - lastGeoAt < 1000) return;   // respect Nominatim's 1 req/s policy
       lastGeoAt = Date.now();
 
@@ -5530,13 +5547,23 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
           }
         },
         err => {
-          const message = err && err.code === 1
-            ? "Location access denied. Please type your location"
-            : "Could not detect your location. Please type your location";
+          /* 1 PERMISSION_DENIED: the guest (or the phone's location settings for
+             this browser) said no. 2 POSITION_UNAVAILABLE / 3 TIMEOUT: no fix. */
+          const code = err && err.code;
+          const message = !window.isSecureContext
+            ? "GPS requires HTTPS (live domain). Please type your location."
+            : code === 1
+              ? "Location permission blocked in browser settings — please allow location or type your address."
+              : code === 2 || code === 3
+                ? "GPS signal weak or timed out — please type your location."
+                : "Could not detect your location — please type your location.";
+          console.info("[AirportFirst] Geolocation error", code, err && err.message);
           finish("", message);
           input.focus();
         },
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+        /* Network/Wi-Fi positioning is enough for a pick-up point and answers in
+           a second or two indoors; high-accuracy GPS can take far longer. */
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
       );
     });
   }
