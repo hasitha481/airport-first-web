@@ -189,17 +189,63 @@ if ($origin === '' || !in_array($origin, $allowed, true)) {
     respond(403, ['ok' => false, 'error' => 'Request rejected']);
 }
 
+/* Cloudflare's published edge ranges, from https://www.cloudflare.com/ips-v4 and
+   https://www.cloudflare.com/ips-v6 (fetched 2026-11-26). They change rarely;
+   refresh this list if Cloudflare announces new ranges. A missing range is not
+   a security hole: those requests are simply keyed on the edge address. */
+const CLOUDFLARE_RANGES = [
+    '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22',
+    '141.101.64.0/18', '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20',
+    '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13',
+    '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
+    '2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32',
+    '2405:8100::/32', '2a06:98c0::/29', '2c0f:f248::/32',
+];
+
+/** Whether $ip (IPv4 or IPv6) falls inside $cidr. */
+function ip_in_cidr(string $ip, string $cidr): bool
+{
+    $parts  = explode('/', $cidr, 2);
+    $ipBin  = @inet_pton($ip);
+    $netBin = @inet_pton($parts[0]);
+    if ($ipBin === false || $netBin === false || strlen($ipBin) !== strlen($netBin) || !isset($parts[1])) {
+        return false;
+    }
+    $bits  = (int) $parts[1];
+    $bytes = intdiv($bits, 8);
+    if (substr($ipBin, 0, $bytes) !== substr($netBin, 0, $bytes)) {
+        return false;
+    }
+    $rest = $bits % 8;
+    if ($rest === 0) {
+        return true;
+    }
+    $mask = (0xFF << (8 - $rest)) & 0xFF;
+    return (ord($ipBin[$bytes]) & $mask) === (ord($netBin[$bytes]) & $mask);
+}
+
+/** Whether the TCP connection itself comes from a Cloudflare edge server. */
+function from_cloudflare(string $ip): bool
+{
+    foreach (CLOUDFLARE_RANGES as $range) {
+        if (ip_in_cidr($ip, $range)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * A stable, non-identifying key for the caller.
  *
- * Only REMOTE_ADDR is used: it is the address of the TCP connection, which the
- * caller cannot choose. Headers such as CF-Connecting-IP or X-Forwarded-For are
- * deliberately ignored. The site is not behind a proxy, so any such header was
- * written by the caller, and trusting it would let a script send a new made-up
- * address with every request and get a fresh allowance each time.
- *
- * If the site is ever put behind Cloudflare, read CF-Connecting-IP only when
- * REMOTE_ADDR is inside Cloudflare's published ranges — never unconditionally.
+ * The site is served through Cloudflare, so REMOTE_ADDR is usually a Cloudflare
+ * edge server shared by many guests, and the guest's own address arrives in
+ * CF-Connecting-IP. That header is trusted ONLY when the connection really
+ * comes from Cloudflare's published ranges: a script talking to the server
+ * directly could otherwise invent a new address per request and dodge the
+ * limit. X-Forwarded-For is never trusted. (If the host already rewrites
+ * REMOTE_ADDR to the visitor's address, that address is not Cloudflare's, the
+ * header is ignored, and the visitor's own address is used — also correct.)
  *
  * IPv6 callers are keyed on their /64, since one subscriber usually holds the
  * whole block and could otherwise rotate through it. The result is hashed, so
@@ -208,6 +254,12 @@ if ($origin === '' || !in_array($origin, $allowed, true)) {
 function client_key(): string
 {
     $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    if ($ip !== '' && from_cloudflare($ip)) {
+        $visitor = trim((string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? ''));
+        if (filter_var($visitor, FILTER_VALIDATE_IP) !== false) {
+            $ip = $visitor;
+        }
+    }
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
         $packed = inet_pton($ip);
         if ($packed !== false) {

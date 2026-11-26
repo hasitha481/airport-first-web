@@ -310,13 +310,18 @@ CSRF token on; matching the origin is the equivalent a static form can offer.
 **How often.** One submission per caller every 20 seconds, and at most 5 in 10
 minutes, answered with `429` and a `Retry-After`. Counters live in
 `af-throttle/` above the web root, keyed by a hash of the caller's IP rather
-than the address itself, and are swept after a day. The address is the
-connection's own (`REMOTE_ADDR`); headers like `CF-Connecting-IP` and
-`X-Forwarded-For` are ignored, because without a proxy in front they come from
-the caller, who could invent a new one per request to dodge the limit. IPv6
-callers are counted per /64. If the site is ever put behind Cloudflare, trust
-`CF-Connecting-IP` only when `REMOTE_ADDR` is in Cloudflare's published ranges.
-If the store cannot be written the limiter fails open and logs it — a broken
+than the address itself, and are swept after a day.
+
+The site is served through **Cloudflare**, so the connection's address
+(`REMOTE_ADDR`) is normally a Cloudflare edge server shared by many guests. The
+guest's real address arrives in `CF-Connecting-IP`, and the mailer uses it
+**only when `REMOTE_ADDR` is inside Cloudflare's published ranges**
+(`CLOUDFLARE_RANGES` in `send-mail.php`, from cloudflare.com/ips). Anyone
+calling the server directly with a made-up header is still keyed on their own
+address. `X-Forwarded-For` is never trusted. If the host already rewrites
+`REMOTE_ADDR` to the visitor's address, that works too. Refresh the range list
+if Cloudflare ever announces new ranges. IPv6 callers are counted per /64. If
+the store cannot be written the limiter fails open and logs it — a broken
 counter must never stop a real booking.
 
 **What gets through.** The body is refused over 16 KB, refused if it is not
