@@ -26,6 +26,12 @@
  * ../airportfirst-smtp.php, one level above public_html, where Apache cannot
  * serve it and no commit can carry it. See SMTP_PASS below.
  *
+ * DATABASE: every validated inquiry is also saved to MySQL (airport_inquiries,
+ * see schema.sql) with a reference code such as AF-7KQ3XM, BEFORE the email is
+ * sent. If the database is not configured or not reachable the email still goes
+ * out; if the email fails but the row was saved, the guest is still told the
+ * desk has it.
+ *
  * WHAT GUARDS THIS ENDPOINT: it answers POST only, from this site's own origin
  * only, at a capped rate per caller, on a body it size-checks before parsing.
  * Every field is validated for shape as well as length, CR/LF can never reach
@@ -189,84 +195,20 @@ if ($origin === '' || !in_array($origin, $allowed, true)) {
     respond(403, ['ok' => false, 'error' => 'Request rejected']);
 }
 
-/* Cloudflare's published edge ranges, from https://www.cloudflare.com/ips-v4 and
-   https://www.cloudflare.com/ips-v6 (fetched 2026-11-26). They change rarely;
-   refresh this list if Cloudflare announces new ranges. A missing range is not
-   a security hole: those requests are simply keyed on the edge address. */
-const CLOUDFLARE_RANGES = [
-    '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22',
-    '141.101.64.0/18', '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20',
-    '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13',
-    '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
-    '2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32',
-    '2405:8100::/32', '2a06:98c0::/29', '2c0f:f248::/32',
-];
-
-/** Whether $ip (IPv4 or IPv6) falls inside $cidr. */
-function ip_in_cidr(string $ip, string $cidr): bool
-{
-    $parts  = explode('/', $cidr, 2);
-    $ipBin  = @inet_pton($ip);
-    $netBin = @inet_pton($parts[0]);
-    if ($ipBin === false || $netBin === false || strlen($ipBin) !== strlen($netBin) || !isset($parts[1])) {
-        return false;
-    }
-    $bits  = (int) $parts[1];
-    $bytes = intdiv($bits, 8);
-    if (substr($ipBin, 0, $bytes) !== substr($netBin, 0, $bytes)) {
-        return false;
-    }
-    $rest = $bits % 8;
-    if ($rest === 0) {
-        return true;
-    }
-    $mask = (0xFF << (8 - $rest)) & 0xFF;
-    return (ord($ipBin[$bytes]) & $mask) === (ord($netBin[$bytes]) & $mask);
-}
-
-/** Whether the TCP connection itself comes from a Cloudflare edge server. */
-function from_cloudflare(string $ip): bool
-{
-    foreach (CLOUDFLARE_RANGES as $range) {
-        if (ip_in_cidr($ip, $range)) {
-            return true;
-        }
-    }
-    return false;
-}
+/* Shared helpers: the visitor's real IP (Cloudflare-verified, see af-common.php)
+   and the optional MySQL connection (db-config.php). A database that is not set
+   up or not reachable never stops an inquiry being emailed. */
+require_once __DIR__ . '/af-common.php';
+require_once __DIR__ . '/db-config.php';
 
 /**
- * A stable, non-identifying key for the caller.
- *
- * The site is served through Cloudflare, so REMOTE_ADDR is usually a Cloudflare
- * edge server shared by many guests, and the guest's own address arrives in
- * CF-Connecting-IP. That header is trusted ONLY when the connection really
- * comes from Cloudflare's published ranges: a script talking to the server
- * directly could otherwise invent a new address per request and dodge the
- * limit. X-Forwarded-For is never trusted. (If the host already rewrites
- * REMOTE_ADDR to the visitor's address, that address is not Cloudflare's, the
- * header is ignored, and the visitor's own address is used — also correct.)
- *
- * IPv6 callers are keyed on their /64, since one subscriber usually holds the
- * whole block and could otherwise rotate through it. The result is hashed, so
- * the store never holds an IP.
+ * A stable, non-identifying key for the rate limiter: a hash of the visitor's
+ * address, with CF-Connecting-IP trusted only on connections from Cloudflare.
+ * IPv6 callers are keyed on their /64.
  */
 function client_key(): string
 {
-    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-    if ($ip !== '' && from_cloudflare($ip)) {
-        $visitor = trim((string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? ''));
-        if (filter_var($visitor, FILTER_VALIDATE_IP) !== false) {
-            $ip = $visitor;
-        }
-    }
-    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
-        $packed = inet_pton($ip);
-        if ($packed !== false) {
-            $ip = bin2hex(substr($packed, 0, 8)) . '::/64';
-        }
-    }
-    return hash('sha256', RATE_SALT . '|' . $ip);
+    return hash('sha256', RATE_SALT . '|' . af_ip_bucket(af_client_ip()));
 }
 
 /** Counters live above the web root when that is writable, /tmp otherwise. */
@@ -379,6 +321,13 @@ if (!is_array($input)) {
 }
 if (!is_array($input) || $input === []) {
     respond(400, ['ok' => false, 'error' => 'Empty request']);
+}
+
+/* Honeypot: a field hidden from people that only form-filling bots complete.
+   Answer as if it worked, so the bot learns nothing, and keep nothing. */
+if (trim((string) ($input['website'] ?? '')) !== '') {
+    error_log('[AirportFirst] honeypot caught an inquiry');
+    respond(200, ['ok' => true, 'emailed' => true, 'stored' => false, 'ref' => af_reference()]);
 }
 
 // ---------------------------------------------------------------------------
@@ -567,10 +516,53 @@ if (preg_match('/^[a-z0-9\-]{1,60}$/i', $data['source']) !== 1) {
 $guestEmail = $data['email'];
 
 // ---------------------------------------------------------------------------
+// Store (MySQL) — before the email, so the reference in the mail is on file.
+// ---------------------------------------------------------------------------
+
+$ref    = af_reference();
+$stored = false;
+$pdo    = af_db();
+if ($pdo !== null) {
+    $distanceKm = preg_match('/^~?([0-9]+(?:[.,][0-9]+)?) km/u', $data['distance'], $dm) === 1
+        ? (float) str_replace(',', '.', $dm[1])
+        : null;
+    $sql = 'INSERT INTO airport_inquiries
+              (ref_code, guest_name, phone, email, pickup, dropoff, route_stops, route_legs,
+               distance_km, distance_text, travel_date, travel_time, flight_number, vehicle,
+               passengers, special_requests, source, ip_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    for ($attempt = 0; $attempt < 3 && !$stored; $attempt++) {
+        try {
+            $pdo->prepare($sql)->execute([
+                $ref,
+                $data['name'], $data['phone'], $data['email'],
+                $data['pickup'], $data['dropoff'], $data['stops'], $data['legs'],
+                $distanceKm, $data['distance'],
+                $data['date'] !== '' ? $data['date'] : null,
+                $data['time'], $data['flight'], $data['vehicle'],
+                $data['pax'] !== '' ? (int) $data['pax'] : null,
+                $data['notes'] !== '' ? $data['notes'] : null,
+                $data['source'] !== '' ? $data['source'] : 'website',
+                af_ip_hash(AF_HASH_SALT),
+            ]);
+            $stored = true;
+        } catch (PDOException $e) {
+            if ((string) $e->getCode() === '23000' && $attempt < 2) {   // reference already taken: draw another
+                $ref = af_reference();
+                continue;
+            }
+            error_log('[AirportFirst] could not store the inquiry: ' . $e->getMessage());
+            break;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Compose
 // ---------------------------------------------------------------------------
 
 $rows = [
+    'Reference'        => $ref,
     'Name'             => $data['name'],
     'Phone / WhatsApp' => $data['phone'],
     'Email'            => $data['email'],
@@ -592,7 +584,8 @@ $rows = [
    words — the things spam filters score. The km figure helps the desk triage. */
 $km = preg_match('/^~?([0-9][0-9.,]*) km/u', $data['distance'], $m) === 1 ? ' (' . $m[1] . ' km)' : '';
 $subject = sprintf(
-    'Booking inquiry: %s, %s to %s%s',
+    'Booking inquiry %s: %s, %s to %s%s',
+    $ref,
     $data['name'] !== '' ? $data['name'] : 'Website guest',
     $data['pickup'] !== '' ? $data['pickup'] : 'pick-up to confirm',
     $data['dropoff'] !== '' ? $data['dropoff'] : 'drop-off to confirm',
@@ -804,6 +797,14 @@ function send_smtp_mail(string $to, string $subject, string $html, string $text,
 
 $sent = send_smtp_mail(MAIL_TO, $subject, $html, $text, $guestEmail);
 
+if ($sent && $stored && $pdo !== null) {
+    try {
+        $pdo->prepare('UPDATE airport_inquiries SET email_sent = 1 WHERE ref_code = ?')->execute([$ref]);
+    } catch (Throwable $e) {
+        error_log('[AirportFirst] could not mark ' . $ref . ' as emailed: ' . $e->getMessage());
+    }
+}
+
 if (!$sent) {
     error_log('[AirportFirst] SMTP would not take the message for ' . MAIL_TO);
 
@@ -812,14 +813,18 @@ if (!$sent) {
        root (outside public_html) where Apache cannot serve it. If that is not
        writable we fall back to this folder, where the shipped .htaccess denies
        access to *.log. */
-    $line = date('c') . ' ' . json_encode($data, JSON_UNESCAPED_UNICODE) . PHP_EOL;
+    $line = date('c') . ' ' . json_encode(['ref' => $ref, 'stored' => $stored] + $data, JSON_UNESCAPED_UNICODE) . PHP_EOL;
     if (@file_put_contents(dirname(__DIR__) . '/inquiries-fallback.log', $line, FILE_APPEND | LOCK_EX) === false) {
         @file_put_contents(__DIR__ . '/inquiries-fallback.log', $line, FILE_APPEND | LOCK_EX);
     }
-    respond(500, ['ok' => false, 'error' => 'Mail server rejected the message']);
+    /* Saved in the database even though the email failed: the desk still has it. */
+    if ($stored) {
+        respond(200, ['ok' => true, 'emailed' => false, 'stored' => true, 'ref' => $ref]);
+    }
+    respond(500, ['ok' => false, 'emailed' => false, 'stored' => false, 'error' => 'Mail server rejected the message']);
 }
 
-respond(200, ['ok' => true]);
+respond(200, ['ok' => true, 'emailed' => true, 'stored' => $stored, 'ref' => $ref]);
 
 /* -----------------------------------------------------------------------------
  * If SMTP will not connect

@@ -13,7 +13,27 @@
     </IfModule>
 </FilesMatch>
 
-# Never expose the Supabase function source if that folder is uploaded.
+# Database config, shared PHP helpers and the schema are never served directly.
+# (The real credentials live above public_html in ../airportfirst-db.php.)
+<FilesMatch "^(db-config\.php|af-common\.php|schema\.sql)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# The admin page is never cached or framed by anything in between.
+<Files "admin-reviews.php">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-store"
+        Header set X-Robots-Tag "noindex, nofollow"
+    </IfModule>
+</Files>
+
+# Never expose the old Supabase files if that folder is uploaded.
 RedirectMatch 404 ^/supabase/
 
 <IfModule mod_headers.c>

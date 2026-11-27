@@ -802,12 +802,12 @@
                    are path-pinned to the exact package versions loaded below.
        style-src   'unsafe-inline' is required by the Tailwind CDN, which writes
                    its CSS into a <style> element at runtime.
-       connect-src send-mail.php (self), Supabase (REST + realtime), Web3Forms
-                   fallback, Photon for place suggestions and coordinates, OSRM
+       connect-src send-mail.php and reviews-api.php (self, MySQL on our own
+                   server), the Web3Forms fallback, Photon for place suggestions and coordinates, OSRM
                    for the road distance, and Nominatim for "Use current location".
      frame-ancestors cannot be set from a meta tag; .htaccess sends
      X-Frame-Options instead. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://xugzwpsviggvswkvzqiu.supabase.co wss://xugzwpsviggvswkvzqiu.supabase.co https://api.web3forms.com https://nominatim.openstreetmap.org https://photon.komoot.io https://router.project-osrm.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net/npm/lucide@1.79.0/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com; connect-src 'self' https://api.web3forms.com https://nominatim.openstreetmap.org https://photon.komoot.io https://router.project-osrm.org; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -870,11 +870,6 @@
      bottom of this file: no Google Maps dependency, no API key, no billing, and
      no third-party request on page load. -->
 
-<!-- Supabase JS client (inquiry persistence). The anon key is a public,
-     row-level-security-scoped key and is safe to ship in the browser. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
-        integrity="sha256-hZaWX+kY5lZgChtWjToWj1wNPSKmAIhrtvRKZVXbAec="
-        crossorigin="anonymous"></script>
 
 <!-- Inquiry emails are delivered by send-mail.php on the same cPanel host:
      no third-party mail service, no API key, no SDK to load. -->
@@ -1182,13 +1177,6 @@
     transition: opacity .35s ease, transform .35s ease, filter .35s ease;
   }
 
-  /* Moderation control: hidden for visitors, revealed only in admin mode. */
-  .review-delete { display: none; }
-  body.af-admin .review-delete {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
 
   /* Horizontal destination rail - snap scrolling on touch */
   .rail { scrollbar-width:none; -ms-overflow-style:none; scroll-snap-type:x mandatory; }
@@ -1418,6 +1406,9 @@
     .zoom-img, .dest-tile, .exp-card, #header { transition: none !important; }
     .hover-card:hover, .exp-card:hover, .dest-tile:hover, .hover-card:hover .zoom-img, .exp-card:hover .zoom-img, .dest-tile:hover .zoom-img { transform: none !important; }
   }
+
+  /* Honeypot fields: off-screen for people, still in the form for bots. */
+  .af-hp { position: absolute !important; left: -10000px !important; top: auto; width: 1px; height: 1px; overflow: hidden; }
 </style>
 </head>
 
@@ -1597,8 +1588,13 @@
       </div>
 
       <!-- Inquiry form: on submit the values are emailed to the dispatch desk
-           by send-mail.php and stored in Supabase (see the dispatch script). -->
+           and stored in MySQL by send-mail.php (see the dispatch script). -->
       <form id="inquiryForm" class="mt-7 grid gap-4 lg:grid-cols-12" novalidate>
+              <!-- Honeypot: hidden from people; only form-filling bots complete it. -->
+              <div class="af-hp" aria-hidden="true">
+                <label for="inquiry_website">Leave this field empty</label>
+                <input id="inquiry_website" name="website" type="text" tabindex="-1" autocomplete="off" />
+              </div>
 
               <div class="grid sm:grid-cols-2 gap-4 lg:col-span-7">
                 <div>
@@ -3199,7 +3195,7 @@
       <p class="mt-5 text-[15.5px] leading-relaxed text-navy-900/55">
         Feedback from guests who have travelled with us. Every review is read by our team before it is published.
       </p>
-      <!-- Filled from approved reviews in Supabase; stays hidden until there is at least one. -->
+      <!-- Filled from approved reviews (reviews-api.php); stays hidden until there is at least one. -->
       <p id="reviewSummary" class="mt-5 hidden items-center justify-center gap-2 rounded-full bg-[#FFF8EC] px-4 py-2 text-[13.5px] font-bold text-navy-900 ring-1 ring-gold/40 mx-auto w-fit"></p>
 
       <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -3210,11 +3206,6 @@
         <span class="text-[13px] text-navy-900/45">Travelled with us? It takes a minute.</span>
       </div>
 
-      <!-- Visible only in admin moderation mode -->
-      <p id="adminBadge" class="mt-4 hidden items-center justify-center gap-2 text-[12px] font-bold text-crimson-500">
-        <i data-lucide="shield-check" class="h-3.5 w-3.5"></i>
-        Moderation mode active &mdash; delete controls are visible to you only
-      </p>
     </div>
 
     <!-- Guest-submitted reviews are prepended here, newest first -->
@@ -3795,6 +3786,10 @@
     </div>
 
     <form id="reviewForm" class="space-y-4 px-7 py-6" novalidate>
+      <div class="af-hp" aria-hidden="true">
+        <label for="review_website">Leave this field empty</label>
+        <input id="review_website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
 
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
@@ -3837,6 +3832,22 @@
           <span id="reviewRatingLabel" class="ml-2 text-[13px] font-bold text-navy-900/55">Excellent</span>
         </div>
         <input id="review_rating" name="rating" type="hidden" value="5" />
+      </div>
+
+      <div>
+        <label for="review_trip" class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
+          <i data-lucide="route" class="h-3.5 w-3.5 text-crimson"></i> Trip type <span class="font-semibold normal-case tracking-normal text-navy-900/35">optional</span>
+        </label>
+        <select id="review_trip" name="trip_type"
+                class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3 text-[14px] font-medium text-navy-900 transition">
+          <option value="">Choose one&hellip;</option>
+          <option>Airport transfer</option>
+          <option>Private tour</option>
+          <option>Corporate travel</option>
+          <option>Hotel transfer</option>
+          <option>Group travel</option>
+          <option>Other</option>
+        </select>
       </div>
 
       <div>
@@ -4035,8 +4046,8 @@
           your information or use it for third-party advertising.</p>
 
         <h4>Where it is kept</h4>
-        <p>Inquiries are emailed to our dispatch team through our own mail server and stored in a secure cloud
-          database (Supabase). Access is limited to authorised Airport First staff. If you choose to contact us on
+        <p>Inquiries are emailed to our dispatch team through our own mail server and stored in our own secure
+          database on our hosting server. Access is limited to authorised Airport First staff. If you choose to contact us on
           WhatsApp, that conversation is also subject to WhatsApp&rsquo;s own terms.</p>
 
         <h4>Third-party services</h4>
@@ -4672,43 +4683,22 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
   /* =========================================================
      DIRECT INQUIRY & DISPATCH SYSTEM  (production)
 
-     One submit confirms on the page and fans out to two destinations:
-       1. Email     - posted to send-mail.php on this host, falling back to
-                      Web3Forms where PHP is not available (see notifyByEmail).
-       2. Supabase  - the inquiry row is written to `airport_inquiries`.
+     One submit confirms on the page and goes to send-mail.php on this host,
+     which saves the inquiry in our own MySQL database (airport_inquiries) and
+     emails the dispatch desk, then answers with a reference code. Where PHP is
+     not available the email falls back to Web3Forms (see notifyByEmail).
 
-     Both are fire-and-forget: a failure in either is logged for the operator
-     and reported honestly in the status pill, but never blocks or interrupts
-     the guest. WhatsApp is NOT opened for the guest — it is an opt-in button
-     on the success card and nothing else.
+     The send is fire-and-forget: a failure is logged for the operator and
+     reported honestly in the status pill, but never blocks or interrupts the
+     guest. WhatsApp is NOT opened for the guest — it is an opt-in button on
+     the success card and nothing else.
      ========================================================= */
   const DISPATCH_NUMBER = "94714784444";                        // WhatsApp business line
-  const SUPABASE_URL    = "https://xugzwpsviggvswkvzqiu.supabase.co";
-  /* Publishable (public) key: safe in the browser, because what it can do is
-     limited by the row-level security policies in supabase/schema.sql. */
-  const SUPABASE_ANON_KEY = "sb_publishable_V79ntexMq7t1K4TA56QoNA_VrNuzvGQ";
-  const INQUIRY_TABLE   = "airport_inquiries";
   const NOTIFY_EMAIL    = "airportfirst1@gmail.com";
-
-  /* Inquiry emails go through send-mail.php on this host (see notifyByEmail
-     below). The Supabase Edge Function mailer in supabase/functions/ is kept
-     in the repo for a future move off cPanel, but the page does not call it. */
-
-  /* Supabase client. Guarded so a blocked CDN can never break the form. */
-  let supabaseClient = null;
-  try {
-    if (window.supabase && typeof window.supabase.createClient === "function") {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-      console.warn("[AirportFirst] Supabase SDK unavailable — inquiries dispatch to WhatsApp only.");
-    }
-  } catch (err) {
-    console.error("[AirportFirst] Supabase init failed:", err);
-  }
 
   const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
 
-  /* The payload shape is the `airport_inquiries` table schema. */
+  /* The inquiry fields send-mail.php validates and stores. */
   function collectInquiry() {
     return {
       name:    val("inquiry_name"),
@@ -4807,19 +4797,6 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
   const whatsappUrl = message =>
     "https://wa.me/" + DISPATCH_NUMBER + "?text=" + encodeURIComponent(message);
 
-  /* ---------- Persistence: Supabase ---------- */
-  async function saveInquiry(payload) {
-    if (!supabaseClient) return { ok: false, reason: "sdk-unavailable" };
-    try {
-      const { error } = await supabaseClient.from(INQUIRY_TABLE).insert([payload]);
-      if (error) throw error;
-      return { ok: true };
-    } catch (err) {
-      console.error("[AirportFirst] Supabase insert failed:", err);
-      return { ok: false, reason: err && err.message };
-    }
-  }
-
   /* ---------- Notification: email the dispatch desk ----------
      Two delivery routes, tried in order:
 
@@ -4906,6 +4883,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.assign({}, payload, {
+        website: val("inquiry_website"),          // honeypot: empty for people
         to: NOTIFY_EMAIL,
         route: (payload.pickup || "") + " → " + (payload.dropoff || ""),
         message: message
@@ -4927,7 +4905,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     if (!response.ok || result.ok !== true) {
       throw new Error((result && result.error) || "HTTP " + response.status);
     }
-    return { ok: true, via: "send-mail.php" };
+    /* The server saves to MySQL first, then emails: either can succeed alone. */
+    return { ok: true, via: "send-mail.php", emailed: result.emailed !== false, stored: !!result.stored, ref: result.ref || "" };
   }
 
   /* Route 2: Web3Forms — works from any origin, including localhost. */
@@ -5412,7 +5391,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 
      When both places are known, measure the road route and show it under the
      location fields. Pick-up defaults to CMB when it is left empty. The figure
-     travels with the inquiry: a row in the email, a line in the Supabase notes
+     travels with the inquiry: a row in the email, a line in the stored inquiry
      and in the WhatsApp message, so the desk can quote straight away.
        1. Coordinates: from the dropdown choice when it has them (live results,
           CMB, GPS); otherwise one Photon lookup of the place name, Sri Lanka only.
@@ -5496,7 +5475,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     return hh ? hh + "h" + (mm ? " " + mm + "m" : "") : mm + " min";
   }
 
-  /* Lines for the desk: email rows, Supabase notes and WhatsApp. The summary
+  /* Lines for the desk: email rows, stored inquiry and WhatsApp. The summary
      always starts with the km figure (send-mail.php checks for it). */
   function afRouteText() {
     if (!afRoute) return "";
@@ -5829,16 +5808,14 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
   document.querySelectorAll("input[data-af-geolocate]").forEach(initGeolocateButton);
 
   /* =========================================================
-     GUEST REVIEWS  (Supabase-backed, with owner-only moderation)
+     GUEST REVIEWS  (MySQL via reviews-api.php)
 
-     Read + insert run on the public anon key. Delete is deliberately NOT
-     secured by the ?admin flag below — that flag only reveals the buttons.
-     The real protection is the row-level security policy in
-     supabase/schema.sql: only an authenticated staff session may delete, so a
-     visitor who forges the flag still gets a 401 from the database.
+     Approved reviews are read from reviews-api.php; new ones are posted there
+     and saved as pending. Approving, unpublishing and deleting happen only in
+     admin-reviews.php, behind a password — nothing on this public page can
+     change a review.
      ========================================================= */
-  const REVIEW_TABLE = "airport_reviews";
-  const ADMIN_PIN = "837513";                 // moderation PIN, see note above
+  const REVIEWS_API = "reviews-api.php";
   const reviewGrid = document.getElementById("reviewGrid");
 
   /* Elegant default avatar: initials on a brand-toned disc, drawn inline so it
@@ -5973,7 +5950,6 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 
     const figure = document.createElement("figure");
     figure.className = "hover-card review-enter relative rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5";
-    if (review.id) figure.dataset.reviewId = review.id;
 
     figure.innerHTML =
       '<i data-lucide="quote" class="absolute right-6 top-6 h-9 w-9 text-mist-500/20"></i>' +
@@ -5989,15 +5965,11 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
           '<div class="text-[14.5px] font-bold text-navy-900 truncate">' + name + '</div>' +
           '<div class="flex items-center gap-1.5 text-[12.5px] text-navy-900/45">' +
             '<span class="text-[15px] leading-none">' + flag + '</span>' + country +
+            (review.trip_type ? '<span class="text-navy-900/30">&middot;</span>' + escapeHtml(review.trip_type) : '') +
           '</div>' +
         '</div>' +
         '<span class="rounded-full bg-navy-900/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-900/50">Guest review</span>' +
-      '</figcaption>' +
-      (review.id
-        ? '<button type="button" class="review-delete absolute bottom-5 right-5 rounded-full bg-crimson-50 px-3 py-1.5 text-[11.5px] font-bold text-crimson-600 ring-1 ring-crimson-200 transition hover:bg-crimson-500 hover:text-white" ' +
-          'data-delete-review="' + escapeHtml(review.id) + '" aria-label="Delete this review">' +
-          '<i data-lucide="trash-2" class="h-3.5 w-3.5"></i> Delete</button>'
-        : "");
+      '</figcaption>';
 
     /* A photo that fails to load falls back to the initials avatar. Attached
        here rather than as an inline onerror="" attribute: inside an attribute
@@ -6030,27 +6002,24 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 
   /* ---------- Load published reviews ---------- */
   async function loadReviews() {
-    if (!supabaseClient || !reviewGrid) return;
+    if (!reviewGrid) return;
     try {
-      const { data, error } = await supabaseClient
-        .from(REVIEW_TABLE)
-        .select("*")
-        .eq("published", true)
-        .order("created_at", { ascending: false })
-        .limit(30);
-      if (error) throw error;
+      const response = await fetch(REVIEWS_API, { headers: { "Accept": "application/json" } });
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json || json.ok !== true) throw new Error("HTTP " + response.status);
       /* Reverse so that prepending leaves the newest at the top. */
-      (data || []).slice().reverse().forEach(prependReview);
-      /* Average of the real, approved reviews just loaded — never a made-up figure. */
-      const rated = (data || []).filter(r => Number(r.rating) >= 1 && Number(r.rating) <= 5);
+      (json.reviews || []).slice().reverse().forEach(r => prependReview({
+        name: r.name, country: r.country, rating: r.rating, review: r.review,
+        avatar_url: r.avatar, trip_type: r.trip_type
+      }));
+      /* Average of ALL approved reviews, worked out by the server — never a made-up figure. */
       const pill = document.getElementById("reviewSummary");
-      if (pill && rated.length) {
-        const avg = rated.reduce((s, r) => s + Number(r.rating), 0) / rated.length;
-        pill.textContent = "★ " + avg.toFixed(1) + " average · " + rated.length + " approved guest review" + (rated.length === 1 ? "" : "s");
+      if (pill && json.count > 0 && json.average) {
+        pill.textContent = "★ " + Number(json.average).toFixed(1) + " average · " + json.count + " approved guest review" + (json.count === 1 ? "" : "s");
         pill.classList.remove("hidden"); pill.classList.add("flex");
       }
     } catch (err) {
-      console.warn("[AirportFirst] Reviews unavailable, showing featured ones only:", err && err.message);
+      console.info("[AirportFirst] Reviews not loaded:", err && err.message);
     }
   }
   loadReviews();
@@ -6264,30 +6233,29 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       const payload = {
         name,
         country,
-        flag: flagFor(country),
         rating: Number(ratingField.value) || 5,
+        trip_type: (document.getElementById("review_trip") || {}).value || "",
         review: text,
-        avatar_url: uploadedAvatar,      /* compressed data: URL, or null for the default avatar */
-        /* Every review waits for staff approval. The database enforces this
-           (supabase/schema.sql) whatever is sent here; saying so keeps the
-           request honest. */
-        published: false
+        avatar: uploadedAvatar,          /* compressed data: URL, or null for the default avatar */
+        website: (document.getElementById("review_website") || {}).value || ""   /* honeypot */
       };
 
       const submit = document.getElementById("reviewSubmit");
       submit.disabled = true;
 
-      /* Plain insert, no .select(): an unpublished row is not readable by the
-         public key, so asking for it back would turn a successful submission
-         into an RLS error. */
-      let saved = false;
+      /* Saved as pending; it appears on the page only after approval. */
+      let saved = false, problem = "";
       try {
-        if (!supabaseClient) throw new Error("Supabase client unavailable");
-        const { error } = await supabaseClient.from(REVIEW_TABLE).insert([payload]);
-        if (error) throw error;
-        saved = true;
+        const response = await fetch(REVIEWS_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const json = await response.json().catch(() => null);
+        if (response.ok && json && json.ok === true) saved = true;
+        else problem = (json && json.error) || "";
       } catch (err) {
-        console.error("[AirportFirst] Review insert failed:", err);
+        console.error("[AirportFirst] Review not sent:", err);
       }
 
       submit.disabled = false;
@@ -6295,7 +6263,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       /* Not sent: keep the modal open with everything they wrote, so trying
          again is one click rather than retyping the review. */
       if (!saved) {
-        showToast("Sorry — your review could not be sent. Please try again", "error");
+        showToast(problem || "Sorry — your review could not be sent. Please try again", "error");
         return;
       }
 
@@ -6312,67 +6280,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     });
   }
 
-  /* ---------- Owner-only moderation ---------- */
-  function enableAdminMode() {
-    document.body.classList.add("af-admin");
-    const badge = document.getElementById("adminBadge");
-    if (badge) { badge.classList.remove("hidden"); badge.classList.add("inline-flex"); }
-    drawIcons();
-  }
-
-  /* Moderation is unlocked with ?admin=true plus the PIN, and then stays on
-     for the rest of the browser session. Nothing here is a security boundary
-     — see the note at the top of this section. */
-  function promptForAdmin() {
-    const entered = window.prompt("Moderation PIN");
-    if (entered === ADMIN_PIN) {
-      sessionStorage.setItem("af-admin", "1");
-      enableAdminMode();
-      showToast("Moderation mode on");
-      return true;
-    }
-    if (entered !== null) showToast("Incorrect PIN", "error");
-    return false;
-  }
-
-  (function initAdminMode() {
-    let stored = null;
-    try { stored = sessionStorage.getItem("af-admin"); } catch (err) { /* private mode */ }
-    if (stored === "1") { enableAdminMode(); return; }
-    if (!new URLSearchParams(location.search).get("admin")) return;
-    /* Let the page paint before the browser dialog blocks the thread. */
-    setTimeout(promptForAdmin, 400);
-  })();
-
-  if (reviewGrid) {
-    reviewGrid.addEventListener("click", async e => {
-      const btn = e.target.closest("[data-delete-review]");
-      if (!btn || !document.body.classList.contains("af-admin")) return;
-
-      const card = btn.closest("figure");
-      const id = btn.getAttribute("data-delete-review");
-      if (!window.confirm("Delete this review permanently?")) return;
-
-      btn.disabled = true;
-      try {
-        if (!supabaseClient) throw new Error("Supabase client unavailable");
-        const { error } = await supabaseClient.from(REVIEW_TABLE).delete().eq("id", id);
-        if (error) throw error;
-
-        card.classList.remove("review-enter");   // otherwise its fill-mode holds opacity at 1
-        card.classList.add("review-leave");
-        setTimeout(() => card.remove(), 360);
-        showToast("Review deleted");
-      } catch (err) {
-        console.error("[AirportFirst] Review delete failed:", err);
-        btn.disabled = false;
-        showToast("Could not delete — sign in as staff and try again", "error");
-      }
-    });
-  }
-
-  /* Exposed for the moderation dashboard and for tests. */
-  window.airportFirstReviews = { load: loadReviews, prepend: prependReview, enableAdminMode, promptForAdmin };
+  /* Moderation lives in admin-reviews.php (password-protected). */
+  window.airportFirstReviews = { load: loadReviews, prepend: prependReview };
 
   /* Exposed so the dataset can be extended or queried without touching markup. */
   window.airportFirstLocations = { list: AF_LOCATIONS, search: afSearchLocations };
@@ -6417,21 +6326,13 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 
     /* 1. Confirm on the page straight away. Nothing opens, nothing navigates —
           the guest never leaves the site. */
-    /* The route estimate rides alongside the payload rather than inside it:
-       Supabase only accepts its own columns, so there it goes into the notes. */
+    /* The route estimate travels with the inquiry: send-mail.php emails it and
+       stores it in its own columns. */
     const R = window.airportFirstRoute;
     const routeText = R ? R.text() : "";
     const routeStops = R ? R.stops() : "";
     const routeLegs = R ? R.legs() : "";
     const withRoute = Object.assign({}, payload, { distance: routeText, stops: routeStops, legs: routeLegs });
-    const routeNotes = [
-      routeStops ? "Route stops: " + routeStops : "",
-      routeText ? (routeLegs ? "Total custom route: " : "Estimated route: ") + routeText : "",
-      routeLegs ? "Legs: " + routeLegs : "",
-    ].filter(Boolean).join("\n");
-    const forDatabase = routeNotes
-      ? Object.assign({}, payload, { notes: ((payload.notes ? payload.notes + "\n\n" : "") + routeNotes).slice(0, 1990) })
-      : payload;
 
     showRequestReceived({
       title: payload.pickup + " → " + payload.dropoff,
@@ -6453,29 +6354,26 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const submitBtn = document.getElementById("inquirySubmit");
     if (submitBtn) submitBtn.disabled = true;
 
-    /* 2. Send it in the background over fetch: email first, database alongside.
-          The status pill updates when they settle; nothing here can block. */
-    const [saved, notified] = await Promise.allSettled([
-      saveInquiry(forDatabase),
-      notifyByEmail(withRoute)
-    ]);
-
-    const storedOk   = saved.status === "fulfilled" && saved.value && saved.value.ok;
-    const emailedOk  = notified.status === "fulfilled" && notified.value && notified.value.ok;
+    /* 2. Send it in the background. send-mail.php stores the inquiry in MySQL
+          and emails the desk; the status pill updates when it answers. */
+    const notified = await notifyByEmail(withRoute).catch(err => ({ ok: false, reason: err && err.message }));
+    const emailedOk = !!(notified && notified.ok && notified.emailed !== false);
+    const storedOk  = !!(notified && notified.stored);
+    const refNote   = notified && notified.ref ? " · Ref " + notified.ref : "";
 
     if (emailedOk) {
       /* Green only here: the mail endpoint answered with a real success. */
-      setSuccessStatus("sent", "Sent to our dispatch team");
+      setSuccessStatus("sent", "Sent to our dispatch team" + refNote);
     } else if (storedOk) {
-      setSuccessStatus("saved", "Received — the desk has your request");
+      setSuccessStatus("saved", "Received — the desk has your request" + refNote);
     } else {
-      /* Both channels failed (offline, or the mailer is not deployed yet).
+      /* Nothing got through (offline, or the mailer is not deployed yet).
          Say so plainly and let the WhatsApp button below be the way through. */
       setSuccessStatus("queued", "Saved on this device — please tap WhatsApp below");
     }
 
     if (submitBtn) submitBtn.disabled = false;
-    if (storedOk)  console.info("[AirportFirst] Inquiry stored.");
+    if (storedOk)  console.info("[AirportFirst] Inquiry stored" + refNote + ".");
     if (emailedOk) console.info("[AirportFirst] Desk notified by email.");
   }
 
@@ -6486,7 +6384,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
      entry point that needs to dispatch the same payload. */
   window.collectAndDispatchInquiry = collectAndDispatchInquiry;
   window.airportFirstDispatch = {
-    collectInquiry, buildInquiryMessage, saveInquiry, notifyByEmail, supabaseClient,
+    collectInquiry, buildInquiryMessage, notifyByEmail,
     mailEndpoint: MAIL_ENDPOINT
   };
 

@@ -1,7 +1,7 @@
 # Airport First — deployment
 
-Static page plus one small PHP mailer. Built for cPanel; no build step, no
-Node, no third-party mail account.
+Static page plus a few small PHP files and the client's own cPanel MySQL
+database. No build step, no Node, no third-party database or mail account.
 
 > ### Live contact details
 >
@@ -28,20 +28,30 @@ Everything below goes into `public_html/`:
 
 ```
 index.html
-send-mail.php          inquiry mailer (PHP mail(), see §3)
-.htaccess              denies *.log, sets security headers
+send-mail.php          inquiry mailer + saves each inquiry to MySQL (§3)
+reviews-api.php        guest reviews: approved list (GET) and new submissions (POST)
+admin-reviews.php      password-protected moderation and inquiry list
+db-config.php          PDO connection; reads the credentials from above public_html
+af-common.php          shared helpers (real visitor IP, origin check, references)
+schema.sql             the tables — run once in phpMyAdmin (served as 403)
+.htaccess              blocks *.log/*.sql/*.md, db-config.php, af-common.php; headers
+PHPMailer/src/         the mail library (§3)
 assets/
-  client-logo.png      the client's own logo artwork, used in both places
 ```
 
-`supabase/` is only needed if you later move the database or mailer off cPanel;
-it is not required for the site to run, so don't upload it. (The shipped
-`.htaccess` 404s it only when the site sits at the domain root.)
+And **above** `public_html/` (never inside it, never in git):
 
-The Edge Function in `supabase/functions/send-inquiry-email/` is **disabled**:
-it answers every request with `410` until `ENABLED` is set to `true` in the
-file. If it was ever deployed, remove it with
-`supabase functions delete send-inquiry-email`.
+```
+airportfirst-db.php    database credentials, admin password hash, IP-hash salt
+airportfirst-smtp.php  the mailbox password (§3)
+```
+
+**Supabase is no longer used.** The page loads no Supabase script and the CSP no
+longer allows any `*.supabase.co` host. The `supabase/` folder in the repo is
+kept only as a record of the old setup; don't upload it (the shipped
+`.htaccess` 404s it at the domain root). Before the free Supabase project is
+paused or deleted, export anything worth keeping from **Table Editor →
+`airport_inquiries` / `airport_reviews` → Export to CSV**.
 
 ### The logo
 
@@ -64,12 +74,8 @@ Two notes on the current file:
 
 `index.html` needs no build step.
 
-Hardcoded and live in the page:
-
-| Credential | Value | Public? |
-|---|---|---|
-| Supabase project URL | `https://xugzwpsviggvswkvzqiu.supabase.co` (also in the CSP `connect-src`, twice) | Yes |
-| Supabase publishable key | `sb_publishable_…` | Yes — protected by RLS |
+There are **no keys or credentials in the page at all**: inquiries and reviews
+go to PHP files on the same host, which hold the database connection server-side.
 
 There is **no Google Maps key and no maps billing**. The pick-up and drop-off
 suggestions merge two free sources:
@@ -105,61 +111,92 @@ into e.g. `Current Location: Kuliyapitiya, Kurunegala`. Two deployment notes:
   traffic grows, self-host Nominatim or move to a paid geocoder. On any failure
   the field falls back to raw coordinates, which the desk can still act on.
 
-## 2. Database
+## 2. Database (cPanel MySQL) — four steps
 
-Run `supabase/schema.sql` in the SQL editor. It is safe to re-run over an
-existing project. It creates a staff allow-list and two tables with their
-row-level security policies:
+1. **Create the database and user.** cPanel → **Manage My Databases** (or
+   *MySQL Database Wizard*): create a database (e.g. `cpuser_airport`), create a
+   user with a long generated password, and add the user to the database with
+   **ALL PRIVILEGES**. Note the full prefixed names cPanel shows.
 
-- `staff` + `is_staff()` — **signed in is not staff.** With the public anon
-  key anyone can register an account unless sign-ups are off, so every
-  privileged policy checks this list rather than "is authenticated".
-- `airport_inquiries` — the public may **insert only**; reading, updating and
-  deleting guest contact details is **staff only**. A trigger sets
-  `created_at` and `handled` itself, so a caller cannot backdate a row or hide
-  it from the queue.
-- `airport_reviews` — the public may **read approved rows and submit**; every
-  submission arrives with `published = false` (forced by a trigger, so even a
-  stale cached page cannot publish). Approving, editing and deleting is
-  **staff only**.
+2. **Create the tables.** cPanel → **phpMyAdmin** → select the new database →
+   **Import** → choose `schema.sql` → *Go* (or paste it into the **SQL** tab).
+   It creates `airport_inquiries`, `guest_reviews` and
+   `admin_login_attempts`, all InnoDB / `utf8mb4`, and is safe to re-run
+   (`CREATE TABLE IF NOT EXISTS`).
 
-Both tables carry size caps, and `avatar_url` only accepts the small inline
-`data:image/…;base64` image the page produces, never a remote URL. The caps are
-added `NOT VALID`, so rows already in the database are not rechecked.
+3. **Add the credentials file above `public_html`.** cPanel → **File
+   Manager** → your home folder (the one that *contains* `public_html`) →
+   *+ File* → `airportfirst-db.php`:
 
-**After running it, once:**
-
-1. **Authentication → Sign In / Providers:** turn off *Allow new users to sign
-   up*.
-2. **Authentication → Users:** create the owner's account, then add it to the
-   allow-list in the SQL editor:
-
-   ```sql
-   insert into public.staff (user_id)
-   select id from auth.users where email = 'owner@example.com';
+   ```php
+   <?php
+   return [
+       'host'                => 'localhost',
+       'name'                => 'cpuser_airport',
+       'user'                => 'cpuser_airportweb',
+       'pass'                => 'the database user password',
+       'admin_password_hash' => '',            // filled in step 4
+       'hash_salt'           => 'any long random string, e.g. 40 characters',
+   ];
    ```
 
-`avatar_url` holds either nothing (the page then draws an initials avatar) or a
-`data:image/jpeg;base64,…` string. Guest photos are cropped square, resized to
-200×200 and re-encoded in the browser before submission, stepping JPEG quality
-down until the payload is under 30 KB — so no image is uploaded at full size,
-no storage bucket is needed, and rows stay small. Measured on a 3000×2000,
-219 KB photo: 3 KB out. Worst case tested (full-frame noise): 7 KB.
+   Apache cannot serve a file outside the web root and no commit can carry it.
+   `db-config.php` (in `public_html`) only reads it.
 
-### Review moderation
+4. **Set the admin password.** Generate a bcrypt hash — cPanel → **Terminal**
+   (or any computer with PHP):
 
-New reviews are **not shown on the site until approved.** The guest is told
-"your review will appear once it has been approved". To approve one, open
-**Table Editor → `airport_reviews`** in the Supabase dashboard, find rows with
-`published = false`, and set `published` to `true` (or delete the row). The
-dashboard bypasses row-level security, so no admin page is needed.
+   ```bash
+   php -r "echo password_hash('a-long-strong-password', PASSWORD_DEFAULT), PHP_EOL;"
+   ```
 
-`?admin=true` plus the PIN in `ADMIN_PIN` reveals a delete control on each
-review card. **That flag is presentation only** — it is client-side and anyone
-can set it. The page never signs anyone in, so that button always gets refused
-by the delete policy above, and the page shows "Could not delete — sign in as
-staff and try again". Moderate from the dashboard. Change `ADMIN_PIN` before
-launch.
+   Paste the `$2y$…` output as `admin_password_hash` in step 3's file (single
+   quotes, so PHP leaves the `$` alone). Then open
+   **`https://airportfirst.vip/admin-reviews.php`** and sign in. The plain
+   password is never stored anywhere.
+
+**Checks:** `GET /reviews-api.php` → `{"ok":true,"reviews":[],"count":0,…}`
+once the database is connected (`503` means `airportfirst-db.php` is missing
+or wrong — the PHP error log says which). `/db-config.php` and `/schema.sql`
+should both answer `403`.
+
+**If MySQL is down or not set up**, nothing breaks for the guest: inquiries are
+still emailed (and the email's reference is simply not on file), and the reviews
+section shows no cards rather than an error.
+
+### What is stored
+
+- `airport_inquiries` — every validated inquiry, saved **before** the email is
+  sent, with a reference such as `AF-7KQ3XM` that also appears in the email
+  subject and on the guest's confirmation card. Route stops, leg distances and
+  the total road distance (`distance_km`) get their own columns.
+  `email_sent` flips to 1 once the mail goes out; `handled` is the desk's
+  to-do flag in the admin page.
+- `guest_reviews` — every submission arrives with `is_approved = 0`. The
+  optional photo is the small `data:image/…;base64` the page makes (cropped
+  square, 200×200, under 30 KB); a remote image URL is never accepted.
+- Visitors' IP addresses are **never stored** — only a salted SHA-256 hash
+  (`ip_hash`), used for rate limits.
+
+### Review moderation — `admin-reviews.php`
+
+New reviews are **not shown until approved.** The guest is told "your review
+will appear once it has been approved". In `admin-reviews.php`:
+
+- **Reviews** tab: pending first; *Approve*, *Unpublish* or *Delete* (asks
+  first). The public list updates within a minute (it is cached 60 s).
+- **Inquiries** tab: the latest 60, with *Mark handled*.
+
+The page is guarded by: `password_verify` against the hash; a session cookie
+that is `HttpOnly`, `Secure` and `SameSite=Strict`, regenerated at sign-in and
+expiring after 30 idle minutes; a CSRF token on every action; at most 5 failed
+sign-ins per 15 minutes per visitor (`admin_login_attempts`); and a strict CSP,
+`noindex` and no caching. The old `?admin=true` PIN on the public page is
+gone — nothing on `index.html` can change a review.
+
+**Who may post a review.** Same origin only, body under 128 KB, a honeypot
+field, name/rating/text validation (no markup, at most one link), and at most
+**2 reviews per visitor per hour** (`429` after that).
 
 ## 3. Email notifications
 
@@ -169,8 +206,10 @@ host and on a laptop with no PHP at all.
 ### Route 1 — `send-mail.php` (production)
 
 The page POSTs each inquiry as JSON to `send-mail.php` in the same folder, which
-emails it to the address in `MAIL_TO` using PHP `mail()`. Nothing to sign up
-for and no API key in the page.
+saves it to MySQL (§2) and then emails it to `MAIL_TO` over SMTP. It answers
+`{ok, emailed, stored, ref}`: if the mail fails but the row was saved the guest
+is still told the desk has it; if both fail the inquiry goes to the fallback log.
+Nothing to sign up for and no API key in the page.
 
 ### Route 2 — Web3Forms (localhost / no-PHP fallback)
 
@@ -271,8 +310,8 @@ Each inquiry email lists the booking, including **Est. distance** (for example
 `~116 km (approx. 2h 40m) by road, CMB Airport to Kandy`), and a green
 **Reply to Guest on WhatsApp** button. It opens a chat with the guest's number
 (Sri Lankan `07…` numbers are converted to `+94`), pre-filled with their name,
-route, distance and vehicle; add the price and tap send. The same distance
-line is appended to the inquiry's `notes` in Supabase and to the guest's
+route, distance and vehicle; add the price and tap send. The same route and
+distance are stored with the inquiry in MySQL and appear in the guest's
 WhatsApp copy.
 
 The distance is measured in the browser: coordinates come from the place
@@ -307,6 +346,10 @@ server's own hostname. A post from another site, or from a bare `curl` with no
 origin at all, gets `403`. The page is static, so there is no session to hang a
 CSRF token on; matching the origin is the equivalent a static form can offer.
 
+**Bots.** A hidden `website` field (the honeypot) is invisible to people and
+skipped by keyboard; a submission that fills it is answered as a success and
+neither stored nor mailed.
+
 **How often.** One submission per caller every 20 seconds, and at most 5 in 10
 minutes, answered with `429` and a `Retry-After`. Counters live in
 `af-throttle/` above the web root, keyed by a hash of the caller's IP rather
@@ -316,7 +359,7 @@ The site is served through **Cloudflare**, so the connection's address
 (`REMOTE_ADDR`) is normally a Cloudflare edge server shared by many guests. The
 guest's real address arrives in `CF-Connecting-IP`, and the mailer uses it
 **only when `REMOTE_ADDR` is inside Cloudflare's published ranges**
-(`CLOUDFLARE_RANGES` in `send-mail.php`, from cloudflare.com/ips). Anyone
+(`CLOUDFLARE_RANGES` in `af-common.php`, from cloudflare.com/ips). Anyone
 calling the server directly with a made-up header is still keyed on their own
 address. `X-Forwarded-For` is never trusted. If the host already rewrites
 `REMOTE_ADDR` to the visitor's address, that works too. Refresh the range list
@@ -359,11 +402,11 @@ a guest abroad on an unfamiliar site never has a tab appear behind their back.
 2. **Confirm immediately** — the "Thank you! Request received" card appears with
    an animated tick and a summary of the request (route, date, passengers,
    vehicle, contact details).
-3. **Send in the background** — `fetch` to the mailer (§3) and a Supabase insert
-   into `airport_inquiries`, run together via `Promise.allSettled`.
+3. **Send in the background** — one `fetch` to `send-mail.php` (§3), which
+   stores the inquiry in MySQL and emails the desk.
 4. **Report honestly** — the status pill on the card settles to:
-   - 🟢 *Sent to our dispatch team* — **green only when a mail endpoint
-     returned a genuine success** (HTTP 2xx *and* its own `ok`/`success` flag).
+   - 🟢 *Sent to our dispatch team · Ref AF-…* — **green only when a mail
+     endpoint returned a genuine success** (HTTP 2xx *and* its own `ok`/`success` flag).
    - 🟡 *Received — the desk has your request* — email failed, the database row
      saved. Amber, because nothing was actually delivered to an inbox.
    - 🔴 *Saved on this device — please tap WhatsApp below* — both failed, so the
@@ -403,7 +446,9 @@ php -S 127.0.0.1:5173 -t .
 ```
 
 `python -m http.server 5173 --bind 127.0.0.1` also serves the page, but the
-mailer will 501 because Python does not execute PHP.
+mailer will 501 because Python does not execute PHP, and the reviews section
+stays empty. For the database locally, put an `airportfirst-db.php` in the
+folder *above* the project pointing at a local MySQL/MariaDB.
 
 ## 6. Known follow-ups
 
@@ -412,7 +457,7 @@ mailer will 501 because Python does not execute PHP.
 - **Place search relies on a free public service.** Photon's public server is
   free with fair-use limits and no uptime guarantee. If traffic grows a lot,
   self-host Photon or move to a paid geocoder. Free-typed addresses always pass
-  through to the email and Supabase unchanged.
+  through to the email and the database unchanged.
 - **A transparent or reversed logo would improve the footer.** The current file
   is a white-background JPEG, so it sits on a white plate there (see §0).
 - **Destination photography is stock.** The cards use Unsplash imagery chosen
