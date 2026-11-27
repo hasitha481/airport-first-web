@@ -184,10 +184,45 @@ if ($signedIn && $pdo !== null) {
     $pendingCount = (int) $pdo->query('SELECT COUNT(*) FROM guest_reviews WHERE is_approved = 0')->fetchColumn();
     if ($tab === 'inquiries') {
         $inquiries = $pdo->query(
-            'SELECT id, ref_code, guest_name, phone, email, pickup, dropoff, route_stops, distance_text, travel_date,
+            'SELECT id, ref_code, guest_name, phone, email, pickup, dropoff, route_stops, route_legs, distance_km, distance_text, travel_date,
                     travel_time, flight_number, vehicle, passengers, special_requests, email_sent, handled, created_at
                FROM airport_inquiries ORDER BY created_at DESC LIMIT 60'
         )->fetchAll();
+
+        /* Every card shows a distance. A row saved without one (an old cached
+           page, or the route service was down) gets a road estimate from the
+           place names, which is also written back so the table has it too. */
+        require_once __DIR__ . '/af-places.php';
+        $fill = null;
+        foreach ($inquiries as &$q) {
+            if ($q['distance_km'] !== null) {
+                continue;
+            }
+            $text = (string) $q['distance_text'];
+            if ($text !== '' && preg_match('/^~?([0-9]+(?:[.,][0-9]+)?) km/u', $text, $dm) === 1) {
+                $q['distance_km'] = (float) str_replace(',', '.', $dm[1]);
+            } else {
+                $stops = (string) $q['route_stops'] === '' ? [] : array_map('trim', explode('→', (string) $q['route_stops']));
+                $est = af_route_estimate((string) $q['pickup'], $stops, (string) $q['dropoff']);
+                if ($est === null) {
+                    continue;
+                }
+                $q['distance_km'] = $est['km'];
+                $q['distance_text'] = $est['text'];
+                if ((string) $q['route_legs'] === '') {
+                    $q['route_legs'] = $est['legs'];
+                }
+            }
+            try {
+                $fill = $fill ?? $pdo->prepare(
+                    'UPDATE airport_inquiries SET distance_km = ?, distance_text = ?, route_legs = ? WHERE id = ? AND distance_km IS NULL'
+                );
+                $fill->execute([$q['distance_km'], $q['distance_text'], (string) $q['route_legs'], (int) $q['id']]);
+            } catch (Throwable $err) {
+                error_log('[AirportFirst] could not fill the distance for ' . $q['ref_code'] . ': ' . $err->getMessage());
+            }
+        }
+        unset($q);
     }
 }
 $message = flash();
@@ -227,6 +262,9 @@ $token = csrf_token();
   dl { display:grid; grid-template-columns:max-content 1fr; gap:4px 14px; margin:10px 0 0; font-size:14px; }
   dt { color:var(--muted); } dd { margin:0; word-break:break-word; }
   p.text { white-space:pre-line; margin:8px 0 0; }
+  dd a { color:var(--navy); }
+  .km { font-size:16px; }
+  .b-copy { margin-left:8px; padding:3px 10px; font-size:12px; border-radius:8px; background:#E2E8F0; color:var(--navy); }
   @media (max-width:560px) { dl { grid-template-columns:1fr; } dt { margin-top:6px; } }
 </style>
 </head>
@@ -308,10 +346,22 @@ $token = csrf_token();
           <dl>
             <dt>Guest</dt><dd><?= e($q['guest_name']) ?></dd>
             <dt>Phone</dt><dd><?= e($q['phone']) ?></dd>
-            <?php if ($q['email'] !== ''): ?><dt>Email</dt><dd><?= e($q['email']) ?></dd><?php endif; ?>
+            <?php if ((string) $q['email'] !== ''): ?><dt>Email</dt><dd>
+              <!--email_off--><a href="mailto:<?= e($q['email']) ?>"><?= e($q['email']) ?></a>
+              <button type="button" class="b-copy" data-copy="<?= e($q['email']) ?>">Copy</button><!--/email_off-->
+            </dd><?php endif; ?>
             <dt>Route</dt><dd><?= e($q['pickup']) ?> → <?= e($q['dropoff']) ?></dd>
             <?php if ($q['route_stops'] !== ''): ?><dt>Via</dt><dd><?= e($q['route_stops']) ?></dd><?php endif; ?>
-            <?php if ($q['distance_text'] !== ''): ?><dt>Distance</dt><dd><?= e($q['distance_text']) ?></dd><?php endif; ?>
+            <dt>Distance</dt><dd>
+              <?php if ($q['distance_km'] !== null): $isRoad = strpos((string) $q['distance_text'], ' by road') !== false; ?>
+                <strong class="km"><?= e(af_fmt_km((float) $q['distance_km'])) ?></strong>
+                <span class="meta"><?= $isRoad ? '(road route)' : '(est.)' ?></span>
+                <?php if ((string) $q['distance_text'] !== ''): ?><div class="meta"><?= e((string) $q['distance_text']) ?></div><?php endif; ?>
+                <?php if ((string) $q['route_legs'] !== ''): ?><div class="meta">Legs: <?= e((string) $q['route_legs']) ?></div><?php endif; ?>
+              <?php else: ?>
+                <span class="meta">Not calculated — the places were not recognised; confirm with the guest.</span>
+              <?php endif; ?>
+            </dd>
             <dt>When</dt><dd><?= e((string) $q['travel_date']) ?> <?= e($q['travel_time']) ?><?= $q['flight_number'] !== '' ? ' · flight ' . e($q['flight_number']) : '' ?></dd>
             <dt>Vehicle</dt><dd><?= e($q['vehicle']) ?><?= $q['passengers'] !== null ? ' · ' . (int) $q['passengers'] . ' pax' : '' ?></dd>
             <?php if ((string) $q['special_requests'] !== ''): ?><dt>Notes</dt><dd style="white-space:pre-line;"><?= e((string) $q['special_requests']) ?></dd><?php endif; ?>
@@ -328,5 +378,19 @@ $token = csrf_token();
     <?php endif; ?>
   </main>
 <?php endif; ?>
+<script>
+  /* One-click copy for the guest's email address. */
+  document.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('[data-copy]') : null;
+    if (!btn) return;
+    var value = btn.getAttribute('data-copy');
+    var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(done, function () { window.prompt('Copy the address:', value); });
+    } else {
+      window.prompt('Copy the address:', value);
+    }
+  });
+</script>
 </body>
 </html>

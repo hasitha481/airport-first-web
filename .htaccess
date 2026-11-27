@@ -15,7 +15,7 @@
 
 # Database config, shared PHP helpers and the schema are never served directly.
 # (The real credentials live above public_html in ../airportfirst-db.php.)
-<FilesMatch "^(db-config\.php|af-common\.php|schema\.sql)$">
+<FilesMatch "^(db-config\.php|af-common\.php|af-places\.php|schema\.sql)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

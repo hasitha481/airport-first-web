@@ -33,8 +33,9 @@ reviews-api.php        guest reviews: approved list (GET) and new submissions (P
 admin-reviews.php      password-protected moderation and inquiry list
 db-config.php          PDO connection; reads the credentials from above public_html
 af-common.php          shared helpers (real visitor IP, origin check, references)
+af-places.php          280 Sri Lankan places with coordinates (server distance fallback)
 schema.sql             the tables — run once in phpMyAdmin (served as 403)
-.htaccess              blocks *.log/*.sql/*.md, db-config.php, af-common.php; headers
+.htaccess              blocks *.log/*.sql/*.md and the include-only PHP files; headers
 PHPMailer/src/         the mail library (§3)
 assets/
 ```
@@ -159,6 +160,23 @@ into e.g. `Current Location: Kuliyapitiya, Kurunegala`. Two deployment notes:
 once the database is connected (`503` means `airportfirst-db.php` is missing
 or wrong — the PHP error log says which). `/db-config.php` and `/schema.sql`
 should both answer `403`.
+
+**Cloudflare — turn off Email Address Obfuscation.** Cloudflare → the
+airportfirst.vip zone → **Scrape Shield** (or *Security → Settings* on newer
+dashboards) → **Email Address Obfuscation: Off**. When it is on, Cloudflare
+rewrites addresses in pages to `[email protected]` and relies on a script of its
+own to decode them; the admin page's strict CSP blocks that script. The admin
+page already marks the guest's address `<!--email_off-->`, so it shows correctly
+either way, but turning the feature off avoids surprises elsewhere.
+
+**Distance on every inquiry.** The page measures the route (OSRM by road, or a
+straight-line × 1.3 estimate) as the guest types and waits for it on submit.
+Places are found from the dropdown, from any known place name inside the text
+(a tour title such as "White Water Rafting in Kitulgala" counts as Kitulgala),
+then Photon. If the page still sends none, `send-mail.php` estimates it from the
+same place list (`af-places.php`), and `admin-reviews.php` fills any older row
+that is missing one. `af-places.php` is generated from `AF_PLACE_DATA` in
+`index.html` — add places there, then regenerate it.
 
 **If MySQL is down or not set up**, nothing breaks for the guest: inquiries are
 still emailed (and the email's reference is simply not on file), and the reviews

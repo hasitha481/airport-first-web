@@ -473,6 +473,21 @@ foreach (['stops', 'legs'] as $key) {
     }
 }
 
+/* No distance from the page (an old cached copy, or OSRM/Photon unreachable):
+   estimate it here from the place names, so the email, the WhatsApp reply and
+   the database row still carry one. Labelled "estimate". */
+if ($data['distance'] === '') {
+    require_once __DIR__ . '/af-places.php';
+    $viaStops = $data['stops'] === '' ? [] : array_map('trim', explode('→', $data['stops']));
+    $estimate = af_route_estimate($data['pickup'], $viaStops, $data['dropoff']);
+    if ($estimate !== null) {
+        $data['distance'] = $estimate['text'];
+        if ($data['legs'] === '') {
+            $data['legs'] = $estimate['legs'];
+        }
+    }
+}
+
 $date = clean_date($data['date']);
 if ($date === null) {
     reject('Use the date picker — the date should look like 2026-09-12');
