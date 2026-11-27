@@ -481,7 +481,10 @@ $data = [
     'source'  => field($input, 'source', 60),
     /* Route estimate computed by the page, e.g. "~116 km (approx. 2h 40m) by
        road, CMB Airport to Kandy". Shown to the desk as a guide only. */
-    'distance' => field($input, 'distance', 160),
+    'distance' => field($input, 'distance', 400),
+    /* Multi-stop custom routes: the stops in order, and the km of each leg. */
+    'stops'    => field($input, 'stops', 600),
+    'legs'     => field($input, 'legs', 600),
 ];
 
 // A name and some way to reply are the minimum worth emailing about.
@@ -514,6 +517,11 @@ foreach (['pickup' => 'Pick-up', 'dropoff' => 'Drop-off', 'vehicle' => 'Vehicle'
 if ($data['distance'] !== ''
     && (!is_clean_line($data['distance']) || preg_match('/^~?[0-9][0-9.,]* km\b/u', $data['distance']) !== 1)) {
     $data['distance'] = '';
+}
+foreach (['stops', 'legs'] as $key) {
+    if ($data[$key] !== '' && !is_clean_line($data[$key])) {
+        $data[$key] = '';
+    }
 }
 
 $date = clean_date($data['date']);
@@ -568,7 +576,9 @@ $rows = [
     'Email'            => $data['email'],
     'Pick-up'          => $data['pickup'],
     'Drop-off'         => $data['dropoff'],
+    'Via (stops)'      => $data['stops'],
     'Est. distance'    => $data['distance'],
+    'Leg distances'    => $data['legs'],
     'Date'             => $data['date'],
     'Arrival time'     => $data['time'],
     'Flight number'    => $data['flight'],
@@ -612,7 +622,8 @@ function wa_number(string $phone): string
 $replyText = 'Hello ' . $data['name'] . ', thank you for choosing ' . SITE_NAME . '.'
     . "\n" . 'Your transfer: ' . ($data['pickup'] !== '' ? $data['pickup'] : 'pick-up') . ' to ' . $data['dropoff']
     . ($data['date'] !== '' ? ', ' . $data['date'] . ($data['time'] !== '' ? ' at ' . $data['time'] : '') : '') . '.'
-    . ($data['distance'] !== '' ? "\n" . 'Estimated distance: ' . $data['distance'] . '.' : '')
+    . ($data['stops'] !== '' ? "\n" . 'Via: ' . $data['stops'] . '.' : '')
+    . ($data['distance'] !== '' ? "\n" . ($data['legs'] !== '' ? 'Total route distance: ' : 'Estimated distance: ') . $data['distance'] . '.' : '')
     . ($data['vehicle'] !== '' ? "\n" . 'Vehicle: ' . $data['vehicle'] . '.' : '')
     . "\n\n" . 'Our all-in price is LKR ______ (tolls, parking, fuel and driver included).'
     . "\n" . 'Advance prepayment confirms the booking. Prepayment instructions: ______'

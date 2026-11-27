@@ -1318,6 +1318,25 @@
   @media (max-width: 767px) {
     #home .hero-img { object-position: 68% 50%; }
   }
+
+  /* ---------- Multi-stop route builder ---------- */
+  .route-toggle { display: flex; width: 100%; align-items: center; gap: 8px; border-radius: 14px; padding: 11px 14px;
+    border: 1px dashed rgba(200,16,46,.35); background: #FFFBFB; color: #0F172A; font-size: 13px; text-align: left; transition: background .2s, border-color .2s; }
+  .route-toggle svg { color: #C8102E; flex: 0 0 auto; }
+  .route-toggle strong { color: #C8102E; }
+  .route-toggle:hover, .route-toggle.is-open { background: #FDF2F4; border-color: rgba(200,16,46,.55); }
+  .route-panel { margin-top: 10px; border-radius: 16px; padding: 14px; background: #F8FAFC; box-shadow: inset 0 0 0 1px rgba(15,23,42,.08); }
+  .route-stop { display: flex; align-items: center; gap: 10px; }
+  .route-stop-num { display: grid; place-items: center; flex: 0 0 28px; height: 28px; border-radius: 999px; background: #C8102E; color: #fff; font-size: 12px; font-weight: 800; }
+  .route-stop-remove { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; color: rgba(15,23,42,.5); background: #fff; box-shadow: inset 0 0 0 1px rgba(15,23,42,.1); transition: color .2s, background .2s; }
+  .route-stop-remove:hover { color: #fff; background: #C8102E; }
+  .route-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 8px 14px; background: #fff; color: #0F172A; font-size: 12.5px; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(15,23,42,.12); transition: box-shadow .2s, color .2s; }
+  .route-chip:hover { color: #C8102E; box-shadow: inset 0 0 0 1px rgba(200,16,46,.4); }
+  .route-chip[disabled] { opacity: .45; cursor: not-allowed; }
+  .route-legs { margin-top: 8px; display: grid; gap: 3px; font-size: 12px; color: rgba(15,23,42,.65); }
+  .route-legs li { display: flex; justify-content: space-between; gap: 12px; border-top: 1px dashed rgba(200,16,46,.15); padding-top: 3px; }
+  .route-legs li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .route-legs li strong { flex: 0 0 auto; color: #0F172A; }
 </style>
 </head>
 
@@ -1575,6 +1594,23 @@
 
 
               <!-- Route distance, filled by the route script once both places are known. -->
+              <!-- Multi-stop custom route: pick-up → stops in order → drop-off. -->
+              <div id="routeBuilder" class="lg:col-span-12">
+                <button type="button" id="routeStopsToggle" class="route-toggle" aria-expanded="false" aria-controls="routeStopsPanel">
+                  <i data-lucide="route" class="h-4 w-4"></i>
+                  <span>Planning a multi-stop tour? <strong>Add stops</strong> between pick-up and drop-off</span>
+                </button>
+                <div id="routeStopsPanel" class="route-panel hidden">
+                  <div class="text-[13.5px] font-extrabold text-navy-900">Your custom route</div>
+                  <p class="mt-0.5 text-[12px] leading-relaxed text-navy-900/55">Pick-up &rarr; your stops in order &rarr; drop-off. The total driving distance is calculated automatically.</p>
+                  <ol id="routeStops" class="mt-3 space-y-2.5"></ol>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <button type="button" id="routeAddStop" class="route-chip"><i data-lucide="plus" class="h-3.5 w-3.5"></i> Add a stop</button>
+                    <button type="button" id="routeRoundTrip" class="route-chip"><i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i> Finish back at pick-up</button>
+                  </div>
+                </div>
+              </div>
+
               <div id="routeBadge" class="lg:col-span-12 hidden" aria-live="polite"></div>
 
               <!-- No-JS fallback only. The live dropdown is driven by AF_LOCATIONS
@@ -2265,7 +2301,7 @@
     </div>
 
     <div class="reveal mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-      <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry"
+      <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry" data-open-stops
          class="service-btn btn-brand inline-flex items-center gap-2 rounded-full px-7 py-4 text-[14.5px] font-bold text-white shadow-glow">
         <i data-lucide="wand-sparkles" class="h-4 w-4"></i> Combine several into one route
       </a>
@@ -2290,7 +2326,7 @@
           every mountain bend, hidden beach and tea estate on the island.
         </p>
       </div>
-      <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry" class="service-btn btn-ghost inline-flex w-fit items-center gap-2 rounded-full border border-navy-900/15 px-6 py-3.5 text-[14px] font-bold text-navy-900">
+      <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry" data-open-stops class="service-btn btn-ghost inline-flex w-fit items-center gap-2 rounded-full border border-navy-900/15 px-6 py-3.5 text-[14px] font-bold text-navy-900">
         Plan a Bespoke Route <i data-lucide="wand-sparkles" class="h-4 w-4"></i>
       </a>
     </div>
@@ -2556,7 +2592,7 @@
           </p>
         </div>
         <div class="relative">
-          <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry" class="service-btn inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-navy-900 transition hover:-translate-y-1 hover:shadow-lux">
+          <a href="#booking" data-service="Private tours and inbound travel" data-note="Custom Multi-Day Island Route Inquiry" data-open-stops class="service-btn inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-navy-900 transition hover:-translate-y-1 hover:shadow-lux">
             Request Custom Plan <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
           </a>
         </div>
@@ -3096,6 +3132,8 @@
       <p class="mt-5 text-[15.5px] leading-relaxed text-navy-900/55">
         Feedback from guests who have travelled with us. Every review is read by our team before it is published.
       </p>
+      <!-- Filled from approved reviews in Supabase; stays hidden until there is at least one. -->
+      <p id="reviewSummary" class="mt-5 hidden items-center justify-center gap-2 rounded-full bg-[#FFF8EC] px-4 py-2 text-[13.5px] font-bold text-navy-900 ring-1 ring-gold/40 mx-auto w-fit"></p>
 
       <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <button type="button" id="openReviewModal"
@@ -4676,7 +4714,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       "- Email: " + orDash(d.email),
       "- Vehicle: " + orDash(d.vehicle)
     ];
-    if (d.distance) lines.push("- Est. distance: " + d.distance);
+    if (d.stops) lines.push("- Via (stops): " + d.stops);
+    if (d.distance) lines.push("- " + (d.legs ? "Total custom route" : "Est. distance") + ": " + d.distance);
     if (d.flight) lines.push("- Flight No: " + d.flight);
     lines.push("- Notes: " + orDash(d.notes));
     return lines.join("\n");
@@ -4839,7 +4878,9 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         Vehicle: payload.vehicle,
         Notes: payload.notes,
         Source: payload.source,
+        "Via (stops)": payload.stops || "",
         "Est. distance": payload.distance || "",
+        "Leg distances": payload.legs || "",
         Summary: message
       })
     });
@@ -5345,17 +5386,24 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     return 2 * R * Math.asin(Math.sqrt(s));
   }
 
-  async function afMeasure(a, b) {
+  /* Road distance along a chain of points in ONE OSRM request (it returns each
+     leg), or a straight-line x 1.3 estimate per leg if OSRM is slow or down. */
+  async function afMeasure(points) {
     try {
-      const r = await afTimeoutFetch(AF_OSRM + a.lon + "," + a.lat + ";" + b.lon + "," + b.lat + "?overview=false&alternatives=false", 7000);
+      const coords = points.map(p => p.lon + "," + p.lat).join(";");
+      const r = await afTimeoutFetch(AF_OSRM + coords + "?overview=false&alternatives=false", 9000);
       if (r.ok) {
         const j = await r.json();
-        const leg = j && j.code === "Ok" && j.routes && j.routes[0];
-        if (leg && leg.distance > 0) return { km: leg.distance / 1000, mins: leg.duration / 60, road: true };
+        const route = j && j.code === "Ok" && j.routes && j.routes[0];
+        if (route && route.distance > 0) {
+          return { km: route.distance / 1000, mins: route.duration / 60, road: true,
+                   legs: (route.legs || []).map(l => ({ km: l.distance / 1000, mins: l.duration / 60 })) };
+        }
       }
     } catch (err) { /* fall through to the estimate */ }
-    const km = afHaversineKm(a, b) * 1.3;
-    return { km, mins: km / 45 * 60, road: false };
+    const legs = points.slice(1).map((p, i) => { const km = afHaversineKm(points[i], p) * 1.3; return { km, mins: km / 45 * 60 }; });
+    const km = legs.reduce((s, l) => s + l.km, 0);
+    return { km, mins: km / 45 * 60, road: false, legs };
   }
 
   const afFmtKm = km => "~" + (km < 10 ? km.toFixed(1) : Math.round(km)) + " km";
@@ -5365,11 +5413,21 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     return hh ? hh + "h" + (mm ? " " + mm + "m" : "") : mm + " min";
   }
 
-  /* One line for the desk: email row, Supabase notes and WhatsApp. */
+  /* Lines for the desk: email rows, Supabase notes and WhatsApp. The summary
+     always starts with the km figure (send-mail.php checks for it). */
   function afRouteText() {
     if (!afRoute) return "";
-    return afFmtKm(afRoute.km) + " (approx. " + afFmtTime(afRoute.mins) + ")" +
-      (afRoute.road ? " by road" : " estimate") + ", " + afRoute.from + " to " + afRoute.to;
+    const how = afRoute.road ? " by road" : " estimate";
+    if (!afRoute.multi) return afFmtKm(afRoute.km) + " (approx. " + afFmtTime(afRoute.mins) + ")" + how + ", " + afRoute.from + " to " + afRoute.to;
+    return afFmtKm(afRoute.km) + " total (approx. " + afFmtTime(afRoute.mins) + " driving)" + how + ", " +
+      afRoute.legs.length + " legs: " + afRoute.names.join(" → ");
+  }
+  function afRouteLegsText() {
+    if (!afRoute || !afRoute.multi) return "";
+    return afRoute.legs.map((l, i) => afRoute.names[i] + " → " + afRoute.names[i + 1] + " " + afFmtKm(l.km)).join("; ");
+  }
+  function afRouteStopsText() {
+    return afStopInputs().map(el => el.value.trim()).filter(v => v.length >= 2).join(" → ");
   }
 
   function afRenderRoute(state, data) {
@@ -5379,31 +5437,51 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     if (state === "none") { box.textContent = ""; return; }
     const pin = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>';
     if (state === "loading") {
-      box.innerHTML = '<div class="route-badge is-loading"><span class="af-ac-spin" aria-hidden="true"></span> Calculating route distance&hellip;</div>';
-    } else if (state === "fail") {
+      box.innerHTML = '<div class="route-badge is-loading"><span class="af-ac-spin" aria-hidden="true"></span> Calculating ' + (data > 1 ? "total route distance for " + data + " legs" : "route distance") + '&hellip;</div>';
+      return;
+    }
+    if (state === "fail") {
       box.innerHTML = '<div class="route-badge is-muted">' + pin + '<span>We could not place <strong>' + afEscape(data) + '</strong> on the map &mdash; the desk will confirm the distance with your quote.</span></div>';
-    } else {
+      return;
+    }
+    const how = data.road ? "road route via OpenStreetMap, traffic not included" : "straight-line estimate, road route unavailable";
+    if (!data.multi) {
       box.innerHTML = '<div class="route-badge">' + pin +
         '<div><div class="route-badge-main">Estimated Route Distance: <strong>' + afFmtKm(data.km) + '</strong> <span>(approx. ' + afFmtTime(data.mins) + ')</span></div>' +
-        '<div class="route-badge-sub">' + afEscape(data.from) + ' &rarr; ' + afEscape(data.to) + ' &middot; ' +
-        (data.road ? "road route via OpenStreetMap, traffic not included" : "straight-line estimate, road route unavailable") + '</div></div></div>';
+        '<div class="route-badge-sub">' + afEscape(data.from) + ' &rarr; ' + afEscape(data.to) + ' &middot; ' + how + '</div></div></div>';
+      return;
     }
+    const legs = data.legs.map((l, i) =>
+      '<li><span>' + afEscape(data.names[i]) + ' &rarr; ' + afEscape(data.names[i + 1]) + '</span><strong>' + afFmtKm(l.km) + '</strong></li>').join("");
+    box.innerHTML = '<div class="route-badge">' + pin +
+      '<div class="min-w-0 flex-1"><div class="route-badge-main">Total Custom Route Distance: <strong>' + afFmtKm(data.km) + '</strong> <span>(approx. ' + afFmtTime(data.mins) + ' driving)</span></div>' +
+      '<div class="route-badge-sub">' + data.legs.length + ' legs &middot; ' + how + '</div>' +
+      '<ol class="route-legs">' + legs + '</ol></div></div>';
   }
+
+  function afStopInputs() { return Array.from(document.querySelectorAll("#routeStops input[data-stop]")); }
 
   async function afUpdateRoute() {
     const pickup = document.getElementById("inquiry_pickup"), dropoff = document.getElementById("inquiry_dropoff");
     if (!pickup || !dropoff) return;
     const seq = ++afRouteSeq;
-    if (dropoff.value.trim().length < 3) { afRoute = null; afRenderRoute("none"); return; }
-    afRenderRoute("loading");
+    const stops = afStopInputs().filter(el => el.value.trim().length >= 2);
+    const chain = [{ el: pickup, isPickup: true }].concat(stops.map(el => ({ el })),
+      dropoff.value.trim().length >= 3 ? [{ el: dropoff }] : []);
+    if (chain.length < 2) { afRoute = null; afRenderRoute("none"); return; }
+    afRenderRoute("loading", chain.length - 1);
     try {
-      const [a, b] = await Promise.all([afCoordsFor(pickup, true), afCoordsFor(dropoff, false)]);
+      const pts = await Promise.all(chain.map(c => afCoordsFor(c.el, !!c.isPickup)));
       if (seq !== afRouteSeq) return;
-      if (!a || !b) { afRoute = null; afRenderRoute("fail", (!a ? pickup : dropoff).value.trim()); return; }
-      if (afHaversineKm(a, b) < 0.3) { afRoute = null; afRenderRoute("none"); return; }
-      const m = await afMeasure(a, b);
+      const missing = pts.findIndex(p => !p);
+      if (missing >= 0) { afRoute = null; afRenderRoute("fail", chain[missing].el.value.trim()); return; }
+      /* Ignore a stop that is the same place as the one before it. */
+      const kept = [pts[0]];
+      pts.slice(1).forEach(p => { if (afHaversineKm(kept[kept.length - 1], p) >= 0.3) kept.push(p); });
+      if (kept.length < 2) { afRoute = null; afRenderRoute("none"); return; }
+      const m = await afMeasure(kept);
       if (seq !== afRouteSeq) return;
-      afRoute = Object.assign(m, { from: a.label, to: b.label });
+      afRoute = Object.assign(m, { names: kept.map(p => p.label), from: kept[0].label, to: kept[kept.length - 1].label, multi: kept.length > 2 });
       afRenderRoute("ok", afRoute);
     } catch (err) {
       if (seq !== afRouteSeq) return;
@@ -5412,27 +5490,113 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     }
   }
 
+  /* ---------- Custom route builder ---------- */
+  const AF_MAX_STOPS = 8;
+  const AF_STOP_EXAMPLES = ["Sigiriya", "Kandy", "Nuwara Eliya", "Ella", "Yala", "Mirissa", "Galle", "Bentota"];
+  let afStopSeq = 0, afRouteWait = 0;
+  const afRouteSoon = ms => { clearTimeout(afRouteWait); afRouteWait = setTimeout(afUpdateRoute, ms); };
+  const afClearChoice = el => { delete el.dataset.for; delete el.dataset.lat; delete el.dataset.lon; delete el.dataset.geoq; };
+
+  function afRenumberStops() {
+    afStopInputs().forEach((el, i) => {
+      const li = el.closest("li");
+      li.querySelector(".route-stop-num").textContent = i + 1;
+      el.placeholder = "Stop " + (i + 1) + " \u2014 e.g. " + AF_STOP_EXAMPLES[i % AF_STOP_EXAMPLES.length];
+      el.setAttribute("aria-label", "Stop " + (i + 1));
+      li.querySelector(".route-stop-remove").setAttribute("aria-label", "Remove stop " + (i + 1));
+    });
+    const add = document.getElementById("routeAddStop");
+    if (add) add.disabled = afStopInputs().length >= AF_MAX_STOPS;
+  }
+
+  function afAddStop(focus) {
+    const list = document.getElementById("routeStops");
+    if (!list || afStopInputs().length >= AF_MAX_STOPS) return null;
+    const id = "route_stop_" + (++afStopSeq);
+    const li = document.createElement("li");
+    li.className = "route-stop";
+    li.innerHTML =
+      '<span class="route-stop-num" aria-hidden="true"></span>' +
+      '<div class="af-ac min-w-0 flex-1"><div class="af-ac-field">' +
+        '<input id="' + id + '" type="text" data-stop data-af-autocomplete autocomplete="off" spellcheck="false" maxlength="120"' +
+        ' role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="' + id + '_list"' +
+        ' class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3 text-[14px] font-medium text-navy-900 transition" />' +
+        '<ul id="' + id + '_list" class="af-ac-list custom-autocomplete-dropdown" role="listbox" aria-label="Stop suggestions" hidden></ul>' +
+      '</div></div>' +
+      '<button type="button" class="route-stop-remove"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+    list.appendChild(li);
+    const input = li.querySelector("input");
+    initLocationAutocomplete(input);
+    li.querySelector(".route-stop-remove").addEventListener("click", () => { li.remove(); afRenumberStops(); afRouteSoon(50); });
+    afRenumberStops();
+    if (focus) input.focus({ preventScroll: true });
+    return input;
+  }
+
+  function afOpenStops(focus) {
+    const panel = document.getElementById("routeStopsPanel"), toggle = document.getElementById("routeStopsToggle");
+    if (!panel) return;
+    panel.classList.remove("hidden");
+    if (toggle) { toggle.setAttribute("aria-expanded", "true"); toggle.classList.add("is-open"); }
+    if (!afStopInputs().length) afAddStop(false);
+    if (focus) { const first = afStopInputs().find(el => !el.value.trim()) || afStopInputs()[0]; if (first) first.focus({ preventScroll: true }); }
+  }
+
+  function afCloseStops() {
+    const panel = document.getElementById("routeStopsPanel"), toggle = document.getElementById("routeStopsToggle"), list = document.getElementById("routeStops");
+    if (list) list.innerHTML = "";
+    if (panel) panel.classList.add("hidden");
+    if (toggle) { toggle.setAttribute("aria-expanded", "false"); toggle.classList.remove("is-open"); }
+  }
+
   (function () {
-    let wait = 0;
-    const soon = ms => { clearTimeout(wait); wait = setTimeout(afUpdateRoute, ms); };
     ["inquiry_pickup", "inquiry_dropoff"].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
-      el.addEventListener("change", () => soon(50));
-      el.addEventListener("input", () => {
-        if (el.dataset.for && el.dataset.for !== el.value) { delete el.dataset.for; delete el.dataset.lat; delete el.dataset.lon; delete el.dataset.geoq; }
-        soon(1200);
-      });
-      el.addEventListener("blur", () => soon(250));
+      el.addEventListener("change", () => afRouteSoon(50));
+      el.addEventListener("input", () => { if (el.dataset.for && el.dataset.for !== el.value) afClearChoice(el); afRouteSoon(1200); });
+      el.addEventListener("blur", () => afRouteSoon(250));
+    });
+    const stops = document.getElementById("routeStops");
+    if (stops) {
+      stops.addEventListener("change", e => { if (e.target.matches("input[data-stop]")) afRouteSoon(50); });
+      stops.addEventListener("input", e => { const el = e.target; if (el.matches("input[data-stop]")) { if (el.dataset.for && el.dataset.for !== el.value) afClearChoice(el); afRouteSoon(1200); } });
+      stops.addEventListener("focusout", e => { if (e.target.matches("input[data-stop]")) afRouteSoon(250); });
+    }
+    const toggle = document.getElementById("routeStopsToggle");
+    if (toggle) toggle.addEventListener("click", () => {
+      if (toggle.getAttribute("aria-expanded") === "true" && !afStopInputs().some(el => el.value.trim())) { afCloseStops(); afRouteSoon(50); }
+      else afOpenStops(true);
+    });
+    const add = document.getElementById("routeAddStop");
+    if (add) add.addEventListener("click", () => afAddStop(true));
+    const round = document.getElementById("routeRoundTrip");
+    if (round) round.addEventListener("click", () => {
+      const p = document.getElementById("inquiry_pickup"), d = document.getElementById("inquiry_dropoff");
+      d.value = p.value.trim() || AF_CMB.name;
+      afClearChoice(d);
+      ["for", "lat", "lon", "geoq"].forEach(k => { if (p.dataset[k]) d.dataset[k] = p.dataset[k]; });
+      if (!p.value.trim()) { d.dataset.for = d.value; d.dataset.lat = AF_CMB.lat; d.dataset.lon = AF_CMB.lon; d.dataset.geoq = AF_CMB.name; }
+      else if (p.dataset.for) d.dataset.for = d.value;
+      showToast("Drop-off set to your pick-up point — a round trip");
+      afRouteSoon(50);
+    });
+    /* "Request Custom Plan" and the other custom-route buttons open the builder. */
+    document.addEventListener("click", e => {
+      if (e.target.closest("[data-open-stops]")) setTimeout(() => afOpenStops(true), 800);
     });
     const form = document.getElementById("inquiryForm");
     if (form) form.addEventListener("reset", () => {
-      ["inquiry_pickup", "inquiry_dropoff"].forEach(id => { const el = document.getElementById(id); if (el) { delete el.dataset.for; delete el.dataset.lat; delete el.dataset.lon; delete el.dataset.geoq; } });
+      ["inquiry_pickup", "inquiry_dropoff"].forEach(id => { const el = document.getElementById(id); if (el) afClearChoice(el); });
+      afCloseStops();
       afRouteSeq++; afRoute = null; afRenderRoute("none");
     });
   })();
 
-  window.airportFirstRoute = { update: afUpdateRoute, get: () => afRoute, text: afRouteText };
+  window.airportFirstRoute = {
+    update: afUpdateRoute, get: () => afRoute, text: afRouteText,
+    legs: afRouteLegsText, stops: afRouteStopsText, openStops: afOpenStops, addStop: afAddStop,
+  };
 
 
   /* =========================================================
@@ -5794,6 +5958,14 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       if (error) throw error;
       /* Reverse so that prepending leaves the newest at the top. */
       (data || []).slice().reverse().forEach(prependReview);
+      /* Average of the real, approved reviews just loaded — never a made-up figure. */
+      const rated = (data || []).filter(r => Number(r.rating) >= 1 && Number(r.rating) <= 5);
+      const pill = document.getElementById("reviewSummary");
+      if (pill && rated.length) {
+        const avg = rated.reduce((s, r) => s + Number(r.rating), 0) / rated.length;
+        pill.textContent = "★ " + avg.toFixed(1) + " average · " + rated.length + " approved guest review" + (rated.length === 1 ? "" : "s");
+        pill.classList.remove("hidden"); pill.classList.add("flex");
+      }
     } catch (err) {
       console.warn("[AirportFirst] Reviews unavailable, showing featured ones only:", err && err.message);
     }
@@ -6164,10 +6336,18 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
           the guest never leaves the site. */
     /* The route estimate rides alongside the payload rather than inside it:
        Supabase only accepts its own columns, so there it goes into the notes. */
-    const routeText = window.airportFirstRoute ? window.airportFirstRoute.text() : "";
-    const withRoute = Object.assign({}, payload, { distance: routeText });
-    const forDatabase = routeText
-      ? Object.assign({}, payload, { notes: (payload.notes ? payload.notes + "\n\n" : "") + "Estimated route: " + routeText })
+    const R = window.airportFirstRoute;
+    const routeText = R ? R.text() : "";
+    const routeStops = R ? R.stops() : "";
+    const routeLegs = R ? R.legs() : "";
+    const withRoute = Object.assign({}, payload, { distance: routeText, stops: routeStops, legs: routeLegs });
+    const routeNotes = [
+      routeStops ? "Route stops: " + routeStops : "",
+      routeText ? (routeLegs ? "Total custom route: " : "Estimated route: ") + routeText : "",
+      routeLegs ? "Legs: " + routeLegs : "",
+    ].filter(Boolean).join("\n");
+    const forDatabase = routeNotes
+      ? Object.assign({}, payload, { notes: ((payload.notes ? payload.notes + "\n\n" : "") + routeNotes).slice(0, 1990) })
       : payload;
 
     showRequestReceived({
@@ -6177,6 +6357,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         ["Date", payload.date + (payload.time ? " at " + payload.time : "")],
         ["Passengers", payload.pax],
         ["Vehicle", payload.vehicle],
+        ["Via (stops)", routeStops],
         ["Est. distance", routeText],
         ["Name", payload.name],
         ["Phone / WhatsApp", payload.phone],
