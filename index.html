@@ -4022,14 +4022,6 @@
            class="mt-3.5 flex w-full items-center justify-center gap-2.5 whitespace-nowrap rounded-xl bg-[#25D366] px-5 py-3.5 text-[15px] font-bold leading-none tracking-[.01em] text-white shadow-[0_14px_30px_-14px_rgba(37,211,102,.8)] transition hover:bg-[#1EBE5A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2">
           <i data-lucide="message-circle" class="h-[18px] w-[18px] shrink-0"></i><span>Send on WhatsApp</span>
         </a>
-        <!-- Secondary: the same summary to paste anywhere (email, Viber, notes). -->
-        <div class="mt-2.5 text-center">
-          <button id="modalCopySummary" type="button"
-                  class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold text-emerald-700 transition hover:bg-emerald-500/10 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
-            <i data-lucide="copy" class="h-3.5 w-3.5"></i><span data-label>Copy summary</span>
-          </button>
-          <span class="sr-only" aria-live="polite" id="modalCopyStatus"></span>
-        </div>
       </div>
 
       <div class="mt-3 flex flex-col gap-3">
@@ -5110,16 +5102,6 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
   function showRequestReceived(summary, whatsappHref) {
     const link = document.getElementById("modalWhatsapp");
     if (link) link.href = whatsappHref || ("https://wa.me/" + DISPATCH_NUMBER);
-    /* The "Copy summary" button copies exactly the WhatsApp message text. */
-    let summaryText = "";
-    try { summaryText = new URL(link ? link.href : "").searchParams.get("text") || ""; } catch (e) { /* no summary */ }
-    const copyBtn = document.getElementById("modalCopySummary");
-    if (copyBtn) {
-      copyBtn.dataset.summary = summaryText;
-      copyBtn.classList.toggle("hidden", !summaryText);
-      const label = copyBtn.querySelector("[data-label]");
-      if (label) label.textContent = "Copy summary";
-    }
 
     document.getElementById("modalRoute").innerHTML = routeRow(summary.title, summary.meta);
     document.getElementById("modalLines").innerHTML = summary.rows
@@ -5131,34 +5113,6 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     openModal();
     replaySuccessMark();
   }
-
-  (function () {
-    const btn = document.getElementById("modalCopySummary");
-    if (!btn) return;
-    let resetTimer = 0;
-    /* Older Safari / in-app browsers: copy through a hidden text box. */
-    const legacyCopy = text => {
-      const box = document.createElement("textarea");
-      box.value = text; box.setAttribute("readonly", "");
-      box.style.cssText = "position:fixed;top:0;left:-9999px;opacity:0";
-      document.body.appendChild(box); box.select();
-      let ok = false;
-      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-      box.remove();
-      return ok;
-    };
-    btn.addEventListener("click", async () => {
-      const text = btn.dataset.summary || "";
-      if (!text) return;
-      let ok = false;
-      try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = legacyCopy(text); }
-      const label = btn.querySelector("[data-label]"), status = document.getElementById("modalCopyStatus");
-      if (label) label.textContent = ok ? "Copied" : "Copy not available";
-      if (status) status.textContent = ok ? "Booking summary copied" : "";
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => { if (label) label.textContent = "Copy summary"; if (status) status.textContent = ""; }, 1800);
-    });
-  })();
 
   /* NOTE: WhatsApp is never opened for the guest. No timer, no window.open,
      no redirect — a foreign guest on an unfamiliar site should not have tabs
