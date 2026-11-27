@@ -253,7 +253,7 @@
           "name": "Is prepayment required, and how do I pay?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Advance prepayment is required to confirm your reservation. Once your route and vehicle are confirmed, our 24/7 dispatch desk sends an official, encrypted online payment link directly to your email and WhatsApp. We never ask for card details by phone, in chat or on this website. Corporate clients can arrange an account with invoicing."
+            "text": "Yes. Advance prepayment is required to confirm your reservation. Once you submit your inquiry, our 24/7 dispatch desk will send your official fare quote and prepayment instructions directly via WhatsApp or Email. Corporate clients can arrange an account with invoicing."
           }
         },
         {
@@ -1289,6 +1289,27 @@
 
   /* Header logo: blends into the white header, shadow applied to the image itself. */
   .header-logo { mix-blend-mode: multiply; filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.16)); }
+
+  /* ---------- Mobile fit ---------- */
+  /* overflow-x: clip (not hidden) so the sticky header keeps working. */
+  html, body { max-width: 100%; overflow-x: clip; }
+  input, select, textarea { max-width: 100%; box-sizing: border-box; }
+  /* iOS Safari zooms the whole page when a field under 16px is focused, and
+     stays zoomed: the cause of the clipped, zoomed-in view on iPhone. */
+  @media (max-width: 767px) { input, select, textarea { font-size: 16px !important; } }
+
+  /* Location field hints */
+  .af-hint { margin-top: 6px; font-size: 12px; line-height: 1.5; color: rgba(15,23,42,.5); }
+
+  /* Mobile bottom bar: room for the iPhone home indicator, and nothing hidden behind it */
+  .mobile-bar { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  @media (max-width: 639px) {
+    .wa-float, #toTop { bottom: calc(76px + env(safe-area-inset-bottom)) !important; }
+    #toast { bottom: calc(140px + env(safe-area-inset-bottom)); }
+  }
+  @media (max-width: 768px) {
+    footer#contact { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
+  }
 </style>
 </head>
 
@@ -1459,7 +1480,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <span class="inline-flex items-center gap-1.5 rounded-full bg-[#FFF8EC] px-3.5 py-2 text-[11.5px] font-bold text-gold-600 ring-1 ring-gold/40">
-            <i data-lucide="lock-keyhole" class="h-3.5 w-3.5"></i> Prepayment &middot; secure payment link
+            <i data-lucide="wallet" class="h-3.5 w-3.5"></i> Advance prepayment required
           </span>
           <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3.5 py-2 text-[11.5px] font-bold text-emerald-700 ring-1 ring-emerald-500/20">
             <i data-lucide="clock" class="h-3.5 w-3.5"></i> Reply in 15 minutes
@@ -1525,6 +1546,7 @@
                     </button>
                     <ul id="inquiry_pickup_list" class="af-ac-list custom-autocomplete-dropdown" role="listbox" aria-label="Pick-up suggestions" hidden></ul>
                   </div>
+                  <p class="af-hint">Type any hotel, airport, or landmark in Sri Lanka &mdash; or tap the red GPS target icon above to use your current location.</p>
                 </div>
                 <div class="af-ac">
                   <label for="inquiry_dropoff" class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
@@ -1539,15 +1561,10 @@
                            class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition" />
                     <ul id="inquiry_dropoff_list" class="af-ac-list custom-autocomplete-dropdown" role="listbox" aria-label="Drop-off suggestions" hidden></ul>
                   </div>
+                  <p class="af-hint">Type any city, hotel, resort, or landmark in Sri Lanka (auto-suggests as you type).</p>
                 </div>
               </div>
 
-              <p class="lg:col-span-12 -mt-1 flex items-center gap-1.5 text-[12px] leading-relaxed text-navy-900/45">
-                <i data-lucide="search" class="h-3.5 w-3.5 shrink-0 text-crimson"></i>
-                Type any Hotel, Resort Address, Airport, or Landmark in Sri Lanka &mdash; or tap
-                <i data-lucide="locate-fixed" class="mx-0.5 inline-block h-3.5 w-3.5 align-[-2px] text-crimson"></i>
-                to use your current location
-              </p>
 
               <!-- Route distance, filled by the route script once both places are known. -->
               <div id="routeBadge" class="lg:col-span-12 hidden" aria-live="polite"></div>
@@ -1651,12 +1668,12 @@
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-crimson/10 px-3 py-1.5 text-[11.5px] font-bold text-crimson-600 ring-1 ring-crimson/20"><i data-lucide="radar" class="h-3 w-3"></i> Flight delay auto-tracking</span>
               </div>
 
-              <!-- Prepayment policy: payment is never taken on this form. -->
+              <!-- Prepayment policy: no payment is taken on this site. -->
               <div class="lg:col-span-12 flex items-start gap-3.5 rounded-2xl bg-[#FFF8EC] p-4 ring-1 ring-gold/40 sm:p-5">
-                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-gold-600 shadow-soft"><i data-lucide="lock-keyhole" class="h-4.5 w-4.5"></i></span>
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-gold-600 shadow-soft"><i data-lucide="wallet" class="h-4.5 w-4.5"></i></span>
                 <div>
-                  <div class="text-[13.5px] font-extrabold text-navy-900">Prepayment policy &middot; secure payment link</div>
-                  <p class="mt-1 text-[13px] leading-relaxed text-navy-900/65">Advance prepayment is required to confirm your reservation. Once your route and vehicle are confirmed, our 24/7 dispatch desk sends an official, encrypted online payment link directly to your Email and WhatsApp. We never ask for card details on this form, by phone or in chat.</p>
+                  <div class="text-[13.5px] font-extrabold text-navy-900">Advance prepayment policy</div>
+                  <p class="mt-1 text-[13px] leading-relaxed text-navy-900/65">Advance prepayment is required to confirm your reservation. Once you submit your inquiry, our 24/7 dispatch desk will send your official fare quote and prepayment instructions directly via WhatsApp or Email.</p>
                 </div>
               </div>
 
@@ -1680,7 +1697,7 @@
             </form>
 
       <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-navy-900/[.06] pt-5 text-[12px] font-semibold text-navy-900/50">
-        <span class="inline-flex items-center gap-1.5"><i data-lucide="lock-keyhole" class="h-3.5 w-3.5 text-gold-600"></i> Encrypted payment link</span>
+        <span class="inline-flex items-center gap-1.5"><i data-lucide="receipt-text" class="h-3.5 w-3.5 text-gold-600"></i> Fare quote before you pay</span>
         <span class="inline-flex items-center gap-1.5"><i data-lucide="file-check-2" class="h-3.5 w-3.5 text-emerald-600"></i> Confirmed in writing</span>
         <span class="inline-flex items-center gap-1.5"><i data-lucide="shield-check" class="h-3.5 w-3.5 text-emerald-600"></i> Fully insured journeys</span>
         <span class="inline-flex items-center gap-1.5"><i data-lucide="headset" class="h-3.5 w-3.5 text-emerald-600"></i> 24/7 dispatch desk</span>
@@ -2273,14 +2290,14 @@
     <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
       <!-- Card 1 (feature) -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card sm:col-span-2 lg:col-span-2 min-h-[340px] sm:min-h-[380px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col sm:col-span-2 lg:col-span-2 min-h-[340px] sm:min-h-[380px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Sigiriya Rock Fortress"
              src="https://images.unsplash.com/photo-1612862862126-865765df2ded?auto=format&fit=crop&w=1400&q=80"
              alt="Sigiriya Rock Fortress" />
         <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/55 to-navy-950/5"></div>
 
-        <div class="absolute top-5 left-5 flex flex-wrap gap-2">
+        <div class="absolute top-5 left-5 right-16 flex flex-wrap items-center gap-1.5">
           <span class="glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">UNESCO Heritage</span>
           <span class="rounded-full bg-crimson px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Best Seller</span>
         </div>
@@ -2288,7 +2305,7 @@
           <i data-lucide="heart" class="h-4 w-4"></i>
         </button>
 
-        <div class="relative flex h-full flex-col justify-end p-6 sm:p-8">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:p-8 sm:pt-20">
           <div class="flex items-center gap-3 text-white/80 text-[12.5px] font-semibold">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 3 Days / 2 Nights</span>
             <span class="hidden sm:inline h-3 w-px bg-white/25"></span>
@@ -2312,7 +2329,7 @@
       </article>
 
       <!-- Card 2 -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[340px] sm:min-h-[380px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[340px] sm:min-h-[380px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Ella Nine Arch Bridge"
              src="https://images.unsplash.com/photo-1566766189268-ecac9118f2b7?auto=format&fit=crop&w=1000&q=80"
@@ -2321,7 +2338,7 @@
         <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Hill Country</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 2 Days / 1 Night</span>
           </div>
@@ -2339,7 +2356,7 @@
       </article>
 
       <!-- Card 3 -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[320px] sm:min-h-[360px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[320px] sm:min-h-[360px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Kandy Temple of the Tooth"
              src="https://images.unsplash.com/photo-1665849050332-8d5d7e59afb6?auto=format&fit=crop&w=1000&q=80"
@@ -2348,7 +2365,7 @@
         <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Cultural Capital</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 2 Days / 1 Night</span>
           </div>
@@ -2366,7 +2383,7 @@
       </article>
 
       <!-- Card 4 -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[320px] sm:min-h-[360px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[320px] sm:min-h-[360px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Mirissa Beach &amp; Whale Point"
              src="https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&fit=crop&w=1000&q=80"
@@ -2375,7 +2392,7 @@
         <span class="absolute top-5 left-5 rounded-full bg-mist-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-navy-950">Seasonal Nov&ndash;Apr</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 1 Day &middot; 05:30 start</span>
           </div>
@@ -2393,20 +2410,20 @@
       </article>
 
       <!-- Card 5 : Nuwara Eliya &amp; Seetha Amman Kovil (feature) -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card sm:col-span-2 min-h-[340px] sm:min-h-[380px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col sm:col-span-2 min-h-[340px] sm:min-h-[380px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Seetha Amman Kovil"
              src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1400&q=80"
              alt="Illuminated Hindu temple gopuram at dusk" />
         <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/60 to-navy-950/10"></div>
 
-        <div class="absolute top-5 left-5 flex flex-wrap gap-2">
+        <div class="absolute top-5 left-5 right-16 flex flex-wrap items-center gap-1.5">
           <span class="rounded-full bg-crimson px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Ramayana Legend</span>
           <span class="glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Heritage Shrine</span>
         </div>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6 sm:p-8">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:p-8 sm:pt-20">
           <div class="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 3 Days / 2 Nights</span>
             <span class="hidden sm:inline h-3 w-px bg-white/25"></span>
@@ -2430,7 +2447,7 @@
       </article>
 
       <!-- Card 6 : Jaffna Northern Heritage -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[320px] sm:min-h-[360px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[320px] sm:min-h-[360px]">
         <!-- Nallur-style gopuram, Jaffna -->
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Jaffna Northern Heritage"
@@ -2440,7 +2457,7 @@
         <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Northern Province</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 3 Days / 2 Nights</span>
           </div>
@@ -2462,7 +2479,7 @@
 
 
       <!-- Card 7 : Kurunegala Ethagala -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[320px] sm:min-h-[360px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[320px] sm:min-h-[360px]">
         <!-- Athugala seated Buddha above Kurunegala -->
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Kurunegala Ethagala"
@@ -2472,7 +2489,7 @@
         <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Ancient Capital</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> Day trip &middot; en route to Kandy</span>
           </div>
@@ -2492,7 +2509,7 @@
         </div>
       </article>
       <!-- Card 8 : Yala -->
-      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card min-h-[320px] sm:min-h-[360px]">
+      <article class="hover-card reveal group relative overflow-hidden rounded-3xl bg-navy-900 shadow-card flex flex-col min-h-[320px] sm:min-h-[360px]">
         <img loading="lazy" decoding="async" class="zoom-img absolute inset-0 h-full w-full object-cover"
              data-fallback="Yala National Park"
              src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1000&q=80"
@@ -2501,7 +2518,7 @@
         <span class="absolute top-5 left-5 glass rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">Wildlife Safari</span>
         <button class="wish lift absolute top-5 right-5 h-9 w-9 grid place-items-center rounded-full glass text-white transition hover:bg-crimson" aria-label="Save"><i data-lucide="heart" class="h-4 w-4"></i></button>
 
-        <div class="relative flex h-full flex-col justify-end p-6">
+        <div class="relative mt-auto flex flex-col justify-end p-6 pt-28 sm:pt-20">
           <div class="flex items-center gap-2 text-[12px] font-semibold text-white/80">
             <span class="inline-flex items-center gap-1"><i data-lucide="clock-4" class="h-3.5 w-3.5"></i> 2 Days / 1 Night</span>
           </div>
@@ -2623,14 +2640,14 @@
         </div>
 
         <!-- Panel -->
-        <div class="relative lg:col-span-5 min-h-[320px] bg-navy-900 noise">
+        <div class="relative flex flex-col lg:col-span-5 min-h-[320px] bg-navy-900 noise">
           <img loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover opacity-45"
                data-fallback="Executive Transport"
                src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1000&q=80"
                alt="Chauffeur driving an executive car through the city at dusk" />
           <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/30"></div>
 
-          <div class="relative flex h-full flex-col justify-end gap-5 p-7 sm:p-10">
+          <div class="relative mt-auto flex flex-col justify-end gap-5 p-7 sm:p-10">
             <div class="grid grid-cols-2 gap-3">
               <div class="rounded-2xl bg-white/6 p-4 ring-1 ring-white/10">
                 <div class="font-display text-2xl font-bold text-white">18+ yrs</div>
@@ -3417,7 +3434,7 @@
             <span class="text-[15.5px] font-bold text-navy-900">Is prepayment required, and how do I pay?</span>
             <span class="faq-icon grid h-8 w-8 shrink-0 place-items-center rounded-full bg-crimson-50 text-crimson-500"><i data-lucide="plus" class="h-4 w-4"></i></span>
           </summary>
-          <div class="px-6 pb-6 -mt-1 text-[14.5px] leading-relaxed text-navy-900/60">Yes. Advance prepayment is required to confirm your reservation. Once your route and vehicle are confirmed, our 24/7 dispatch desk sends an official, encrypted online payment link directly to your email and WhatsApp. We never ask for card details by phone, in chat or on this website. Corporate clients can arrange an account with invoicing.</div>
+          <div class="px-6 pb-6 -mt-1 text-[14.5px] leading-relaxed text-navy-900/60">Yes. Advance prepayment is required to confirm your reservation. Once you submit your inquiry, our 24/7 dispatch desk will send your official fare quote and prepayment instructions directly via WhatsApp or Email. Corporate clients can arrange an account with invoicing.</div>
         </details>
         <details class="faq reveal group rounded-2xl bg-white ring-1 ring-navy-900/8">
           <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left">
@@ -3468,7 +3485,7 @@
         </h2>
         <p class="mt-4 text-[15.5px] leading-relaxed text-white/85">
           Send us your flight number and we will confirm your chauffeur, vehicle and your best all-in rate &mdash;
-          confirmed in writing with a secure payment link &mdash; and no surprises at arrivals.
+          confirmed in writing with clear prepayment instructions &mdash; and no surprises at arrivals.
         </p>
       </div>
 
@@ -3632,7 +3649,7 @@
 </button>
 
 <!-- Mobile sticky call bar -->
-<div class="sm:hidden fixed bottom-0 inset-x-0 z-30 glass-light border-t border-navy-900/10 px-4 py-3 flex gap-3">
+<div class="mobile-bar sm:hidden fixed bottom-0 inset-x-0 z-30 glass-light border-t border-navy-900/10 px-4 pt-3 flex gap-3">
   <a href="tel:+94714784444" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-navy-900 px-4 py-3 text-[14px] font-bold text-white">
     <i data-lucide="phone" class="h-4 w-4 text-crimson-300"></i> Call
   </a>
@@ -3829,12 +3846,6 @@
       </div>
 
       <div class="mt-3 flex flex-col gap-3">
-        <!-- Asks the desk for the official payment link; no card details are taken here. -->
-        <a id="modalPayLink" href="https://wa.me/94714784444" target="_blank" rel="noopener noreferrer"
-           class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#FFF8EC] px-5 py-3.5 text-[14px] font-bold text-navy-900 ring-1 ring-gold/50 transition hover:bg-[#FFF1D6]">
-          <i data-lucide="lock-keyhole" class="h-4 w-4 text-gold-600"></i>
-          Request Secure Payment Link
-        </a>
 
         <button id="modalDismiss" type="button"
                 class="btn-ghost w-full inline-flex items-center justify-center gap-2 rounded-xl border border-navy-900/12 px-5 py-3 text-[14px] font-bold text-navy-900">
@@ -3844,8 +3855,8 @@
 
       <p class="mt-4 text-center text-[11.5px] leading-relaxed text-navy-900/40">
         <span class="mb-2 block rounded-xl bg-[#FFF8EC] px-4 py-3 text-left text-[12.5px] leading-relaxed text-navy-900/70 ring-1 ring-gold/30">
-          <strong class="text-navy-900">Prepayment confirms your booking.</strong> Once your route and vehicle are confirmed,
-          our 24/7 dispatch desk sends an official, encrypted online payment link to your Email and WhatsApp.
+          <strong class="text-navy-900">Advance prepayment confirms your booking.</strong> Our 24/7 dispatch desk
+          will send your official fare quote and prepayment instructions directly via WhatsApp or Email.
         </span>
         Prefer to talk? Call
         <a href="tel:+94714784444" class="whitespace-nowrap font-bold text-crimson-500">+94 71 478 4444</a>.
@@ -3949,9 +3960,9 @@
           on this site are a general guide; your quote and confirmation are what apply.</p>
 
         <h4>Prepayment</h4>
-        <p>Advance prepayment is required to confirm a reservation. After we confirm your route, vehicle and price in
-          writing, we send an official, encrypted online payment link by email and WhatsApp. We never ask for card
-          details by phone, email, chat or on this website&rsquo;s forms.</p>
+        <p>Advance prepayment is required to confirm a reservation. After you submit your inquiry, our dispatch desk
+          sends your official fare quote and prepayment instructions by WhatsApp or email. Your booking is confirmed
+          once the prepayment has been received.</p>
 
         <h4>Changes and cancellations</h4>
         <p>Please tell us about any change to your plans as early as possible. Cancellation terms are stated in your
@@ -4337,14 +4348,14 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 </script>
 
 <!-- ==================== TOAST ==================== -->
-<div id="toast" class="pointer-events-none fixed bottom-40 sm:bottom-6 left-1/2 z-[70] hidden -translate-x-1/2">
-  <div class="flex items-center gap-3 rounded-full bg-navy-900 px-5 py-3.5 text-white shadow-lux">
+<div id="toast" class="pointer-events-none fixed inset-x-3 bottom-40 z-[70] hidden flex justify-center sm:bottom-6">
+  <div class="flex max-w-full items-center gap-3 rounded-2xl bg-navy-900 px-4 py-3 text-white shadow-lux sm:max-w-[560px] sm:rounded-full sm:px-5 sm:py-3.5">
     <!-- Badge and glyph are set by showToast(): a tick for confirmations, a
          warning triangle for anything the guest has to correct. -->
-    <span id="toastIcon" class="h-7 w-7 grid place-items-center rounded-full bg-gradient-to-br from-crimson-500 to-crimson-700">
+    <span id="toastIcon" class="h-7 w-7 shrink-0 grid place-items-center rounded-full bg-gradient-to-br from-crimson-500 to-crimson-700">
       <i data-lucide="check" class="h-3.5 w-3.5"></i>
     </span>
-    <span id="toastMsg" class="text-[13.5px] font-semibold whitespace-nowrap"></span>
+    <span id="toastMsg" class="min-w-0 text-[13.5px] font-semibold leading-snug whitespace-normal break-words"></span>
   </div>
 </div>
 
@@ -4924,15 +4935,6 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const link = document.getElementById("modalWhatsapp");
     if (link) link.href = whatsappHref || ("https://wa.me/" + DISPATCH_NUMBER);
 
-    /* "Request Secure Payment Link" sends the same summary, asking for the link. */
-    const pay = document.getElementById("modalPayLink");
-    if (pay) {
-      let details = "";
-      try { details = new URL(whatsappHref).searchParams.get("text") || ""; } catch (err) { /* no summary */ }
-      pay.href = "https://wa.me/" + DISPATCH_NUMBER + "?text=" + encodeURIComponent(
-        "Hello Airport First, please send me the secure payment link to confirm my booking request." +
-        (details ? "\n\n" + details : ""));
-    }
 
     document.getElementById("modalRoute").innerHTML = routeRow(summary.title, summary.meta);
     document.getElementById("modalLines").innerHTML = summary.rows
@@ -5514,6 +5516,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         if (edited) return;                        // guest started typing: leave them alone
         if (value) input.value = value;
         else input.value = previous === "Detecting location…" ? "" : previous;
+        requestAnimationFrame(() => { input.scrollLeft = 0; });
         if (message) showToast(message, value ? undefined : "error");
       };
 

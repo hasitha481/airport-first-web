@@ -615,7 +615,7 @@ $replyText = 'Hello ' . $data['name'] . ', thank you for choosing ' . SITE_NAME 
     . ($data['distance'] !== '' ? "\n" . 'Estimated distance: ' . $data['distance'] . '.' : '')
     . ($data['vehicle'] !== '' ? "\n" . 'Vehicle: ' . $data['vehicle'] . '.' : '')
     . "\n\n" . 'Our all-in price is LKR ______ (tolls, parking, fuel and driver included).'
-    . "\n" . 'Advance prepayment confirms the booking - we will send you a secure payment link.'
+    . "\n" . 'Advance prepayment confirms the booking. Prepayment instructions: ______'
     . "\n\n" . SITE_NAME . ' - +94 71 478 4444';
 $guestWa = wa_number($data['phone']);
 $waReplyUrl = $guestWa !== '' ? 'https://wa.me/' . $guestWa . '?text=' . rawurlencode($replyText) : '';
