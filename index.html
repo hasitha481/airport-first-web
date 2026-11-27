@@ -6,6 +6,48 @@
   /* Scroll reveals hide content only once this runs, so a page whose scripts
      fail can never be left with invisible sections. */
   document.documentElement.classList.add("js-reveal");
+
+  /* Every "book / quote / tour" button lands on the TOP of the booking form
+     (Full Name, Phone), just below the sticky header, not mid-form. */
+  window.afScrollToBooking = function () {
+    var form = document.getElementById("inquiryForm") || document.getElementById("booking");
+    if (!form) return;
+    var smooth = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var offset = function () {
+      var header = document.getElementById("header");
+      return (header ? header.getBoundingClientRect().height : 80) + 18;
+    };
+    var go = function () {
+      window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - offset()), behavior: smooth ? "smooth" : "auto" });
+    };
+    go();
+    /* Content above can still settle (images, reveals, the header shrinking):
+       one correction once the scroll has finished. */
+    setTimeout(function () { if (Math.abs(form.getBoundingClientRect().top - offset()) > 24) go(); }, 1100);
+  };
+
+  /* Text boxes marked data-autogrow grow with what is typed (or filled in by a
+     button), from their rows= height up to 60% of the screen, then scroll. */
+  window.afGrow = function (el) {
+    if (!el || !el.style) return;
+    var max = Math.max(160, Math.round(window.innerHeight * 0.6));
+    el.style.height = "auto";
+    var needed = el.scrollHeight + (el.offsetHeight - el.clientHeight);
+    el.style.height = Math.min(needed, max) + "px";
+    el.classList.toggle("is-capped", needed > max);
+  };
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.matches && e.target.matches("textarea[data-autogrow]")) window.afGrow(e.target);
+  });
+  document.addEventListener("reset", function () {
+    setTimeout(function () { document.querySelectorAll("textarea[data-autogrow]").forEach(window.afGrow); }, 0);
+  }, true);
+  var afGrowW = 0;
+  window.addEventListener("resize", function () {
+    if (window.innerWidth === afGrowW) return;     /* mobile URL-bar resizes change height only */
+    afGrowW = window.innerWidth;
+    document.querySelectorAll("textarea[data-autogrow]").forEach(window.afGrow);
+  });
   /* Always serve the live site over HTTPS. Browsers refuse GPS (and treat the
      page as insecure) on plain http://. Done here rather than in .htaccess
      because Cloudflare sits in front: the server cannot always tell which
@@ -1409,6 +1451,19 @@
 
   /* Honeypot fields: off-screen for people, still in the form for bots. */
   .af-hp { position: absolute !important; left: -10000px !important; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+  /* Auto-growing text boxes (see afGrow): no inner scrollbar until 60% of the screen. */
+  textarea[data-autogrow] { resize: none; overflow-y: hidden; transition: height .12s ease; }
+  textarea[data-autogrow].is-capped { overflow-y: auto; }
+  @media (prefers-reduced-motion: reduce) { textarea[data-autogrow] { transition: none; } }
+
+  /* Long words, emails and URLs wrap instead of pushing a box wider than the
+     screen. break-word everywhere (it never changes layout widths); anywhere
+     inside boxes that show text a guest typed. */
+  body { overflow-wrap: break-word; }
+  textarea, input, #modalRoute, #modalLines, #toastMsg, .route-badge, .route-legs li span,
+  #reviewGrid figure, #reviewGrid blockquote, .af-ac-list li { overflow-wrap: anywhere; }
+  #modalLines > *, .route-legs li > span { min-width: 0; }
 </style>
 </head>
 
@@ -1778,9 +1833,9 @@
                 <label for="inquiry_notes" class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
                   <i data-lucide="message-square-text" class="h-3.5 w-3.5 text-crimson"></i> Special Requests / Notes
                 </label>
-                <textarea id="inquiry_notes" name="notes" rows="2"
+                <textarea id="inquiry_notes" name="notes" rows="3" data-autogrow
                           placeholder="Child seats, extra luggage, multi-day tour interest, wheelchair access&hellip;"
-                          class="w-full resize-y rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition"></textarea>
+                          class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3.5 text-[14px] font-medium text-navy-900 transition"></textarea>
               </div>
 
               <div class="lg:col-span-12 flex flex-wrap gap-2 pt-0.5">
@@ -3854,9 +3909,9 @@
         <label for="review_text" class="mb-1.5 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-navy-900/50">
           <i data-lucide="message-square-text" class="h-3.5 w-3.5 text-crimson"></i> Your Review
         </label>
-        <textarea id="review_text" name="review" rows="4" required maxlength="600"
+        <textarea id="review_text" name="review" rows="4" data-autogrow required maxlength="600"
                   placeholder="Tell other travellers how the transfer or tour went&hellip;"
-                  class="w-full resize-y rounded-xl border border-navy-900/12 bg-white px-4 py-3 text-[14px] font-medium text-navy-900 transition"></textarea>
+                  class="w-full rounded-xl border border-navy-900/12 bg-white px-4 py-3 text-[14px] font-medium text-navy-900 transition"></textarea>
         <p class="mt-1.5 text-right text-[11.5px] text-navy-900/40"><span id="reviewCount">0</span> / 600</p>
       </div>
 
@@ -4334,6 +4389,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     if (notes) {
       var line = "Itinerary: " + t.title + " (" + t.duration + ") — please send a quote.";
       if (notes.value.indexOf(t.title) === -1) notes.value = notes.value.trim() ? notes.value.trim() + "\n" + line : line;
+      window.afGrow(notes);
     }
     if (vehicle && t.vehicleOption) {
       var match = Array.prototype.find.call(vehicle.options, function (o) { return o.value === t.vehicleOption; });
@@ -4342,7 +4398,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     close();
     if (window.showToast) window.showToast(t.title + " added — add your dates and contact details");
     setTimeout(function () {
-      $("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      window.afScrollToBooking();
       var name = $("inquiry_name");
       if (name) setTimeout(function () { name.focus({ preventScroll: true }); }, 700);
     }, 340);
@@ -4457,7 +4513,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
   $("readerBook").addEventListener("click", function () {
     close();
-    setTimeout(function () { $("booking").scrollIntoView({ behavior: "smooth", block: "center" }); }, 60);
+    setTimeout(window.afScrollToBooking, 60);
   });
 
   function fromHash() {
@@ -4995,13 +5051,14 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
 
   const routeRow = (title, meta) =>
     '<span class="h-10 w-10 shrink-0 grid place-items-center rounded-xl bg-white text-crimson ring-1 ring-navy-900/8"><i data-lucide="route" class="h-4 w-4"></i></span>' +
-    '<div class="min-w-0"><div class="text-[14.5px] font-bold text-navy-900 truncate">' + escapeHtml(title) + '</div>' +
-    '<div class="text-[12.5px] text-navy-900/50 truncate">' + escapeHtml(meta) + '</div></div>';
+    '<div class="min-w-0"><div class="text-[14.5px] font-bold leading-snug text-navy-900">' + escapeHtml(title) + '</div>' +
+    '<div class="text-[12.5px] text-navy-900/50">' + escapeHtml(meta) + '</div></div>';
 
   const detailRow = (label, value) =>
     '<div class="flex items-start justify-between gap-4 border-b border-dashed border-navy-900/10 pb-3">' +
     '<span class="shrink-0 text-navy-900/55">' + label + '</span>' +
-    '<span class="text-right font-semibold text-navy-900">' + escapeHtml(value) + '</span></div>';
+    /* Multi-line values (notes) keep their line breaks and read left-aligned. */
+    '<span class="min-w-0 ' + (/\n/.test(String(value)) ? "whitespace-pre-line text-left" : "text-right") + ' font-semibold text-navy-900">' + escapeHtml(value) + '</span></div>';
 
   /* Opens WhatsApp with the pre-filled message, then shows the confirmation
      modal (which also carries a manual link for blocked popups). */
@@ -6429,7 +6486,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const notified = await notifyByEmail(withRoute).catch(err => ({ ok: false, reason: err && err.message }));
     const emailedOk = !!(notified && notified.ok && notified.emailed !== false);
     const storedOk  = !!(notified && notified.stored);
-    const refNote   = notified && notified.ref ? " · Ref " + notified.ref : "";
+    /* Non-breaking hyphen, so the reference never splits across two lines. */
+    const refNote   = notified && notified.ref ? " · Ref " + String(notified.ref).replace(/-/g, "‑") : "";
 
     if (emailedOk) {
       /* Green only here: the mail endpoint answered with a real success. */
@@ -6476,10 +6534,11 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         if (notes.value.indexOf(tour) === -1) {
           notes.value = notes.value.trim() ? notes.value.trim() + "\n" + line : line;
         }
+        window.afGrow(notes);
       }
 
       showToast(tour + " added — complete the form for your best tariff");
-      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      window.afScrollToBooking();
       const nameField = document.getElementById("inquiry_name");
       if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
     })
@@ -6499,9 +6558,10 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
         if (notes.value.indexOf(line) === -1) {
           notes.value = notes.value.trim() ? notes.value.trim() + "\n" + line : line;
         }
+        window.afGrow(notes);
       }
       showToast((note || service) + " — add your details below");
-      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      window.afScrollToBooking();
       const nameField = document.getElementById("inquiry_name");
       if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
     })
@@ -6516,7 +6576,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       if (pickup) pickup.value = link.dataset.routeFrom || "";
       if (dropoff) { dropoff.value = link.dataset.routeTo || ""; dropoff.dispatchEvent(new Event("change", { bubbles: true })); }
       showToast("Route added — " + (link.dataset.routeTo || "") + ". Add your date and details");
-      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      window.afScrollToBooking();
       const nameField = document.getElementById("inquiry_name");
       if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
     })
@@ -6543,7 +6603,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       }
       /* Short class name for the toast: "KDH Van - 4 to 8 Pax" → "KDH Van" */
       showToast(vehicle.replace(/\s+-\s.*$/, "") + " selected — add your details for your best rate");
-      document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "center" });
+      window.afScrollToBooking();
       const nameField = document.getElementById("inquiry_name");
       if (nameField) setTimeout(() => nameField.focus({ preventScroll: true }), 700);
     })
@@ -6566,7 +6626,8 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
       const target = document.querySelector(id);
       if (!target) return;
       e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (id === "#booking") window.afScrollToBooking();
+      else target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 })();
