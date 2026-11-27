@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <script>
+  /* Scroll reveals hide content only once this runs, so a page whose scripts
+     fail can never be left with invisible sections. */
+  document.documentElement.classList.add("js-reveal");
   /* Always serve the live site over HTTPS. Browsers refuse GPS (and treat the
      page as insecure) on plain http://. Done here rather than in .htaccess
      because Cloudflare sits in front: the server cannot always tell which
@@ -39,8 +42,8 @@
       "@id": "https://airportfirst.vip/#business",
       "name": "Airport First",
       "legalName": "Airport First (Pvt) Ltd",
-      "slogan": "Feel the ambience.",
-      "description": "Airport First is a Sri Lankan ground transportation company with 18+ years of experience, providing pre-booked, chauffeur-driven airport transfers, corporate and executive travel, hotel transfers, private tours, group and intercity transport.",
+      "slogan": "Your Journey, Our Priority | Feel the Ambience",
+      "description": "Airport First (Pvt) Ltd is a Sri Lankan privately owned transportation and travel services company with over 18 years of experience, specialising in airport transfers, chauffeur-driven transportation, corporate mobility, hotel transfers, customized tours and island-wide travel solutions.",
       "url": "https://airportfirst.vip/",
       "logo": "https://airportfirst.vip/assets/client-logo.png",
       "image": "https://airportfirst.vip/assets/client-logo.png",
@@ -83,9 +86,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Airport transfers and meet-and-greet",
-              "description": "Arrival and departure transfers at Bandaranaike International Airport (CMB) and Mattala (HRI) with name-board meet-and-greet and flight tracking.",
-              "serviceType": "Airport transfers and meet-and-greet",
+              "name": "Airport pickups and drop-offs",
+              "description": "Meet-and-greet arrivals and on-time departures at Bandaranaike (CMB) and Mattala (HRI), with flight tracking.",
+              "serviceType": "Airport pickups and drop-offs",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -99,9 +102,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Chauffeur-driven private vehicles",
-              "description": "Private vehicles with professional chauffeurs by the day, week or length of stay.",
-              "serviceType": "Chauffeur-driven private vehicles",
+              "name": "Corporate and executive transportation",
+              "description": "Discreet, punctual transport for executives, delegations and events, with corporate accounts.",
+              "serviceType": "Corporate and executive transportation",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -115,9 +118,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Corporate transportation and executive travel",
-              "description": "Discreet, punctual transport for executives, delegations, roadshows and events, with corporate accounts.",
-              "serviceType": "Corporate transportation and executive travel",
+              "name": "Chauffeur-driven luxury vehicles",
+              "description": "Premium vehicles with experienced, professional chauffeurs for VIP and special journeys.",
+              "serviceType": "Chauffeur-driven luxury vehicles",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -131,9 +134,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Hotel and hospitality transfers",
-              "description": "Guest transfers for hotels and resorts across Sri Lanka.",
-              "serviceType": "Hotel and hospitality transfers",
+              "name": "Hotel and resort transfers",
+              "description": "Smooth transfers between the airport, hotels and resorts anywhere on the island.",
+              "serviceType": "Hotel and resort transfers",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -147,9 +150,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Private tours and inbound travel",
-              "description": "Tailor-made, chauffeur-driven island itineraries and inbound travel programmes.",
-              "serviceType": "Private tours and inbound travel",
+              "name": "Private tours and customized travel itineraries",
+              "description": "Tailor-made itineraries planned around your interests, your pace and your dates.",
+              "serviceType": "Private tours and customized travel itineraries",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -163,9 +166,9 @@
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Group transportation",
-              "description": "Vans, minibuses and buses for families, tour groups, weddings and conferences.",
-              "serviceType": "Group transportation",
+              "name": "City tours and island-wide excursions",
+              "description": "Guided city tours and day excursions to Sri Lanka's best-loved sights.",
+              "serviceType": "City tours and island-wide excursions",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -180,8 +183,40 @@
             "itemOffered": {
               "@type": "Service",
               "name": "Long-distance and intercity transportation",
-              "description": "Door-to-door journeys between cities and regions anywhere in Sri Lanka.",
+              "description": "Comfortable door-to-door journeys between cities and regions across Sri Lanka.",
               "serviceType": "Long-distance and intercity transportation",
+              "provider": {
+                "@id": "https://airportfirst.vip/#business"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "Sri Lanka"
+              }
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Group transportation and shuttle services",
+              "description": "Vans, minibuses and coaches for families, tour groups, events and staff shuttles.",
+              "serviceType": "Group transportation and shuttle services",
+              "provider": {
+                "@id": "https://airportfirst.vip/#business"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "Sri Lanka"
+              }
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Dedicated vehicle and chauffeur arrangements",
+              "description": "A vehicle and chauffeur reserved for you by the day, the week or your whole stay.",
+              "serviceType": "Dedicated vehicle and chauffeur arrangements",
               "provider": {
                 "@id": "https://airportfirst.vip/#business"
               },
@@ -1337,6 +1372,52 @@
   .route-legs li { display: flex; justify-content: space-between; gap: 12px; border-top: 1px dashed rgba(200,16,46,.15); padding-top: 3px; }
   .route-legs li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .route-legs li strong { flex: 0 0 auto; color: #0F172A; }
+
+  /* =========================================================
+     MOTION — scroll reveals, hero entrance, header, micro-interactions
+     Easing: cubic-bezier(.22, 1, .36, 1) throughout.
+     ========================================================= */
+  .reveal { opacity: 1; transform: none;
+    transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1), box-shadow .55s cubic-bezier(.22,1,.36,1);
+    transition-delay: var(--rd, 0ms), var(--rd, 0ms), 0ms; }
+  .js-reveal .reveal:not(.in) { opacity: 0; transform: translateY(24px); }
+  .reveal.revealed { transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1), box-shadow .55s cubic-bezier(.22,1,.36,1); transition-delay: 0ms; }
+
+  /* Hero: staggered entrance on load, and a slow settle of the photo for depth */
+  @keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @keyframes heroSettle { from { transform: scale(1.06); } to { transform: scale(1); } }
+  .hero-in { animation: heroIn .95s cubic-bezier(.22,1,.36,1) both; animation-delay: var(--hi, 0ms); }
+  #home .hero-img { animation: heroSettle 2.2s cubic-bezier(.22,1,.36,1) both; }
+
+  /* Header: flat at the top, frosted and elevated once scrolling */
+  #header { transition: background-color .35s ease, box-shadow .35s ease, -webkit-backdrop-filter .35s ease, backdrop-filter .35s ease; }
+  #header.is-scrolled { background-color: rgba(255,255,255,.86); -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: 0 12px 32px -20px rgba(15,23,42,.45); }
+
+  /* Cards: lift and a slow image zoom — only on devices that really hover */
+  .zoom-img { transition: transform .6s cubic-bezier(.22,1,.36,1); }
+  .dest-tile, .exp-card { transition: transform .55s cubic-bezier(.22,1,.36,1), box-shadow .55s cubic-bezier(.22,1,.36,1); }
+  @media (hover: hover) {
+    .hover-card:hover, .hover-card.reveal.in:hover, .exp-card:hover, .exp-card.reveal.in:hover, .dest-tile:hover {
+      transform: translateY(-4px); box-shadow: 0 26px 56px -32px rgba(15,23,42,.45); }
+    .hover-card:hover .zoom-img, .exp-card:hover .zoom-img, .dest-tile:hover .zoom-img { transform: scale(1.04); }
+  }
+
+  /* Buttons: a tactile press */
+  .btn-brand, .btn-ghost, .wa-float, .route-chip, .mobile-bar a, [data-open-stops] { -webkit-tap-highlight-color: transparent; }
+  .btn-brand:active, .btn-ghost:active, .wa-float:active, .route-chip:active, .mobile-bar a:active, [data-open-stops]:active,
+  #modalWhatsapp:active, .service-btn:active { transform: translateY(0) scale(.97); transition-duration: .12s; }
+
+  .about-chip { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 9px 14px; background: #F8FAFC;
+    color: #0F172A; font-size: 13px; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(15,23,42,.08); }
+  .about-chip svg { color: #C8102E; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js-reveal .reveal:not(.in), .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .hero-in, #home .hero-img { animation: none !important; }
+    .zoom-img, .dest-tile, .exp-card, #header { transition: none !important; }
+    .hover-card:hover, .exp-card:hover, .dest-tile:hover, .hover-card:hover .zoom-img, .exp-card:hover .zoom-img, .dest-tile:hover .zoom-img { transform: none !important; }
+  }
 </style>
 </head>
 
@@ -1378,7 +1459,7 @@
      (mix-blend-multiply on the <img> cannot fix this on its own: backdrop-filter
      isolates its subtree, so the image blends only with the header's own
      semi-transparent white — not with the page showing through it.) -->
-<header id="header" class="sticky top-0 z-50 bg-white shadow-[0_10px_30px_-20px_rgba(15,23,42,.45)] transition-all duration-500">
+<header id="header" class="sticky top-0 z-50 bg-white border-b border-navy-900/[.05]">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div id="headerInner" class="flex items-center justify-between gap-6 h-20 transition-all duration-500">
 
@@ -1460,13 +1541,13 @@
   <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,rgba(0,0,0,.38),transparent_62%)]"></div>
 
   <div class="mx-auto flex min-h-[620px] max-w-5xl flex-col items-center justify-center px-5 pb-44 pt-16 text-center sm:min-h-[700px] sm:pb-52 lg:min-h-[780px]">
-    <span class="reveal inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-white/85 backdrop-blur-md sm:text-[12px]">
+    <span style="--hi:0ms" class="hero-in inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-white/85 backdrop-blur-md sm:text-[12px]">
       <i data-lucide="building-2" class="h-3.5 w-3.5 text-gold-300"></i> Airport First (Pvt) Ltd &middot; 18+ years &middot; Colombo
     </span>
 
-    <p class="hero-script reveal mt-7 font-script text-[3.6rem] leading-[1.05] sm:text-[5.2rem] lg:text-[6.4rem]">Feel the Ambience</p>
+    <p style="--hi:120ms" class="hero-script hero-in mt-7 font-script text-[3.6rem] leading-[1.05] sm:text-[5.2rem] lg:text-[6.4rem]">Feel the Ambience</p>
 
-    <h1 class="reveal mt-1 font-display text-[2.6rem] font-bold leading-[1.04] tracking-tight text-white sm:text-[4rem] lg:text-[4.9rem]">
+    <h1 style="--hi:240ms" class="hero-in mt-1 font-display text-[2.6rem] font-bold leading-[1.04] tracking-tight text-white sm:text-[4rem] lg:text-[4.9rem]">
       Your Journey <span class="relative inline-block whitespace-nowrap">Begins Here
         <svg class="absolute -bottom-3 left-0 h-4 w-full sm:-bottom-4 sm:h-5" viewBox="0 0 320 20" preserveAspectRatio="none" aria-hidden="true">
           <path d="M3 13 C 70 4, 150 3, 317 10" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
@@ -1475,14 +1556,14 @@
       </span>
     </h1>
 
-    <p class="reveal mt-8 max-w-3xl text-[12.5px] font-bold uppercase leading-relaxed tracking-[.2em] text-white/90 sm:text-[14.5px]">
+    <p style="--hi:360ms" class="hero-in mt-8 max-w-3xl text-[12.5px] font-bold uppercase leading-relaxed tracking-[.2em] text-white/90 sm:text-[14.5px]">
       Airport First &ndash; Your Trusted Transportation Partner in Sri Lanka
     </p>
-    <p class="reveal mt-4 max-w-2xl text-[15px] leading-relaxed text-white/70 sm:text-[16px]">
+    <p style="--hi:480ms" class="hero-in mt-4 max-w-2xl text-[15px] leading-relaxed text-white/70 sm:text-[16px]">
       Chauffeur-driven airport transfers, corporate travel and private island journeys &mdash; arranged around you, 24/7.
     </p>
 
-    <div class="reveal mt-9 flex flex-wrap items-center justify-center gap-3.5">
+    <div style="--hi:600ms" class="hero-in mt-9 flex flex-wrap items-center justify-center gap-3.5">
       <a href="#booking" class="btn-brand inline-flex items-center gap-2 rounded-full bg-[#D92B3A] px-8 py-4 text-[15px] font-bold text-white shadow-glow">
         <i data-lucide="calendar-check" class="h-4 w-4"></i> Get Instant Quote
       </a>
@@ -1977,100 +2058,83 @@
 <!-- ==================== ABOUT / COMPANY OVERVIEW ==================== -->
 <section id="about" class="py-16 sm:py-24">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="grid lg:grid-cols-12 gap-12 xl:gap-16 items-start">
+    <div class="grid gap-12 lg:grid-cols-12 xl:gap-16 items-start">
 
-      <!-- Overview -->
-      <div class="lg:col-span-7 reveal">
-        <span class="eyebrow text-crimson-500">About Airport First</span>
-        <h2 class="mt-3 font-display text-4xl sm:text-[2.9rem] font-semibold leading-[1.1] tracking-tight text-navy-900">
-          18+ years of trusted ground transportation <span class="text-brand">across Sri Lanka</span>
+      <div class="reveal lg:col-span-7">
+        <span class="eyebrow text-crimson-500">About Us</span>
+        <h2 class="mt-3 font-display text-4xl font-semibold leading-[1.1] tracking-tight text-navy-900 sm:text-[2.9rem]">
+          Airport First <span class="text-brand">(Pvt) Ltd</span>
         </h2>
+        <p class="mt-3 font-script text-[1.75rem] leading-snug text-[#D92B3A] sm:text-[2.1rem]">
+          Your Journey, Our Priority <span class="font-sans text-[1.2rem] text-navy-900/25">|</span> Feel the Ambience
+        </p>
         <div class="divider-brand mt-5"></div>
 
-        <p class="mt-6 max-w-2xl text-[15.5px] leading-relaxed text-navy-900/60">
-          Airport First (Pvt) Ltd is a Sri Lankan transportation company with more than eighteen years of industry
-          experience, operating from the World Trade Center &mdash; WTC West Tower, 37th Floor, Colombo 00100.
+        <p class="mt-6 max-w-2xl text-[16.5px] leading-relaxed text-navy-900/75">
+          Airport First (Pvt) Ltd is a Sri Lankan privately owned transportation and travel services company dedicated to
+          providing reliable, comfortable, and professional travel experiences for individuals, families, corporate
+          clients, and international visitors.
         </p>
         <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-navy-900/60">
-          We specialise in pre-booked, chauffeur-driven ground transportation across the island: airport transfers,
-          corporate and executive travel, hotel and hospitality transfers, private tours, group movements and
-          intercity journeys &mdash; each one planned in advance and coordinated end to end by our operations team.
+          With over 18 years of experience in the transportation and travel industry, we specialize in airport transfers,
+          chauffeur-driven transportation, corporate mobility, hotel transfers, customized tours, and island-wide travel
+          solutions.
+        </p>
+        <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-navy-900/60">
+          Our commitment is to deliver more than just transportation. We aim to make every journey safe, seamless, and
+          memorable through professional service, well-maintained vehicles, experienced chauffeurs, and personalized
+          attention to every client&rsquo;s needs.
+        </p>
+        <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-navy-900/60">
+          Whether it is a business transfer, VIP airport pickup, family holiday, executive journey, or a long-distance
+          tour across Sri Lanka, Airport First provides tailored transportation solutions with a focus on comfort,
+          punctuality, safety, and customer satisfaction.
         </p>
 
-        <div class="mt-9 grid gap-5 sm:grid-cols-2">
-          <div class="flex gap-3.5">
-            <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-crimson-50 text-crimson-500">
-              <i data-lucide="badge-check" class="h-4.5 w-4.5"></i>
-            </span>
-            <div>
-              <h3 class="text-[15px] font-bold text-navy-900">Registered company</h3>
-              <p class="mt-1 text-[13.5px] leading-relaxed text-navy-900/50">Airport First (Pvt) Ltd is a registered Sri Lankan company, accountable for every journey it arranges.</p>
-            </div>
-          </div>
-          <div class="flex gap-3.5">
-            <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-crimson-50 text-crimson-500">
-              <i data-lucide="shield-check" class="h-4.5 w-4.5"></i>
-            </span>
-            <div>
-              <h3 class="text-[15px] font-bold text-navy-900">Comprehensive passenger insurance</h3>
-              <p class="mt-1 text-[13.5px] leading-relaxed text-navy-900/50">Passengers and vehicles are covered by comprehensive insurance on every trip.</p>
-            </div>
-          </div>
-          <div class="flex gap-3.5">
-            <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-crimson-50 text-crimson-500">
-              <i data-lucide="headset" class="h-4.5 w-4.5"></i>
-            </span>
-            <div>
-              <h3 class="text-[15px] font-bold text-navy-900">24/7 operational backup</h3>
-              <p class="mt-1 text-[13.5px] leading-relaxed text-navy-900/50">An operations desk that never closes, coordinating backup so a late flight or a change of plan is handled calmly.</p>
-            </div>
-          </div>
-          <div class="flex gap-3.5">
-            <span class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-crimson-50 text-crimson-500">
-              <i data-lucide="building-2" class="h-4.5 w-4.5"></i>
-            </span>
-            <div>
-              <h3 class="text-[15px] font-bold text-navy-900">Head office in Colombo</h3>
-              <p class="mt-1 text-[13.5px] leading-relaxed text-navy-900/50">WTC West Tower, 37th Floor, World Trade Center, Colombo 00100, Sri Lanka.</p>
-            </div>
-          </div>
+        <div class="mt-8 flex flex-wrap gap-2.5">
+          <span class="about-chip"><i data-lucide="award" class="h-4 w-4"></i> 18+ years&rsquo; experience</span>
+          <span class="about-chip"><i data-lucide="building-2" class="h-4 w-4"></i> WTC West Tower, 37th Floor, Colombo</span>
+          <span class="about-chip"><i data-lucide="headset" class="h-4 w-4"></i> 24/7 operations desk</span>
         </div>
       </div>
 
-      <!-- Vision & Mission -->
-      <div class="lg:col-span-5 space-y-5">
+      <div class="space-y-5 lg:col-span-5">
         <div class="reveal relative overflow-hidden rounded-3xl bg-navy-900 p-8 shadow-lux noise">
           <div class="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-crimson-500/20 blur-3xl"></div>
           <span class="relative grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-crimson-500 to-crimson-700 text-white">
-            <i data-lucide="eye" class="h-5 w-5"></i>
+            <i data-lucide="handshake" class="h-5 w-5"></i>
           </span>
-          <div class="relative mt-5 text-[11px] font-extrabold uppercase tracking-[.16em] text-crimson-300">Our Vision</div>
-          <p class="relative mt-3 font-display text-[1.25rem] font-medium leading-snug text-white">
-            To become a trusted and recognised transportation partner in Sri Lanka for corporate travel, airport
-            transfers and personalised visitor experiences.
+          <div class="relative mt-5 text-[11px] font-extrabold uppercase tracking-[.16em] text-crimson-300">Our Commitment</div>
+          <p class="relative mt-3 text-[15.5px] leading-relaxed text-white/85">
+            At Airport First, we believe every journey should begin with confidence and end with satisfaction. We focus on
+            building long-term relationships with our clients through dependable service, professional conduct,
+            transparent communication, and attention to detail.
           </p>
         </div>
 
         <div class="reveal card-clean p-8">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson-50 text-crimson-500">
-            <i data-lucide="target" class="h-5 w-5"></i>
+            <i data-lucide="eye" class="h-5 w-5"></i>
           </span>
-          <div class="mt-5 text-[11px] font-extrabold uppercase tracking-[.16em] text-crimson-500">Our Mission</div>
-          <p class="mt-3 font-display text-[1.25rem] font-medium leading-snug text-navy-900">
-            To deliver safe, dependable and customer-focused transportation through professional coordination,
-            suitable vehicles and attentive service.
+          <div class="mt-5 text-[11px] font-extrabold uppercase tracking-[.16em] text-crimson-500">Our Vision</div>
+          <p class="mt-3 font-display text-[1.2rem] font-medium leading-snug text-navy-900">
+            Our vision is to become a globally recognized Sri Lankan transportation and travel brand, known for
+            excellence, trust, and personalized hospitality.
           </p>
         </div>
       </div>
-
     </div>
+
+    <p class="reveal mt-14 text-center font-display text-[1.15rem] font-semibold text-navy-900 sm:text-[1.35rem]">
+      Airport First (Pvt) Ltd &mdash; <span class="font-script text-[1.6em] font-normal text-[#D92B3A]">Feel the Ambience.</span>
+      Experience the Difference.
+    </p>
   </div>
 </section>
 
 <!-- ==================== SERVICES ==================== -->
-<!-- Each card's button writes its service into the inquiry notes (see the
-     .service-btn handler in the dispatch script), so a guest can pick a
-     service here and finish the request in the booking form. -->
+<!-- The client's nine official services. Each "Enquire" writes the service into
+     the inquiry notes and takes the guest to the booking form. -->
 <section id="services" class="bg-white py-16 sm:py-24">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
@@ -2081,107 +2145,110 @@
       </h2>
       <div class="divider-brand mx-auto mt-5"></div>
       <p class="mt-5 text-[15.5px] leading-relaxed text-navy-900/55">
-        Seven core services, one operations desk. Choose a service to start your request.
+        Nine services, one 24/7 operations desk. Choose a service to start your request.
       </p>
     </div>
 
-    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="plane-landing" class="h-5 w-5"></i></span>
           <span class="font-display text-[13px] font-bold text-navy-900/25">01</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Airport transfers &amp; meet-and-greet</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Arrivals and departures at Bandaranaike (CMB) and Mattala (HRI). Your chauffeur meets you with a name board, assists with luggage and follows your flight.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Airport transfer and meet-and-greet">
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Airport pickups and drop-offs</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Meet-and-greet arrivals and on-time departures at Bandaranaike (CMB) and Mattala (HRI), with flight tracking.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Airport pickups and drop-offs">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
-      <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
-        <div class="flex items-center justify-between">
-          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="car-front" class="h-5 w-5"></i></span>
-          <span class="font-display text-[13px] font-bold text-navy-900/25">02</span>
-        </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Chauffeur-driven private vehicles</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">A private vehicle with a professional chauffeur for a day, a week or the whole of your stay &mdash; on your schedule.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Chauffeur-driven private vehicle">
-          Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
-        </button>
-      </article>
-
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="briefcase-business" class="h-5 w-5"></i></span>
-          <span class="font-display text-[13px] font-bold text-navy-900/25">03</span>
+          <span class="font-display text-[13px] font-bold text-navy-900/25">02</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Corporate &amp; executive travel</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Discreet, punctual transport for executives, delegations, roadshows and events, with corporate accounts and invoicing.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Corporate transportation and executive travel">
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Corporate and executive transportation</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Discreet, punctual transport for executives, delegations and events, with corporate accounts.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Corporate and executive transportation">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
+      <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
+        <div class="flex items-center justify-between">
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="gem" class="h-5 w-5"></i></span>
+          <span class="font-display text-[13px] font-bold text-navy-900/25">03</span>
+        </div>
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Chauffeur-driven luxury vehicles</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Premium vehicles with experienced, professional chauffeurs for VIP and special journeys.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Chauffeur-driven luxury vehicles">
+          Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+        </button>
+      </article>
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="hotel" class="h-5 w-5"></i></span>
           <span class="font-display text-[13px] font-bold text-navy-900/25">04</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Hotel &amp; hospitality transfers</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Dependable guest transfers for hotels and resorts &mdash; between properties, the airport and venues across the island.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Hotel and hospitality transfer">
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Hotel and resort transfers</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Smooth transfers between the airport, hotels and resorts anywhere on the island.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Hotel and resort transfers">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="map" class="h-5 w-5"></i></span>
           <span class="font-display text-[13px] font-bold text-navy-900/25">05</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Private tours &amp; inbound travel</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Tailor-made island itineraries and inbound programmes, driven by an experienced chauffeur who knows the country.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Private tour and inbound travel">
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Private tours and customized travel itineraries</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Tailor-made itineraries planned around your interests, your pace and your dates.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Private tours and customized travel itineraries">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
-          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="users" class="h-5 w-5"></i></span>
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="landmark" class="h-5 w-5"></i></span>
           <span class="font-display text-[13px] font-bold text-navy-900/25">06</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Group transportation</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Vans, minibuses and buses for families, tour groups, weddings, conferences and incentive travel.</p>
-        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Group transportation (vans, minibuses and buses)">
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">City tours and island-wide excursions</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Guided city tours and day excursions to Sri Lanka&rsquo;s best-loved sights.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="City tours and island-wide excursions">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
       <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
         <div class="flex items-center justify-between">
           <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="route" class="h-5 w-5"></i></span>
           <span class="font-display text-[13px] font-bold text-navy-900/25">07</span>
         </div>
-        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Long-distance &amp; intercity</h3>
-        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Comfortable door-to-door journeys between cities and regions, anywhere in Sri Lanka.</p>
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Long-distance and intercity transportation</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Comfortable door-to-door journeys between cities and regions across Sri Lanka.</p>
         <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Long-distance and intercity transportation">
           Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
         </button>
       </article>
-
-      <article class="reveal relative flex flex-col overflow-hidden rounded-3xl bg-navy-900 p-7 shadow-lux noise">
-        <div class="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-crimson-500/25 blur-3xl"></div>
-        <span class="relative grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-crimson-300"><i data-lucide="headset" class="h-5 w-5"></i></span>
-        <h3 class="relative mt-5 text-[16.5px] font-bold leading-snug text-white">Not sure which you need?</h3>
-        <p class="relative mt-2 flex-1 text-[13.5px] leading-relaxed text-white/60">Tell our 24/7 desk about your trip and we will recommend the right service and vehicle.</p>
-        <a href="https://wa.me/94714784444" target="_blank" rel="noopener"
-           class="relative mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-300 hover:text-white">
-          Chat on WhatsApp <i data-lucide="arrow-up-right" class="h-3.5 w-3.5"></i>
-        </a>
+      <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
+        <div class="flex items-center justify-between">
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="users" class="h-5 w-5"></i></span>
+          <span class="font-display text-[13px] font-bold text-navy-900/25">08</span>
+        </div>
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Group transportation and shuttle services</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">Vans, minibuses and coaches for families, tour groups, events and staff shuttles.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Group transportation and shuttle services">
+          Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+        </button>
       </article>
-
+      <article class="hover-card reveal flex flex-col rounded-3xl bg-cream p-7 ring-1 ring-navy-900/5">
+        <div class="flex items-center justify-between">
+          <span class="grid h-12 w-12 place-items-center rounded-2xl bg-crimson/10 text-crimson"><i data-lucide="calendar-clock" class="h-5 w-5"></i></span>
+          <span class="font-display text-[13px] font-bold text-navy-900/25">09</span>
+        </div>
+        <h3 class="mt-5 text-[16.5px] font-bold leading-snug text-navy-900">Dedicated vehicle and chauffeur arrangements</h3>
+        <p class="mt-2 flex-1 text-[13.5px] leading-relaxed text-navy-900/55">A vehicle and chauffeur reserved for you by the day, the week or your whole stay.</p>
+        <button type="button" class="service-btn mt-5 inline-flex items-center gap-1.5 text-[13px] font-bold text-crimson-500 hover:text-crimson-600" data-service="Dedicated vehicle and chauffeur arrangements">
+          Enquire <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+        </button>
+      </article>
     </div>
   </div>
 </section>
@@ -4465,7 +4532,7 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     const y = window.scrollY;
     headerInner.classList.toggle("h-16", y > 40);
     headerInner.classList.toggle("h-20", y <= 40);
-    header.classList.toggle("shadow-card", y > 40);
+    header.classList.toggle("is-scrolled", y > 8);
     toTop.classList.toggle("hidden", y < 500);
     toTop.classList.toggle("grid", y >= 500);
   };
@@ -4492,24 +4559,37 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
      cards. The scroll sweep below is the guarantee: anything that has reached
      within 1.2 viewports is shown, observer or not. */
   const reveals = document.querySelectorAll(".reveal");
+  const showReveal = el => {
+    if (el.classList.contains("in")) return;
+    el.classList.add("in");
+    /* After the entrance, hover transitions run without the stagger delay. */
+    const delay = parseFloat(el.style.getPropertyValue("--rd")) || 0;
+    setTimeout(() => el.classList.add("revealed"), delay + 950);
+  };
+  /* Items that come into view together and share a parent (a grid of cards)
+     cascade in 70ms apart, in page order. */
+  const showBatch = els => {
+    const groups = new Map();
+    els.forEach(el => { const p = el.parentElement; if (!groups.has(p)) groups.set(p, []); groups.get(p).push(el); });
+    groups.forEach(list => list.forEach((el, i) => { el.style.setProperty("--rd", Math.min(i, 8) * 70 + "ms"); showReveal(el); }));
+  };
   if ("IntersectionObserver" in window) {
     const revealObserver = new IntersectionObserver((entries, obs) => {
-      entries.forEach((e, i) => {
-        if (!e.isIntersecting) return;
-        setTimeout(() => e.target.classList.add("in"), Math.min(i, 4) * 90);
-        obs.unobserve(e.target);
-      });
-    }, { threshold: 0.01, rootMargin: "0px 0px -30px 0px" });
+      const visible = entries.filter(e => e.isIntersecting).map(e => e.target);
+      visible.forEach(el => obs.unobserve(el));
+      if (visible.length) showBatch(visible);
+    }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
     reveals.forEach(el => revealObserver.observe(el));
 
     const sweepReveals = () => {
       const limit = window.innerHeight * 1.2;
+      const due = [];
       let pending = 0;
       reveals.forEach(el => {
         if (el.classList.contains("in")) return;
-        if (el.getBoundingClientRect().top < limit) el.classList.add("in");
-        else pending++;
+        if (el.getBoundingClientRect().top < limit) due.push(el); else pending++;
       });
+      if (due.length) showBatch(due);
       if (!pending) window.removeEventListener("scroll", onSweep);
     };
     let sweepQueued = false;
@@ -4520,9 +4600,12 @@ window.AF_ITINERARIES = {"sigiriya":{"title":"Sigiriya Rock Fortress","region":"
     };
     window.addEventListener("scroll", onSweep, { passive: true });
     window.addEventListener("resize", onSweep, { passive: true });
-    setTimeout(sweepReveals, 900);
+    /* Safety nets: whatever is on or above the screen is shown even if the
+       observer is slow (short viewports, deep links, a fast first flick). */
+    setTimeout(sweepReveals, 700);
+    setTimeout(sweepReveals, 2500);
   } else {
-    reveals.forEach(el => el.classList.add("in"));
+    reveals.forEach(showReveal);
   }
 
   /* ---------- Animated counters ---------- */
