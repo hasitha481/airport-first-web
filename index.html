@@ -1310,6 +1310,14 @@
   @media (max-width: 768px) {
     footer#contact { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
   }
+
+  /* Hero on phones: the leopard walks left to right with its face at ~64% of the
+     photo, which a portrait crop centred at 50% cuts off on the right. Shift the
+     crop so the face sits in the middle of the screen. Desktop (>= 768px) keeps
+     object-position: 50% 42% from the img class. */
+  @media (max-width: 767px) {
+    #home .hero-img { object-position: 68% 50%; }
+  }
 </style>
 </head>
 
